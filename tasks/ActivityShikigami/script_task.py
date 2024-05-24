@@ -10,16 +10,31 @@ from tasks.AreaBoss.assets import AreaBossAssets
 from tasks.Component.BaseActivity.base_activity import BaseActivity
 from tasks.Component.BaseActivity.config_activity import ApMode
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
-from tasks.GameUi.page import page_main
+from tasks.GameUi.page import page_main, page_shikigami_records
 from tasks.GameUi.game_ui import GameUi
-
+from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from module.logger import logger
 from module.exception import TaskEnd
 
 
-class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets):
+class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
 
     def run(self) -> None:
+        logger.info('running ActivityShikigami')
+        # 御魂切换方式一
+        if self.config.activity_shikigami.switch_soul.enable:
+            logger.info('enter switch soul by group')
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul(self.config.activity_shikigami.switch_soul.switch_group_team)
+
+        # 御魂切换方式二
+        if self.config.activity_shikigami.switch_soul.enable_switch_by_name:
+            logger.info('enter switch soul by group')
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul_by_name(self.config.activity_shikigami.switch_soul.group_name,
+                                         self.config.activity_shikigami.switch_soul.team_name)
 
         config = self.config.activity_shikigami
         self.limit_time: timedelta = config.general_climb.limit_time
