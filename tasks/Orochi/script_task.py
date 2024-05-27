@@ -22,14 +22,12 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
     def run(self) -> bool:
         # 御魂切换方式一
         if self.config.orochi.switch_soul.enable:
-            logger.info('enter switch soul by group')
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
             self.run_switch_soul(self.config.orochi.switch_soul.switch_group_team)
 
         # 御魂切换方式二
         if self.config.orochi.switch_soul.enable_switch_by_name:
-            logger.info('enter switch soul by name')
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
             self.run_switch_soul_by_name(self.config.orochi.switch_soul.group_name,
@@ -113,16 +111,6 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                     return True
                 if self.appear_then_click(self.I_OROCHI_LOCK, interval=1):
                     continue
-
-
-
-
-
-
-
-
-
-
 
     def run_leader(self):
         logger.info('Start run leader')
