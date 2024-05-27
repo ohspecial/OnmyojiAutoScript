@@ -20,23 +20,24 @@ from module.exception import TaskEnd
 class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
 
     def run(self) -> None:
+        config = self.config.activity_shikigami
         logger.info('running ActivityShikigami')
         # 御魂切换方式一
-        if self.config.activity_shikigami.switch_soul.enable:
+        if self.config.activity_shikigami.switch_soul_config.enable:
             logger.info('enter switch soul by group')
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
-            self.run_switch_soul(self.config.activity_shikigami.switch_soul.switch_group_team)
+            self.run_switch_soul(config.switch_soul_config.switch_group_team)
 
         # 御魂切换方式二
-        if self.config.activity_shikigami.switch_soul.enable_switch_by_name:
-            logger.info('enter switch soul by group')
+        if self.config.activity_shikigami.switch_soul_config.enable_switch_by_name:
+            logger.info('enter switch soul by name')
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
-            self.run_switch_soul_by_name(self.config.activity_shikigami.switch_soul.group_name,
-                                         self.config.activity_shikigami.switch_soul.team_name)
+            self.run_switch_soul_by_name(config.switch_soul_config.group_name,
+                                         config.switch_soul_config.team_name)
 
-        config = self.config.activity_shikigami
+        
         self.limit_time: timedelta = config.general_climb.limit_time
         if isinstance(self.limit_time, time):
             self.limit_time = timedelta(hours=self.limit_time.hour, minutes=self.limit_time.minute,
