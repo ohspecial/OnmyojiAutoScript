@@ -20,7 +20,6 @@ class ActivityShikigami(ConfigBase):
     # shikigami: ShikigamiConfig = Field(default_factory=ShikigamiConfig)
     general_climb: GeneralClimb = Field(default_factory=GeneralClimb)
     general_battle: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
-    switch_soul: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
-
+    switch_soul_config: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
 
 

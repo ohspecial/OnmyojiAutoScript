@@ -18,7 +18,7 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle):
         self.ui_get_current_page()
         self.ui_goto(page_main)
         con: PetsConfig = self.config.pets.pets_config
-        self.orichi_con: GoToOrochiConfig = self.config.go_to_orochi_config
+        self.orichi_con: GoToOrochiConfig = self.config.pets.go_to_orochi_config
         # 进入
         while 1:
             self.screenshot()
@@ -38,20 +38,20 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle):
         # 如果打开了御魂开关
         if self.orichi_con.go_to_orochi:
             # 御魂切换方式一
-            if orichi_con.switch_soul.enable:
+            if self.config.pets.switch_soul.enable:
                 self.ui_get_current_page()
                 self.ui_goto(page_shikigami_records)
-                self.run_switch_soul(orichi_con.switch_soul.switch_group_team)
+                self.run_switch_soul(self.config.pets.switch_soul.switch_group_team)
 
             # 御魂切换方式二
-            if orichi_con.switch_soul.enable_switch_by_name:
+            if self.config.pets.switch_soul.enable_switch_by_name:
                 self.ui_get_current_page()
                 self.ui_goto(page_shikigami_records)
-                self.run_switch_soul_by_name(orichi_con.switch_soul.group_name,
-                                            orichi_con.switch_soul.team_name)
+                self.run_switch_soul_by_name(self.config.pets.switch_soul.group_name,
+                                            self.config.pets.switch_soul.team_name)
             
             self.current_count = 0
-            self.limit_count = orichi_con.limin_count
+            self.limit_count = self.orichi_con.limin_count
             self.ui_get_current_page()
             self.ui_goto(page_main)
             self.run_alone()
@@ -107,7 +107,7 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle):
         self.orochi_enter()
         layer = self.orichi_con.layer
         self.check_layer(layer)
-        self.check_lock(self.orichi_con.general_battle_config.lock_team_enable)
+        self.check_lock(self.config.pets.general_battle_config.lock_team_enable)
         def is_in_orochi(screenshot=False) -> bool:
             if screenshot:
                 self.screenshot()
@@ -126,9 +126,7 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle):
             if self.current_count >= 1:
                 logger.info('Orochi count limit out')
                 break
-            if datetime.now() - self.start_time >= self.limit_time:
-                logger.info('Orochi time limit out')
-                break
+           
 
             # 点击挑战
             while 1:
@@ -137,7 +135,7 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle):
                     pass
 
                 if not self.appear(self.I_OROCHI_FIRE):
-                    self.run_general_battle(config=self.orichi_con.general_battle_config)
+                    self.run_general_battle(config=self.config.pets.general_battle_config)
                     break
 
         # 回去

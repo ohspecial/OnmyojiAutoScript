@@ -45,14 +45,14 @@ class GoToOrochiConfig(ConfigBase):
     limin_count: int = Field(default=1, description='filight_timse')
     # 层数
     layer: Layer = Field(default=Layer.TEN, description='layer_help')
-    # 是否切换御魂
-    switch_soul: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
-    # 通用战斗设置
-    general_battle_config: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
-
+    
 class Pets(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
     pets_config: PetsConfig = Field(default_factory=PetsConfig)
     go_to_orochi_config: GoToOrochiConfig = Field(default_factory=GoToOrochiConfig)
+    # 是否切换御魂
+    switch_soul: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
+    # 通用战斗设置
+    general_battle_config: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
 
 
