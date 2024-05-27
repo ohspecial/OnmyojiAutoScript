@@ -8,7 +8,7 @@ from enum import Enum
 from tasks.Component.config_scheduler import Scheduler
 from tasks.Component.config_base import ConfigBase
 from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
-
+from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 
 class UserStatus(str, Enum):
     # LEADER = 'leader'
@@ -47,7 +47,8 @@ class GoToOrochiConfig(ConfigBase):
     layer: Layer = Field(default=Layer.TEN, description='layer_help')
     # 是否切换御魂
     switch_soul: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
-
+    # 通用战斗设置
+    general_battle_config: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
 
 class Pets(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
