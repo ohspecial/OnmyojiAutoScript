@@ -13,8 +13,12 @@ class PetsConfig(ConfigBase):
     # 大餐
     pets_feast: bool = Field(default=True)
 
+class GoToOrochiConfig(ConfigBase):
+    go_to_orochi: bool = Field(default=True)
+
 class Pets(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
     pets_config: PetsConfig = Field(default_factory=PetsConfig)
+    go_to_orochi_config: GoToOrochiConfig = Field(default_factory=GoToOrochiConfig)
 
 
