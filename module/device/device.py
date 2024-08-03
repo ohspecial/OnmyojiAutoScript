@@ -99,6 +99,8 @@ class Device(Screenshot, Control, AppControl, EmulatorManager):
         # self.config.script.device.screenshot_method = 'scrcpy'
         if self.config.script.device.screenshot_method == 'scrcpy':
             self._scrcpy_server_stop()
+        if self.config.Emulator_ScreenshotMethod == 'nemu_ipc':
+            self.nemu_ipc_release()
 
     def stuck_record_add(self, button):
         """
@@ -108,6 +110,7 @@ class Device(Screenshot, Control, AppControl, EmulatorManager):
         :return:
         """
         self.detect_record.add(str(button))
+        logger.info(f'Add stuck record: {button}')
 
     def stuck_record_clear(self):
         self.detect_record = set()

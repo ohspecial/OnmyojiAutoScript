@@ -3,7 +3,6 @@ import traceback
 from tasks.GameUi.assets import GameUiAssets as G
 from tasks.RyouToppa.assets import RyouToppaAssets
 
-
 class Page:
     parent = None
 
@@ -94,7 +93,6 @@ page_bondling_fairyland = Page(G.I_CHECK_BONDLING_FAIRYLAND)
 page_bondling_fairyland.link(button=G.I_BACK_YOLLOW, destination=page_exploration)
 page_exploration.link(button=G.I_EXPLORATION_GOTO_BONDLING_FAIRYLAND, destination=page_bondling_fairyland)
 
-
 # ************************************* 町中部分 *****************************************#
 # 斗鸡 duel
 page_duel = Page(G.I_CHECK_DUEL)
@@ -143,7 +141,7 @@ page_daily.link(button=G.I_BACK_Y, destination=page_main)
 page_main.link(button=G.I_MAIN_GOTO_DAILY, destination=page_daily)
 # 商店 mall
 page_mall = Page(G.I_CHECK_MALL)
-page_mall.additional = [G.I_AD_CLOSE_RED]
+page_mall.additional = [G.I_AD_CLOSE_RED, G.I_BACK_Y]
 page_mall.link(button=G.I_BACK_BLUE, destination=page_main)
 page_main.link(button=G.I_MAIN_GOTO_MALL, destination=page_mall)
 # 阴阳寮 guild
@@ -164,6 +162,12 @@ page_travel.link(button=G.I_BACK_Y, destination=page_main)
 page_main.link(button=G.I_MAIN_GOTO_TRAVEL, destination=page_travel)
 
 
+# 道馆
+from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
+from tasks.Dokan.assets import DokanAssets
+page_dokan = Page(DokanAssets.I_RYOU_DOKAN_CHECK)
+page_dokan.additional = [GeneralBattleAssets.I_EXIT, DokanAssets.I_RYOU_DOKAN_EXIT_ENSURE, G.I_BACK_BLUE]
+page_dokan.link(button=G.I_BACK_Y, destination=page_main)
 
 
 

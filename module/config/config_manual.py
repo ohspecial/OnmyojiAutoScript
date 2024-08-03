@@ -11,14 +11,14 @@ class ConfigManual:
         Restart
         > KekkaiUtilize > KekkaiActivation > DemonEncounter
         > AreaBoss > GoldYoukai > ExperienceYoukai > Nian > Tako > RealmRaid > RyouToppa > DailyTrifles > Exploration
-        > Hunt 
-        > Orochi > OrochiMoans > OrochiJudgement > Sougenbi > FallenSun > EternitySea
+        > Dokan > Hunt 
+        > Orochi > OrochiMoans > OrochiJudgement > Sougenbi > FallenSun > EternitySea > SixRealms
         > ActivityShikigami > WantedQuests
         > BondlingFairyland > EvoZone > GoryouRealm
         > TrueOrochi > RichMan
         > CollectiveMissions
-        > Pets > TalismanPass > SoulsTidy > Delegation
-        > Secret > WeeklyTrifles > MysteryShop > Duel > MetaDemon > FrogBoss
+        > Pets > TalismanPass > SoulsTidy > Delegation > Hyakkiyakou
+        > Secret > WeeklyTrifles > MysteryShop > Duel > MetaDemon > FrogBoss > FloatParade
         """
 
     DEVICE_OVER_HTTP = False
@@ -30,10 +30,8 @@ class ConfigManual:
 
     # 'DroidCast', 'DroidCast_raw'
     DROIDCAST_VERSION = 'DroidCast'
-    DROIDCAST_FILEPATH_LOCAL = './bin/droidcast/DroidCast-debug-1.2.0.apk'
-    DROIDCAST_FILEPATH_REMOTE = '/data/local/tmp/DroidCast.apk'
-    DROIDCAST_RAW_FILEPATH_LOCAL = './bin/droidcast/DroidCastS-release-1.1.5.apk'
-    DROIDCAST_RAW_FILEPATH_REMOTE = '/data/local/tmp/DroidCastS.apk'
+    DROIDCAST_FILEPATH_LOCAL = './bin/droidcast/DroidCast_raw-release-1.0.apk'
+    DROIDCAST_FILEPATH_REMOTE = '/data/local/tmp/DroidCast_raw.apk'
 
     MINITOUCH_FILEPATH_REMOTE = '/data/local/tmp/minitouch'
 

@@ -48,9 +48,9 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
         self.ui_goto(page_main)
         self.home_main()
 
-        # 2024-04-04 ---------------------start
-        config.general_climb.ap_mode = ApMode.AP_GAME
-        # 2024-04-04 ---------------------end
+        # # 2024-04-04 ---------------------start
+        # config.general_climb.ap_mode = ApMode.AP_GAME
+        # # 2024-04-04 ---------------------end
         # 选择是游戏的体力还是活动的体力
         current_ap = config.general_climb.ap_mode
         self.switch(current_ap)
@@ -194,27 +194,26 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
         :param current_ap:
         :return:
         """
-        pass
-        # if current_ap == ApMode.AP_ACTIVITY:
-        #     logger.info("Select activity ap")
-        #     while 1:
-        #         self.screenshot()
-        #         if self.appear(self.I_AP_ACTIVITY):
-        #             break
-        #         if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1):
-        #             continue
-        #         if self.appear_then_click(self.I_UI_CONFIRM, interval=1):
-        #             continue
-        #         if self.appear(self.I_AP, interval=1):
-        #             self.appear_then_click(self.I_SWITCH, interval=2)  # 点击切换
-        # else:
-        #     logger.info("Select game ap")
-        #     while 1:
-        #         self.screenshot()
-        #         if self.appear(self.I_AP):
-        #             break
-        #         if self.appear(self.I_AP_ACTIVITY, interval=1):
-        #             self.appear_then_click(self.I_SWITCH, interval=2)
+        if current_ap == ApMode.AP_ACTIVITY:
+            logger.info("Select activity ap")
+            while 1:
+                self.screenshot()
+                if self.appear(self.I_AP_ACTIVITY):
+                    break
+                if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1):
+                    continue
+                if self.appear_then_click(self.I_UI_CONFIRM, interval=1):
+                    continue
+                if self.appear(self.I_AP, interval=1):
+                    self.appear_then_click(self.I_SWITCH, interval=2)  # 点击切换
+        else:
+            logger.info("Select game ap")
+            while 1:
+                self.screenshot()
+                if self.appear(self.I_AP):
+                    break
+                if self.appear(self.I_AP_ACTIVITY, interval=1):
+                    self.appear_then_click(self.I_SWITCH, interval=2)
 
     # def battle_wait(self, random_click_swipt_enable: bool) -> bool:
     #     # 重写

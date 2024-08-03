@@ -46,9 +46,9 @@ class GeneralInviteAssets:
 	# 左上角退出 
 	I_BACK_YELLOW = RuleImage(roi_front=(19,13,58,55), roi_back=(19,13,58,55), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_back_yellow.png")
 	# 点击邀请 
-	I_INVITE_ENSURE = RuleImage(roi_front=(712,544,132,60), roi_back=(712,544,132,60), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_invite_ensure.png")
+	I_INVITE_ENSURE = RuleImage(roi_front=(500,541,132,60), roi_back=(478,523,378,92), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_invite_ensure.png")
 	# 判断是否点中好友了 
-	I_SELECTED = RuleImage(roi_front=(895,373,33,32), roi_back=(541,157,407,350), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_selected.png")
+	I_SELECTED = RuleImage(roi_front=(895,373,33,32), roi_back=(380,157,568,350), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_selected.png")
 	# 用来判断当前的列表是哪儿的 
 	I_FLAG_1_ON = RuleImage(roi_front=(354,126,62,21), roi_back=(354,126,62,21), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_flag_1_on.png")
 	# description 
@@ -69,6 +69,12 @@ class GeneralInviteAssets:
 	I_ADD_SEA = RuleImage(roi_front=(836,231,100,100), roi_back=(836,231,100,100), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_sea.png")
 	# 队员不接受邀请 
 	I_I_REJECT = RuleImage(roi_front=(12,226,64,61), roi_back=(12,226,64,275), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_i_reject.png")
+	# 队员不接受邀请 
+	I_I_REJECT_1 = RuleImage(roi_front=(5,210,110,95), roi_back=(5,210,110,95), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_i_reject.png")
+	# 队员不接受邀请 
+	I_I_REJECT_2 = RuleImage(roi_front=(5,320,110,95), roi_back=(5,320,110,95), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_i_reject.png")
+	# 队员不接受邀请 
+	I_I_REJECT_3 = RuleImage(roi_front=(5,430,110,95), roi_back=(5,430,110,95), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_i_reject.png")
 	# 队员接受邀请 
 	I_I_ACCEPT = RuleImage(roi_front=(113,225,63,72), roi_back=(113,225,63,280), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_i_accept.png")
 	# 队员默认接受邀请 

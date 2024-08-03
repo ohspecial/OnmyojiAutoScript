@@ -17,6 +17,10 @@ class GlobalGameAssets:
 	I_G_REJECT = RuleImage(roi_front=(832,508,53,51), roi_back=(808,480,108,101), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_g_reject.png")
 	# 勾玉 
 	I_G_JADE = RuleImage(roi_front=(661,466,43,46), roi_back=(661,466,43,46), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_g_jade.png")
+	# 猫粮 
+	I_G_CAT_FOOD = RuleImage(roi_front=(565,463,59,65), roi_back=(565,463,59,65), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_g_cat_food.png")
+	# 狗粮 
+	I_G_DOG_FOOD = RuleImage(roi_front=(565,464,60,63), roi_back=(565,464,60,63), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_g_dog_food.png")
 	# 忽略 
 	I_G_IGNORE = RuleImage(roi_front=(773,116,21,21), roi_back=(759,102,48,48), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_g_ignore.png")
 	# 网络异常 
@@ -53,5 +57,9 @@ class GlobalGameAssets:
 	I_UI_CONFIRM_SAMLL = RuleImage(roi_front=(677,390,130,62), roi_back=(677,390,130,62), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_confirm_samll.png")
 	# 短一点的取消 
 	I_UI_CANCEL_SAMLL = RuleImage(roi_front=(472,389,128,62), roi_back=(472,389,128,62), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_cancel_samll.png")
+	# description 
+	I_UI_UNCHECK = RuleImage(roi_front=(567,343,33,36), roi_back=(497,303,216,100), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_uncheck.png")
+	# 勾选 
+	I_UI_CHECK = RuleImage(roi_front=(564,341,40,38), roi_back=(512,329,164,78), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_check.png")
 
 
