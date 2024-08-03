@@ -9,6 +9,7 @@ from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
 from tasks.Component.config_scheduler import Scheduler
 from tasks.Component.config_base import ConfigBase, DateTime, TimeDelta, Time
 from tasks.BondlingFairyland.config_battle import BattleConfig
+from tasks.Component.GeneralInvite.config_invite import InviteConfig
 
 class BondlingMode(str, Enum):
     MODE1 = 'mode_1'
@@ -47,13 +48,18 @@ class BondlingSwitchSoul(ConfigBase):
     # 火灵 config
     azure_basan_switch: str = Field(default='-1,-1', description='azure_basan_switch_help')
 
+class BallHelp(ConfigBase):
+    # 是否求援
+    ball_help:bool = Field(default=False, description='ball_help')
+
 class BondlingFairyland(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
     bondling_config: BondlingConfig = Field(default_factory=BondlingConfig)
     bondling_switch_soul: BondlingSwitchSoul = Field(default_factory=BondlingSwitchSoul)
     battle_config: BattleConfig = Field(default_factory=BattleConfig)
     switch_soul_config: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
-
+    ball_help_config:BallHelp= Field(default_factory=BallHelp)
+    invite_config: InviteConfig = Field(default_factory=InviteConfig)
 
 
 

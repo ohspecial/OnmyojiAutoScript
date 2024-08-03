@@ -1,0 +1,11 @@
+[
+  {
+    "itemName": "create_team",
+    "imageName": "ballhelp_create_team.png",
+    "roiFront": "529,487,220,58",
+    "roiBack": "529,487,220,58",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "创建队伍"
+  }
+]
