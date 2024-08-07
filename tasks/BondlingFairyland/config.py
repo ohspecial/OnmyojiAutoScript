@@ -54,7 +54,7 @@ class UserStatus(str, Enum):
 
 class BallHelp(ConfigBase):
     # 是否求援
-    ball_help:bool = Field(default=False, description='ball_help')
+    need_ball_help:bool = Field(default=False, description='ball_help')
     user_status: UserStatus = Field(default=UserStatus.LEADER, description='user_status_help')
 
 class BondlingFairyland(ConfigBase):

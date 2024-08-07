@@ -86,7 +86,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                     continue
 
                 try:
-                    if self.run_catch(bondling_config, bondling_switch_soul, battle_config):
+                    if self.run_catch(bondling_config, bondling_switch_soul, battle_config,ball_help):
                         current_ball -= 1
                         logger.info(f'Catch successful and current ball number: {current_ball} ')
                     else:
@@ -205,7 +205,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
 
     def run_catch(self, bondling_config: BondlingConfig,
                         bondling_switch_soul: BondlingSwitchSoul,
-                        battle_config: BattleConfig):
+                        battle_config: BattleConfig,
+                        ball_help: BallHelp):
         """
         执行捕捉的(确保进入了结契界面)
         :return:
@@ -280,8 +281,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                 logger.warning(f'No time, exit')
                 return False
             # 检查是否打开求援设置
-            if self.config.bondling_fairyland.ball_help_config.ball_help:
-                match self.config.bondling_fairyland.ball_help_config.user_status:
+            if ball_help.need_ball_help:
+                match ball_help.user_status:
                     case UserStatus.LEADER: success = self.run_leader()
                     case UserStatus.MEMBER: success = self.run_member()
             # ok 就进行挑战
