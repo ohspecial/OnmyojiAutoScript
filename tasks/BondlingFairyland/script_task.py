@@ -655,7 +655,53 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             return False
         return True
 
+    def run_member(self,bondling_config: BondlingConfig):
+        logger.info('Start run member')
+        self.ui_get_current_page()
+        # self.ui_goto(page_soul_zones)
+        # self.orochi_enter()
+        # self.check_lock(self.config.orochi.general_battle_config.lock_team_enable)
 
+        # 进入战斗流程
+        self.device.stuck_record_add('BATTLE_STATUS_S')
+        while 1:
+            self.screenshot()
+
+            if self.current_count >= bondling_config.limit_count:
+                logger.info('bondling count limit out')
+                break
+            if datetime.now() - self.start_time >= bondling_config.limit_time:
+                logger.info('bondling time limit out')
+                break
+
+            if self.check_then_accept():
+                continue
+
+            if self.is_in_room():
+                self.device.stuck_record_clear()
+                if self.wait_battle(wait_time=bondling_config.invite_config.wait_time):
+                    self.run_general_battle(config=bondling_config.battle_config)
+                else:
+                    break
+            # 队长秒开的时候，检测是否进入到战斗中
+            elif self.check_take_over_battle(False, config=bondling_config.battle_config):
+                continue
+
+        while 1:
+            # 有一种情况是本来要退出的，但是队长邀请了进入的战斗的加载界面
+            if self.appear(self.I_GI_HOME) or self.appear(self.I_GI_EXPLORE):
+                break
+            # 如果可能在房间就退出
+            if self.exit_room():
+                pass
+            # 如果还在战斗中，就退出战斗
+            if self.exit_battle():
+                pass
+
+
+        self.ui_get_current_page()
+        self.ui_goto(page_main)
+        return True
 
     def in_catch_ui(self, screenshot=False) -> bool:
         """
