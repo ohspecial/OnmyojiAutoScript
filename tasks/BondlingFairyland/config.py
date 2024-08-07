@@ -48,9 +48,14 @@ class BondlingSwitchSoul(ConfigBase):
     # 火灵 config
     azure_basan_switch: str = Field(default='-1,-1', description='azure_basan_switch_help')
 
+class UserStatus(str, Enum):
+    LEADER = 'leader'
+    MEMBER = 'member'
+
 class BallHelp(ConfigBase):
     # 是否求援
     ball_help:bool = Field(default=False, description='ball_help')
+    user_status: UserStatus = Field(default=UserStatus.LEADER, description='user_status_help')
 
 class BondlingFairyland(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
