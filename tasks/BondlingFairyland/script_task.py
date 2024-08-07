@@ -13,13 +13,14 @@ from tasks.base_task import BaseTask
 from tasks.GameUi.game_ui import GameUi
 from tasks.BondlingFairyland.config import (BondlingFairyland, BondlingMode,
                                             BondlingClass,
-                                            BondlingSwitchSoul, BondlingConfig,InviteConfig)
+                                            BondlingSwitchSoul, BondlingConfig,InviteConfig,UserStatus)
 from tasks.BondlingFairyland.assets import BondlingFairylandAssets
 from tasks.BondlingFairyland.battle import BondlingBattle
 from tasks.BondlingFairyland.config_battle import BattleConfig
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul, switch_parser
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.GameUi.page import page_main, page_bondling_fairyland, page_shikigami_records
+
 
 from module.atom.image import RuleImage
 from module.logger import logger
@@ -49,6 +50,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         self.ui_get_current_page()
         self.ui_goto(page_bondling_fairyland)
 
+        ball_help = cong.ball_help_config
         bondling_config = cong.bondling_config
         bondling_switch_soul = cong.bondling_switch_soul
         battle_config = cong.battle_config
@@ -277,8 +279,10 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if datetime.now() - self.start_time >= self.limit_time:
                 logger.warning(f'No time, exit')
                 return False
-            if self.config.bondling_fairyland.ball_help_config:
-                self.run_leader(bondling_config)
+            if self.config.bondling_fairyland.ball_help_config.ball_help:
+                match self.config.bondling_fairyland.ball_help_config.user_status:
+                    case UserStatus.LEADER: success = self.run_leader()
+                    case UserStatus.MEMBER: success = self.run_member()
             # ok 就进行挑战
             else:
                 self.click_fire()
