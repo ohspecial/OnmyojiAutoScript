@@ -279,6 +279,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if datetime.now() - self.start_time >= self.limit_time:
                 logger.warning(f'No time, exit')
                 return False
+            # 检查是否打开求援设置
             if self.config.bondling_fairyland.ball_help_config.ball_help:
                 match self.config.bondling_fairyland.ball_help_config.user_status:
                     case UserStatus.LEADER: success = self.run_leader()
