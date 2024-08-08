@@ -13,7 +13,7 @@ from tasks.base_task import BaseTask
 from tasks.GameUi.game_ui import GameUi
 from tasks.BondlingFairyland.config import (BondlingFairyland, BondlingMode,
                                             BondlingClass,
-                                            BondlingSwitchSoul, BondlingConfig,InviteConfig,UserStatus)
+                                            BondlingSwitchSoul, BondlingConfig,InviteConfig,UserStatus,BallHelp)
 from tasks.BondlingFairyland.assets import BondlingFairylandAssets
 from tasks.BondlingFairyland.battle import BondlingBattle
 from tasks.BondlingFairyland.config_battle import BattleConfig
@@ -283,8 +283,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             # 检查是否打开求援设置
             if ball_help.need_ball_help:
                 match ball_help.user_status:
-                    case UserStatus.LEADER: success = self.run_leader()
-                    case UserStatus.MEMBER: success = self.run_member()
+                    case UserStatus.LEADER: success = self.run_leader(bondling_config)
+                    case UserStatus.MEMBER: success = self.run_member(bondling_config)
             # ok 就进行挑战
             else:
                 self.click_fire()
