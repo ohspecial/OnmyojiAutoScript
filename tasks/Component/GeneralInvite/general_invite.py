@@ -99,8 +99,14 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
 
             fire = False  # 是否开启挑战
+            
             # 如果这个房间最多只容纳两个人（意思是只可以邀请一个人），且已经邀请一个人了，那就开启挑战
+            # 探索房间
             if self.room_type == RoomType.NORMAL_2 and not self.appear(self.I_ADD_2):
+                logger.info('Start challenge and this room can only invite one friend')
+                fire = True
+            # 契灵房间
+            if self.room_type == RoomType.NORMAL_2_1 and not self.appear(self.I_ADD_1):
                 logger.info('Start challenge and this room can only invite one friend')
                 fire = True
             # 如果这个房间最多容纳三个人（意思是可以邀请两个人），且设定邀请一个就开启挑战，那就开启挑战
