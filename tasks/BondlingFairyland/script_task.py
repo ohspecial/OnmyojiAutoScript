@@ -621,7 +621,6 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                 # run_invite没有适配契灵，邀请完直接打
                 if self.run_invite(config=self.config.bondling_fairyland.invite_config):
                     # BUG 邀请完直接进入战斗，没有等待队友再挑战
-                    self.click_team_fire()
                     self.run_general_battle(config=self.general_battle_config)
                 else:
                     # 邀请失败，退出任务
@@ -637,7 +636,6 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                     break
                 else:
                     is_first = False
-                    self.click_team_fire()
                     self.run_general_battle(self.general_battle_config)
 
         # 当结束或者是失败退出循环的时候只有两个UI的可能，在房间或者是在组队界面
