@@ -298,7 +298,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 friend_number = 2
 
         if friend_number == 2:
-            if self.room_type == RoomType.NORMAL_2:
+            if self.room_type == RoomType.NORMAL_2 or RoomType.NORMAL_2_1:
                 # 整个房间就可以两个人，还邀请两个 这个是报错的
                 logger.error('Room can only be one people, but invite two people')
                 return False
