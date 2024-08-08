@@ -26,6 +26,8 @@ class FriendList(str, Enum):
 class RoomType(str, Enum):
     # 房间只可以两个人的： 探索
     NORMAL_2 = 'normal_2'
+    # 房间只可以两个人的： 契灵，与探索的位置不一样
+    NORMAL_2_1 = 'normal_2_1'
     # 房间可以两三个人的： 觉醒、御魂、日轮、石距（石距是单次没有锁定阵容）
     NORMAL_3 = 'normal_3'
     # 永生之海不一样
@@ -224,9 +226,17 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 appear = True
             return appear
 
+        # 探索房间
         def check_2(img) -> bool:
             appear = False
             if not self.I_ADD_1.match(img) and self.I_ADD_2.match(img):
+                appear = True
+            return appear
+
+        # 契灵房间
+        def check_2_1(img) -> bool:
+            appear = False
+            if self.I_ADD_1.match(img) and not self.I_ADD_2.match(img):
                 appear = True
             return appear
 
@@ -248,6 +258,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             match pre_type:
                 case RoomType.NORMAL_2:
                     room_type = RoomType.NORMAL_2 if check_2(image) else None
+                case RoomType.NORMAL_2_1:
+                    room_type = RoomType.NORMAL_2_1 if check_2_1(image) else None
                 case RoomType.NORMAL_3:
                     room_type = RoomType.NORMAL_3 if check_3(image) else None
                 case RoomType.NORMAL_5:
@@ -258,6 +270,9 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             return room_type
         if room_type is None and check_2(image):
             room_type = RoomType.NORMAL_2
+            return room_type
+        if room_type is None and check_2_1(image):
+            room_type = RoomType.NORMAL_2_1
             return room_type
         if room_type is None and check_3(image):
             room_type = RoomType.NORMAL_3
