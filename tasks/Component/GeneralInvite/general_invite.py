@@ -364,7 +364,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 continue
             if self.appear_then_click(self.I_ADD_5_4, interval=1):
                 continue
-            if self.apper_then_click(self.I_ADD_1, interval=1):
+            if self.appear_then_click(self.I_ADD_1, interval=1):
                 continue
 
         friend_class = []
