@@ -662,6 +662,7 @@ if __name__ == '__main__':
 
     # t.run_invite(c.orochi.invite_config, is_first=True)
     t.screenshot()
-    print(t.appear(t.I_FIRE, threshold=0.8))
+    # print(t.appear(t.I_FIRE, threshold=0.8))
+    print(t.appear(t.I_ADD_1,threshold = 0.8))
 
 
