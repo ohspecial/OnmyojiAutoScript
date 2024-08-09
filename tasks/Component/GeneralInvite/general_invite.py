@@ -366,6 +366,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 continue
             if self.appear_then_click(self.I_ADD_1, interval=1):
                 continue
+            print(self.I_ADD_1.match(self.device.image))
 
         friend_class = []
         class_ocr = [self.O_F_LIST_1, self.O_F_LIST_2, self.O_F_LIST_3, self.O_F_LIST_4]
