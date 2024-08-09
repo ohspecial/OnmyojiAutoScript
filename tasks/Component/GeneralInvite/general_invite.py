@@ -364,10 +364,10 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 continue
             if self.appear_then_click(self.I_ADD_5_4, interval=1):
                 continue
-            if self.appear_then_click(self.I_ADD_1, interval=1):
+            if self.appear_then_click(self.I_BOND_ADD_1, interval=1):
                 continue
-            print(self.I_ADD_1.match(self.device.image))
-            print(self.appear(self.I_ADD_1,threshold = 0.8))
+            print(self.I_BOND_ADD_1.match(self.device.image))
+            print(self.appear(self.I_BOND_ADD_1,threshold = 0.8))
 
         friend_class = []
         class_ocr = [self.O_F_LIST_1, self.O_F_LIST_2, self.O_F_LIST_3, self.O_F_LIST_4]
@@ -430,12 +430,23 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             # 首先切换到不同的好友列表
             while index == 0:
                 self.screenshot()
-                if self.appear(self.I_FLAG_1_ON)  or self.appear(self.I_FLAG_5_ON):
+                if self.room_type == RoomType.NORMAL_2_1:
+                    if self.appear(self.I_FLAG_5_ON):
+                        break
+                    if self.appear_then_click(self.I_FLAG_5_OFF, interval=1):
+                        continue
+                if self.appear(self.I_FLAG_1_ON):
                     break
-                if self.appear_then_click(self.I_FLAG_1_OFF, interval=1) or self.appear_then_click(self.I_FLAG_5_OFF, interval=1):
-                    continue
+                if self.appear_then_click(self.I_FLAG_1_OFF, interval=1):
+                        continue
             while index == 1:
                 self.screenshot()
+                if self.room_type == RoomType.NORMAL_2_1:
+                    print(f'I_FLAG_6_ON:{self.appear(self.I_FLAG_6_ON)}')
+                    if self.appear(self.I_FLAG_6_ON):
+                        break
+                    if self.appear_then_click(self.I_FLAG_6_OFF, interval=1):
+                        continue
                 if self.appear(self.I_FLAG_2_ON) or self.appear(self.I_FLAG_6_ON):
                     break
                 if self.appear_then_click(self.I_FLAG_2_OFF, interval=1) or self.appear_then_click(self.I_FLAG_6_OFF, interval=1):

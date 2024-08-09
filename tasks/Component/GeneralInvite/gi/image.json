@@ -358,5 +358,50 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "三人御魂组队左上角的协站队伍"
+  },
+  {
+    "itemName": "bond_add_1",
+    "imageName": "gi_bond_add_1.png",
+    "roiFront": "591,206,100,100",
+    "roiBack": "591,206,100,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "flag_5_on",
+    "imageName": "gi_flag_5_on.png",
+    "roiFront": "371,123,73,23",
+    "roiBack": "371,123,73,23",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "flag_6_off",
+    "imageName": "gi_flag_6_off.png",
+    "roiFront": "485,119,74,24",
+    "roiBack": "485,119,74,24",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "flag_6_on",
+    "imageName": "gi_flag_6_on.png",
+    "roiFront": "490,118,59,25",
+    "roiBack": "490,118,59,25",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "flag_5_off",
+    "imageName": "gi_flag_5_off.png",
+    "roiFront": "378,123,57,21",
+    "roiBack": "378,123,57,21",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]
