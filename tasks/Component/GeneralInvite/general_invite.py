@@ -430,23 +430,14 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             # 首先切换到不同的好友列表
             while index == 0:
                 self.screenshot()
-                if self.room_type == RoomType.NORMAL_2_1:
-                    if self.appear(self.I_FLAG_5_ON):
-                        break
-                    if self.appear_then_click(self.I_FLAG_5_OFF, interval=1):
-                        continue
-                if self.appear(self.I_FLAG_1_ON):
+                
+                if self.appear(self.I_FLAG_1_ON) or self.appear(self.I_FLAG_5_ON):
                     break
-                if self.appear_then_click(self.I_FLAG_1_OFF, interval=1):
+                if self.appear_then_click(self.I_FLAG_1_OFF, interval=1) or self.appear_then_click(self.I_FLAG_5_OFF, interval=1):
                         continue
             while index == 1:
                 self.screenshot()
-                if self.room_type == RoomType.NORMAL_2_1:
-                    print(f'I_FLAG_6_ON:{self.appear(self.I_FLAG_6_ON)}')
-                    if self.appear(self.I_FLAG_6_ON):
-                        break
-                    if self.appear_then_click(self.I_FLAG_6_OFF, interval=1):
-                        continue
+                
                 if self.appear(self.I_FLAG_2_ON) or self.appear(self.I_FLAG_6_ON):
                     break
                 if self.appear_then_click(self.I_FLAG_2_OFF, interval=1) or self.appear_then_click(self.I_FLAG_6_OFF, interval=1):

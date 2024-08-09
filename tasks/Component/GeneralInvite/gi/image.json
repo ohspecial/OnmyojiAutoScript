@@ -380,8 +380,8 @@
   {
     "itemName": "flag_6_off",
     "imageName": "gi_flag_6_off.png",
-    "roiFront": "485,119,74,24",
-    "roiBack": "485,119,74,24",
+    "roiFront": "487,124,74,24",
+    "roiBack": "487,124,74,24",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
@@ -389,8 +389,8 @@
   {
     "itemName": "flag_6_on",
     "imageName": "gi_flag_6_on.png",
-    "roiFront": "490,118,59,25",
-    "roiBack": "490,118,59,25",
+    "roiFront": "487,124,72,25",
+    "roiBack": "487,124,72,25",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
