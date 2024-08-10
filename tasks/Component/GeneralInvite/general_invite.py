@@ -106,11 +106,11 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 logger.info('Start challenge and this room can only invite one friend')
                 fire = True
             # 契灵房间
-            if self.room_type == RoomType.NORMAL_2_1 and not self.appear(self.I_ADD_1):
+            if self.room_type == RoomType.NORMAL_2_1 and not self.appear(self.I_BOND_ADD_1):
                 logger.info('Start challenge and this room can only invite one friend')
                 fire = True
             # 如果这个房间最多容纳三个人（意思是可以邀请两个人），且设定邀请一个就开启挑战，那就开启挑战
-            elif self.room_type == RoomType.NORMAL_3 and config.invite_number == InviteNumber.ONE and not self.appear(self.I_ADD_1):
+            elif self.room_type == RoomType.NORMAL_3 and config.invite_number == InviteNumber.ONE and not self.appear(self.I_BOND_ADD_1):
                 logger.info('Start challenge and user only invite one friend')
                 fire = True
             # 如果这个房间最多容纳三个人（意思是可以邀请两个人），且设定邀请两个就开启挑战，那就开启挑战
@@ -242,7 +242,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         # 契灵房间
         def check_2_1(img) -> bool:
             appear = False
-            if self.I_ADD_1.match(img) and not self.I_ADD_2.match(img):
+            if self.I_BOND_ADD_1.match(img) and not self.I_ADD_2.match(img):
                 appear = True
             return appear
 
@@ -304,7 +304,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 friend_number = 2
 
         if friend_number == 2:
-            if self.room_type == RoomType.NORMAL_2 or RoomType.NORMAL_2_1:
+            if self.room_type == RoomType.NORMAL_2 or self.room_type == RoomType.NORMAL_2_1:
                 # 整个房间就可以两个人，还邀请两个 这个是报错的
                 logger.error('Room can only be one people, but invite two people')
                 return False
