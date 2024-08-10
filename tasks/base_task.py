@@ -124,6 +124,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                         continue
                     if not self.appear(self.I_G_IGNORE):
                         break
+            # 添加任务
             if invite and self.config.global_game.emergency.friend_invitation != FriendInvitation.IGNORE:
                 self.set_next_run(task='WantedQuests', success=False, finish=False, target=datetime.now())
             # 有的时候长战斗 点击后会取消战斗状态
