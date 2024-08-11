@@ -4,6 +4,7 @@
 from datetime import time, timedelta
 from pydantic import BaseModel, Field
 
+from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.config_scheduler import Scheduler
 from tasks.Component.config_base import ConfigBase, TimeDelta
@@ -19,7 +20,6 @@ class ActivityShikigami(ConfigBase):
     # shikigami: ShikigamiConfig = Field(default_factory=ShikigamiConfig)
     general_climb: GeneralClimb = Field(default_factory=GeneralClimb)
     general_battle: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
-
-
+    switch_soul_config: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
 
 

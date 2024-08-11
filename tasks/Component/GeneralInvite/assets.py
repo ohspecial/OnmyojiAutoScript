@@ -12,7 +12,7 @@ class GeneralInviteAssets:
 
 	# Image Rule Assets
 	# 中间的邀请图片 
-	I_ADD_1 = RuleImage(roi_front=(592,288,114,51), roi_back=(592,288,114,51), threshold=0.9, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_1.png")
+	I_ADD_1 = RuleImage(roi_front=(596,269,114,51), roi_back=(596,269,114,51), threshold=0.9, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_1.png")
 	# 最右边的邀请 
 	I_ADD_2 = RuleImage(roi_front=(1039,205,100,100), roi_back=(1039,205,100,100), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_2.png")
 	# description 
@@ -91,6 +91,16 @@ class GeneralInviteAssets:
 	I_GI_BUFF = RuleImage(roi_front=(794,38,46,42), roi_back=(794,38,46,42), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_gi_buff.png")
 	# 三人御魂组队左上角的协站队伍 
 	I_GI_IN_ROOM = RuleImage(roi_front=(92,17,213,64), roi_back=(92,17,213,64), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_in_room.png")
+	# description 
+	I_BOND_ADD_1 = RuleImage(roi_front=(591,206,100,100), roi_back=(591,206,100,100), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_bond_add_1.png")
+	# description 
+	I_FLAG_5_ON = RuleImage(roi_front=(371,123,73,23), roi_back=(371,123,73,23), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_flag_5_on.png")
+	# description 
+	I_FLAG_6_OFF = RuleImage(roi_front=(487,124,74,24), roi_back=(487,124,74,24), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_flag_6_off.png")
+	# description 
+	I_FLAG_6_ON = RuleImage(roi_front=(487,124,72,25), roi_back=(487,124,72,25), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_flag_6_on.png")
+	# description 
+	I_FLAG_5_OFF = RuleImage(roi_front=(378,123,57,21), roi_back=(378,123,57,21), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_flag_5_off.png")
 
 
 	# Image Rule Assets
