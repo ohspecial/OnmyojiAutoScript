@@ -99,14 +99,14 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
 
             fire = False  # 是否开启挑战
-            
+            self.device.save_screenshot()
             # 如果这个房间最多只容纳两个人（意思是只可以邀请一个人），且已经邀请一个人了，那就开启挑战
             # 探索房间
             if self.room_type == RoomType.NORMAL_2 and not self.appear(self.I_ADD_2):
                 logger.info('Start challenge and this room can only invite one friend')
                 fire = True
             # 契灵房间
-            if self.room_type == RoomType.NORMAL_2_1 and not self.appear(self.I_BOND_ADD_1):
+            if self.room_type == RoomType.NORMAL_2_1 and not self.appear(self.I_ADD_1):
                 logger.info('Start challenge and this room can only invite one friend')
                 fire = True
             # 如果这个房间最多容纳三个人（意思是可以邀请两个人），且设定邀请一个就开启挑战，那就开启挑战
@@ -135,7 +135,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
             # 点击挑战
             if fire:
-                self.click_fire()
+                if self.room_type != RoomType.NORMAL_2_1:
+                    self.click_fire()
                 return True
 
     def ensure_enter(self) -> bool:
@@ -173,8 +174,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             return True
         if self.appear(self.I_GI_EMOJI_2):
             return True
-        # if self.appear(self.I_MATCHING):
-        #     return False
+        if self.appear(self.I_GI_IN_ROOM):
+            return True
         return False
 
     def exit_room(self) -> bool:
@@ -225,6 +226,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         :param pre_type: 可以先指定这个类型，如果不指定，就自动检查
         :return:
         """
+        im = self.device.save_screenshot()
 
         def check_3(img) -> bool:
             appear = False
@@ -242,9 +244,12 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         # 契灵房间
         def check_2_1(img) -> bool:
             appear = False
-            if self.I_BOND_ADD_1.match(img) and not self.I_ADD_2.match(img):
+            
+            if self.I_ADD_1.match(img) and not self.I_ADD_2.match(img):
                 appear = True
             return appear
+
+            
 
         def check_5(img) -> bool:
             appear = False
@@ -260,6 +265,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             return appear
 
         room_type = None
+ 
         if pre_type is not None:
             match pre_type:
                 case RoomType.NORMAL_2:
@@ -289,7 +295,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         if room_type is None and check_eternity_sea(image):
             room_type = RoomType.ETERNITY_SEA
             return room_type
-        return room_type
+            
 
     def ensure_room_type(self, friend_number: int = None) -> bool:
         """
@@ -366,8 +372,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 continue
             if self.appear_then_click(self.I_BOND_ADD_1, interval=1):
                 continue
-            print(self.I_BOND_ADD_1.match(self.device.image))
-            print(self.appear(self.I_BOND_ADD_1,threshold = 0.8))
+       
+            
 
         friend_class = []
         class_ocr = [self.O_F_LIST_1, self.O_F_LIST_2, self.O_F_LIST_3, self.O_F_LIST_4]
@@ -664,8 +670,11 @@ if __name__ == '__main__':
     t = GeneralInvite(c, d)
 
     # t.run_invite(c.orochi.invite_config, is_first=True)
-    t.screenshot()
+    img = t.screenshot()
     # print(t.appear(t.I_FIRE, threshold=0.8))
-    print(t.appear(t.I_ADD_1,threshold = 0.8))
+    # print(t.I_BOND_ADD_1.match(img))
+    # print(t.I_ADD_2.match(img))
+    print(t.is_in_room(False))
+    # print(t.appear(t.I_ADD_2,threshold = 0.8))
 
 

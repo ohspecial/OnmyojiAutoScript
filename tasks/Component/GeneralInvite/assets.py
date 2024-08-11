@@ -12,7 +12,7 @@ class GeneralInviteAssets:
 
 	# Image Rule Assets
 	# 中间的邀请图片 
-	I_ADD_1 = RuleImage(roi_front=(592,288,114,51), roi_back=(592,288,114,51), threshold=0.9, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_1.png")
+	I_ADD_1 = RuleImage(roi_front=(596,269,114,51), roi_back=(596,269,114,51), threshold=0.9, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_1.png")
 	# 最右边的邀请 
 	I_ADD_2 = RuleImage(roi_front=(1039,205,100,100), roi_back=(1039,205,100,100), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralInvite/gi/gi_add_2.png")
 	# description 

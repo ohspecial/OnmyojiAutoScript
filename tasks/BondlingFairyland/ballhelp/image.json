@@ -7,5 +7,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "创建队伍"
+  },
+  {
+    "itemName": "battle_emo",
+    "imageName": "ballhelp_battle_emo.png",
+    "roiFront": "41,409,31,36",
+    "roiBack": "41,409,31,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]
