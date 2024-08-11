@@ -683,7 +683,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
 
             if self.is_in_room():
                 self.device.stuck_record_clear()
-                if self.wait_battle(wait_time=bondling_config.invite_config.wait_time):
+                if self.wait_battle(wait_time=self.config.bondling_fairyland.invite_config.wait_time):
                     self.run_battle(battle_config)
                 else:
                     break
