@@ -285,6 +285,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                 match ball_help.user_status:
                     case UserStatus.LEADER: success = self.run_leader(bondling_config,battle_config)
                     case UserStatus.MEMBER: success = self.run_member(bondling_config,battle_config)
+                if success:
+                    return True
             # ok 就进行挑战
             else:
                 self.click_fire()
@@ -672,7 +674,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if self.current_count >= bondling_config.limit_count:
                 logger.info('bondling count limit out')
                 break
-            if datetime.now() - self.start_time >= bondling_config.limit_time:
+            if datetime.now() - self.start_time >= self.limit_time:
                 logger.info('bondling time limit out')
                 break
 
@@ -682,11 +684,11 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if self.is_in_room():
                 self.device.stuck_record_clear()
                 if self.wait_battle(wait_time=bondling_config.invite_config.wait_time):
-                    self.run_battle(config=bondling_config.battle_config)
+                    self.run_battle(battle_config)
                 else:
                     break
             # 队长秒开的时候，检测是否进入到战斗中
-            elif self.check_take_over_battle(False, config=bondling_config.battle_config):
+            elif self.check_take_over_battle(False, battle_config):
                 continue
 
         while 1:
@@ -758,7 +760,7 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    config = Config('xiaohao1')
+    config = Config('xiaohao')
     device = Device(config)
     task = ScriptTask(config, device)
     image = task.screenshot()
