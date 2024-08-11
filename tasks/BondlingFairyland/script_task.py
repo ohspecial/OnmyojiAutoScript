@@ -283,8 +283,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             # 检查是否打开求援设置
             if ball_help.need_ball_help:
                 match ball_help.user_status:
-                    case UserStatus.LEADER: success = self.run_leader(bondling_config)
-                    case UserStatus.MEMBER: success = self.run_member(bondling_config)
+                    case UserStatus.LEADER: success = self.run_leader(bondling_config,battle_config)
+                    case UserStatus.MEMBER: success = self.run_member(bondling_config,battle_config)
             # ok 就进行挑战
             else:
                 self.click_fire()
@@ -531,7 +531,9 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         click_count = 0
         while 1:
             self.screenshot()
-            if not self.appear(self.I_ADD_1,threshold=0.8):
+            if self.appear(self.I_ADD_1,threshold=0.8):
+                break
+            if self.appear(self.I_BATTLE_EMO,threshold=0.8):
                 break
             if self.appear_then_click(self.I_FIRE,interval=1):
                 click_count += 1
@@ -575,7 +577,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                 return True
     
 
-    def run_leader(self,bondling_config: BondlingConfig):
+    def run_leader(self,bondling_config: BondlingConfig,battle_config: BattleConfig):
         logger.info('Start ball get help')
         while 1:
             self.screenshot()
@@ -618,10 +620,10 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
 
             # 点击挑战
             if not is_first:
-                # run_invite没有适配契灵，邀请完直接打
                 if self.run_invite(config=self.config.bondling_fairyland.invite_config):
-                    # BUG 邀请完直接进入战斗，没有等待队友再挑战
-                    self.run_general_battle(config=self.general_battle_config)
+                    self.click_team_fire()
+                    if self.run_battle(battle_config):
+                        return True
                 else:
                     # 邀请失败，退出任务
                     logger.warning('Invite failed and exit this bondlingfairyland task')
@@ -636,7 +638,9 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                     break
                 else:
                     is_first = False
-                    self.run_general_battle(self.general_battle_config)
+                    self.click_team_fire()
+                    if self.run_battle(battle_config):
+                        return True
 
         # 当结束或者是失败退出循环的时候只有两个UI的可能，在房间或者是在组队界面
         # 如果在房间就退出
@@ -653,7 +657,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             return False
         return True
 
-    def run_member(self,bondling_config: BondlingConfig):
+    def run_member(self,bondling_config: BondlingConfig,battle_config: BattleConfig):
         logger.info('Start run member')
         self.ui_get_current_page()
         # self.ui_goto(page_soul_zones)
@@ -678,7 +682,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if self.is_in_room():
                 self.device.stuck_record_clear()
                 if self.wait_battle(wait_time=bondling_config.invite_config.wait_time):
-                    self.run_general_battle(config=bondling_config.battle_config)
+                    self.run_battle(config=bondling_config.battle_config)
                 else:
                     break
             # 队长秒开的时候，检测是否进入到战斗中
