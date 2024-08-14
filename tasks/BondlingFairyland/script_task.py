@@ -7,6 +7,7 @@ from time import sleep
 from cached_property import cached_property
 from datetime import datetime, timedelta
 
+
 from tasks.Component.GeneralRoom.general_room import GeneralRoom
 from tasks.Component.GeneralInvite.general_invite import GeneralInvite
 from tasks.base_task import BaseTask
@@ -22,6 +23,7 @@ from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleCon
 from tasks.GameUi.page import page_main, page_bondling_fairyland, page_shikigami_records
 
 
+from module.base.timer import Timer
 from module.atom.image import RuleImage
 from module.logger import logger
 from module.exception import TaskEnd
@@ -263,7 +265,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         # 开始执行循环
         while 1:
             self.screenshot()
-
+            success = True
             # 如果不在结契界面，就等待
             if not self.in_catch_ui():
                 continue
@@ -271,27 +273,29 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             # 检查是否有盘子
             if not check_plate_number(target_plate):
                 logger.warning(f'No plate number, exit')
-                return False
+                success = False
+                return success
             # 检查是否有挑战次数
             if self.current_count >= bondling_config.limit_count:
                 logger.warning(f'No challenge count, exit')
-                return False
+                success = False
+                return success
             # 检查是否到了限制时间
             if datetime.now() - self.start_time >= self.limit_time:
                 logger.warning(f'No time, exit')
-                return False
+                success = False
+                return success
             # 检查是否打开求援设置
             if ball_help.need_ball_help:
                 match ball_help.user_status:
                     case UserStatus.LEADER: success = self.run_leader(bondling_config,battle_config)
                     case UserStatus.MEMBER: success = self.run_member(bondling_config,battle_config)
-                if success:
-                    return True
+                return success
             # ok 就进行挑战
             else:
                 self.click_fire()
                 if self.run_battle(battle_config):
-                    return True
+                    return success
 
 
 
@@ -655,17 +659,28 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         # self.ui_get_current_page()
         # self.ui_goto(page_main)
 
-        if not success:
-            return False
-        return True
+        return success
 
     def run_member(self,bondling_config: BondlingConfig,battle_config: BattleConfig):
         logger.info('Start run member')
         self.ui_get_current_page()
-        # self.ui_goto(page_soul_zones)
-        # self.orochi_enter()
-        # self.check_lock(self.config.orochi.general_battle_config.lock_team_enable)
+        
+        # 开始等待队长拉人
+        wait_time = self.config.orochi.invite_config.wait_time
+        wait_timer = Timer(wait_time.minute * 60)
+        wait_timer.start()
 
+        success = True
+        while 1:
+            self.screenshot()
+
+            # 等待超时
+            if wait_timer.reached():
+                success = False
+                return success
+
+            if self.check_then_accept():
+                break
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
         while 1:
@@ -705,7 +720,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
 
         self.ui_get_current_page()
         self.ui_goto(page_main)
-        return True
+        return success
 
     def in_catch_ui(self, screenshot=False) -> bool:
         """

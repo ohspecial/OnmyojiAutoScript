@@ -13,6 +13,8 @@ from tasks.GameUi.assets import GameUiAssets
 from tasks.GameUi.page import *
 from tasks.Restart.assets import RestartAssets
 from tasks.base_task import BaseTask
+from tasks.Component.GeneralInvite.assets import GeneralInviteAssets as GIA
+
 from module.logger import logger
 from module.exception import (GameNotRunningError, GamePageUnknownError, RequestHumanTakeover)
 
@@ -247,6 +249,9 @@ class GameUi(BaseTask, GameUiAssets):
                         self.ui_button_interval_reset(button)
                         confirm_timer.reset()
                         clicked = True
+                        # 部分页面需要确认退出
+                        if self.appear_then_click(GIA.I_GI_SURE, interval=0.8):
+                            pass
                         break
 
             if clicked:
