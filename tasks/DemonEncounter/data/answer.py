@@ -63,18 +63,16 @@ class Answer:
 
         def decide_by_options(question: str, ops: list[str]):
             # 瞎猫当死耗子
-            matches = {}
-            for index, option in enumerate(ops):
-                if option not in self.data_options.keys():
-                    continue
-                for ques in self.data_options[option]:
-                    ques_match_ratio = difflib.SequenceMatcher(None, ques, question).ratio()
-                    if ques_match_ratio > 0.8:
-                        matches[index + 1] = ques_match_ratio
-            if matches:
-                opts = sorted(matches.items(), key=lambda x: x[1], reverse=True)
-                logger.warning('No match found for question,\n Now traversing the entire database to find the most similar question')
-                logger.warning(f'Most similar answer: {opts[0][0]}, and similarity char number is {opts[0][1]}')
+            opts = {}
+            for index, option in enumerate(options):
+                if option in self.data_options.keys():
+                    cnts = [count_intersection(question, ques) for ques in self.data_options[option] ]
+                    cnts.sort(reverse=True)
+                    opts[index + 1] = cnts[0]
+            #
+            if opts:
+                opts = sorted(opts.items(), key=lambda x: x[1], reverse=True)
+            if opts:
                 return opts[0][0]
             index = decide_by_question_foreach(question, ops)
             return index if index else None

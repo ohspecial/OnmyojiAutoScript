@@ -14,6 +14,7 @@ from tasks.Quiz.debug import Debugger, remove_symbols
 from module.logger import logger
 from module.exception import TaskEnd
 from module.base.timer import Timer
+from module.base.timer import Timer
 from module.atom.image_grid import ImageGrid
 from module.atom.image import RuleImage
 from module.atom.click import RuleClick
@@ -91,8 +92,6 @@ class ScriptTask(GameUi, QuizAssets, ActivityShikigamiAssets, Debugger):
                 continue
         self.last_select_1, self.last_select_2, self.last_select_3, self.last_select_4 = '', '', '', ''
 
-        quiz_timer = Timer(1.4)
-        quiz_timer.start()
         while 1:
             self.screenshot()
 
