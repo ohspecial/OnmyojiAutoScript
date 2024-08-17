@@ -666,7 +666,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         self.ui_get_current_page()
         
         # 开始等待队长拉人
-        wait_time = self.config.orochi.invite_config.wait_time
+        wait_time = self.config.bondling_fairyland.invite_config.wait_time
         wait_timer = Timer(wait_time.minute * 60)
         wait_timer.start()
 
