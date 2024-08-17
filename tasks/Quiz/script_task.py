@@ -67,7 +67,9 @@ class ScriptTask(GameUi, QuizAssets, ActivityShikigamiAssets, Debugger):
             self.screenshot()
             if self.appear(self.I_START):
                 break
-            if self.appear_then_click(self.I_SHI, interval=1):
+            # if self.appear_then_click(self.I_SHI, interval=1):
+            #     continue
+            if self.appear_then_click(self.I_ENTER, interval=1):
                 continue
             if self.appear_then_click(self.I_ENTRY, interval=1):
                 continue

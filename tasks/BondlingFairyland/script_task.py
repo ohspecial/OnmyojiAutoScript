@@ -692,7 +692,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if datetime.now() - self.start_time >= self.limit_time:
                 logger.info('bondling time limit out')
                 break
-
+            
             if self.check_then_accept():
                 continue
 
@@ -729,6 +729,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         """
         if screenshot:
             self.screenshot()
+            
         return self.appear(self.I_BALL_FIRE)
 
     def in_search_ui(self, screenshot=False) -> bool:

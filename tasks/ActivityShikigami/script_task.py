@@ -16,7 +16,6 @@ from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from module.logger import logger
 from module.exception import TaskEnd
 
-
 class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
 
     def run(self) -> None:
@@ -67,9 +66,11 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
         else:
             logger.info("Unlock team")
             while 1:
-                self.screenshot()
+                img = self.screenshot()
                 if self.appear_then_click(self.I_LOCK, interval=1):
                     continue
+                # 保存截图
+                self.device.save_screenshot()
                 if self.appear(self.I_UNLOCK):
                     break
 
@@ -140,10 +141,12 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
             if self.appear_then_click(self.I_N_BATTLE, interval=1):
                 continue
             # 2024-04-04 --------------end
-            if self.appear_then_click(self.I_SHI, interval=1):
+            # if self.appear_then_click(self.I_SHI, interval=1):
+            #     continue
+            if self.appear_then_click(self.I_ENTER,interval=1):
                 continue
-            if self.appear_then_click(self.I_DRUM, interval=1):
-                continue
+            # if self.appear_then_click(self.I_DRUM, interval=1):
+            #     continue
             if self.appear_then_click(self.I_BATTLE, interval=1):
                 continue
 
@@ -254,7 +257,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('xiaohao')
     d = Device(c)
     t = ScriptTask(c, d)
 
