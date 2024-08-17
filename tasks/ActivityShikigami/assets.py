@@ -42,7 +42,7 @@ class ActivityShikigamiAssets:
 	# 归鹿之途 
 	I_DRUM = RuleImage(roi_front=(885,310,29,145), roi_back=(885,310,29,145), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_drum.png")
 	# 上锁图标 
-	I_LOCK = RuleImage(roi_front=(827,655,25,32), roi_back=(749,592,139,116), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_lock.png")
+	I_LOCK = RuleImage(roi_front=(827,655,25,32), roi_back=(827,655,25,32), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_lock.png")
 	# 还未上锁图片 
 	I_UNLOCK = RuleImage(roi_front=(823,654,28,28), roi_back=(776,610,112,87), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_unlock.png")
 	# 点击战斗 

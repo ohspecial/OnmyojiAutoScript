@@ -145,6 +145,8 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
             #     continue
             if self.appear_then_click(self.I_ENTER1,interval=1):
                 continue
+            if self.appear_then_click(self.I_ENTER,interval=1):
+                continue
             # if self.appear_then_click(self.I_DRUM, interval=1):
             #     continue
             if self.appear_then_click(self.I_BATTLE, interval=1):

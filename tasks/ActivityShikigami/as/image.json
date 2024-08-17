@@ -39,7 +39,7 @@
     "itemName": "lock",
     "imageName": "as_lock.png",
     "roiFront": "827,655,25,32",
-    "roiBack": "749,592,139,116",
+    "roiBack": "827,655,25,32",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "上锁图标"
@@ -48,7 +48,7 @@
     "itemName": "unlock",
     "imageName": "as_unlock.png",
     "roiFront": "823,654,28,28",
-    "roiBack": "776,610,112,87",
+    "roiBack": "823,654,28,28",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "还未上锁图片"
@@ -121,15 +121,6 @@
     "imageName": "as_enter.png",
     "roiFront": "441,199,38,30",
     "roiBack": "431,182,62,61",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
-    "itemName": "enter1",
-    "imageName": "as_enter1.png",
-    "roiFront": "446,200,34.5,33.5",
-    "roiBack": "433,185,66,57",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
