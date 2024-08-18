@@ -30,18 +30,31 @@ class ScriptTask(GameUi, SwitchSoul, MoonSea):
     def _config(self):
         return self.config.model.six_realms
 
+    def _two_teams_switch_sous(self, config):
+        if self._config.enable:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul(config.switch_group_team)
+
+        if self._config.enable_switch_by_name:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul_by_name(config.group_name, config.team_name)
+            
     def run(self):
-        if self._config.switch_soul_config.enable:
-            self.ui_get_current_page()
-            self.ui_goto(page_shikigami_records)
-            self.run_switch_soul(self._config.switch_soul_config.switch_group_team)
-        if self._config.switch_soul_config.enable_switch_by_name:
-            self.ui_get_current_page()
-            self.ui_goto(page_shikigami_records)
-            self.run_switch_soul_by_name(
-                self._config.switch_soul_config.group_name,
-                self._config.switch_soul_config.team_name
-            )
+        self._two_teams_switch_sous(config=self._config.switch_soul_config_1)
+        self._two_teams_switch_sous(config=self._config.switch_soul_config_2)
+        # if self._config.switch_soul_config_1.enable:
+        #     self.ui_get_current_page()
+        #     self.ui_goto(page_shikigami_records)
+        #     self.run_switch_soul(self._config.switch_soul_config.switch_group_team)
+        # if self._config.switch_soul_config.enable_switch_by_name:
+        #     self.ui_get_current_page()
+        #     self.ui_goto(page_shikigami_records)
+        #     self.run_switch_soul_by_name(
+        #         self._config.switch_soul_config.group_name,
+        #         self._config.switch_soul_config.team_name
+        #     )
         self.ui_get_current_page()
         self.ui_goto(page_six_gates)
 
