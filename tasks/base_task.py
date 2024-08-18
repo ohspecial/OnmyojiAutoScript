@@ -114,7 +114,8 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 break
             if self.appear_then_click(target=click_button, interval=0.8,threshold=0.8):
                 # 把悬赏加入任务列表
-                self.set_next_run(task='WantedQuests', success=True, finish=False, target=datetime.now())
+                if click_button == self.I_G_ACCEPT:
+                    self.set_next_run(task='WantedQuests', success=True, finish=False, target=datetime.now())
                 continue
         # 有的时候长战斗 点击后会取消战斗状态
         self.device.detect_record = detect_record
