@@ -124,5 +124,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "enter1",
+    "imageName": "as_enter1.png",
+    "roiFront": "446,200,34.5,33.5",
+    "roiBack": "433,185,66,57",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]

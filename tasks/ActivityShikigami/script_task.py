@@ -143,7 +143,7 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
             # 2024-04-04 --------------end
             # if self.appear_then_click(self.I_SHI, interval=1):
             #     continue
-            if self.appear_then_click(self.I_ENTER,interval=1):
+            if self.appear_then_click(self.I_ENTER1,interval=1):
                 continue
             # if self.appear_then_click(self.I_DRUM, interval=1):
             #     continue
