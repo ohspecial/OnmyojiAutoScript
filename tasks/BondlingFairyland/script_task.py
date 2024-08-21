@@ -568,6 +568,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         :return:
         """
         logger.info('Create room')
+        # 盘子满了要点一下按钮，待补
         if not self.appear(self.I_CREATE_TEAM):
             logger.warning('No create room button')
             return False
@@ -584,6 +585,10 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
     
 
     def run_leader(self,bondling_config: BondlingConfig,battle_config: BattleConfig):
+        '''
+        队长任务，只有捉到契灵了才返回成功，抓不到则在此循环直到成功
+        如果组队失败、次数失败则直接结束任务
+        '''
         logger.info('Start ball get help')
         while 1:
             self.screenshot()
@@ -606,11 +611,13 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             
             if self.current_count >= bondling_config.limit_count:
                 if self.is_in_room():
+                    success = False
                     logger.info('bondlingfairyland count limit out')
                     break
                 
             if datetime.now() - self.start_time >= self.limit_time:
                 if self.is_in_room():
+                    success = False
                     logger.info('bondlingfairyland time limit out')
                     break
 
@@ -647,7 +654,15 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                     self.click_team_fire()
                     if self.run_battle(battle_config):
                         return True
+                    
+        # 如果任务失败，则直接结束任务
+        if not success:
+            self.run_team_failed()
 
+        return success
+
+    def run_team_failed(self):
+        logger.info('bondlingfairyland team failed')
         # 当结束或者是失败退出循环的时候只有两个UI的可能，在房间或者是在组队界面
         # 如果在房间就退出
         if self.exit_room():
@@ -656,10 +671,12 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         if self.exit_team():
             pass
 
-        # self.ui_get_current_page()
-        # self.ui_goto(page_main)
-
-        return success
+        self.ui_get_current_page()
+        self.ui_goto(page_main)
+        
+        self.set_next_run(task='BondlingFairyland', finish=True, success=False)
+        raise TaskEnd 
+        
 
     def run_member(self,bondling_config: BondlingConfig,battle_config: BattleConfig):
         logger.info('Start run member')
