@@ -663,14 +663,16 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
 
     def run_team_failed(self):
         logger.info('bondlingfairyland team failed')
-        # 当结束或者是失败退出循环的时候只有两个UI的可能，在房间或者是在组队界面
+        # 当结束或者是失败退出循环的时候只有两个UI的可能，在房间或者是在组队界面，如果是队员模式，可能在战斗
         # 如果在房间就退出
         if self.exit_room():
             pass
         # 如果在组队界面就退出
         if self.exit_team():
             pass
-
+        # 如果还在战斗中，就退出战斗
+        if self.exit_battle():
+            pass
         self.ui_get_current_page()
         self.ui_goto(page_main)
         
@@ -679,6 +681,11 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         
 
     def run_member(self,bondling_config: BondlingConfig,battle_config: BattleConfig):
+        '''
+        队员任务
+        如果组队失败、次数或时间够了则直接结束任务
+        不会返回成功
+        '''
         logger.info('Start run member')
         self.ui_get_current_page()
         
@@ -691,10 +698,10 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         while 1:
             self.screenshot()
 
-            # 等待超时
+            # 等待超时,结束任务
             if wait_timer.reached():
                 success = False
-                return success
+                self.run_team_failed()
 
             if self.check_then_accept():
                 break
@@ -704,9 +711,11 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             self.screenshot()
 
             if self.current_count >= bondling_config.limit_count:
+                success = False
                 logger.info('bondling count limit out')
                 break
             if datetime.now() - self.start_time >= self.limit_time:
+                success = False
                 logger.info('bondling time limit out')
                 break
             
@@ -723,20 +732,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             elif self.check_take_over_battle(False, battle_config):
                 continue
 
-        while 1:
-            # 有一种情况是本来要退出的，但是队长邀请了进入的战斗的加载界面
-            if self.appear(self.I_GI_HOME) or self.appear(self.I_GI_EXPLORE):
-                break
-            # 如果可能在房间就退出
-            if self.exit_room():
-                pass
-            # 如果还在战斗中，就退出战斗
-            if self.exit_battle():
-                pass
-
-
-        self.ui_get_current_page()
-        self.ui_goto(page_main)
+        if not success:
+            self.run_team_failed()
         return success
 
     def in_catch_ui(self, screenshot=False) -> bool:
