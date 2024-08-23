@@ -695,13 +695,11 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         
         # 开始等待队长拉人
         wait_time = self.config.bondling_fairyland.invite_config.wait_time
-        wait_timer = Timer(wait_time.minute * 60)
+        wait_timer = Timer(wait_time.minute * 60,count=wait_time.minute * 60)
         wait_timer.start()
 
         success = True
         while 1:
-            self.screenshot()
-
             # 等待超时,结束任务
             if wait_timer.reached():
                 success = False
