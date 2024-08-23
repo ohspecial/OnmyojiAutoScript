@@ -691,7 +691,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         不会返回成功
         '''
         logger.info('Start run member')
-        self.ui_get_current_page()
+        self.screenshot()
         
         # 开始等待队长拉人
         wait_time = self.config.bondling_fairyland.invite_config.wait_time
