@@ -706,7 +706,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             if wait_timer.reached():
                 success = False
                 self.run_team_failed()
-
+            
             if self.check_then_accept():
                 break
         # 进入战斗流程
@@ -794,7 +794,7 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    config = Config('zhu')
+    config = Config('xiaohao')
     device = Device(config)
     task = ScriptTask(config, device)
     image = task.screenshot()
