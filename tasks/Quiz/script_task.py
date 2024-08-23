@@ -91,16 +91,9 @@ class ScriptTask(GameUi, QuizAssets, ActivityShikigamiAssets, Debugger):
                 continue
         self.last_select_1, self.last_select_2, self.last_select_3, self.last_select_4 = '', '', '', ''
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        quiz_timer = Timer(1)
-        quiz_timer.start()
-=======
->>>>>>> 849ce2e (merge)
-=======
+
         quiz_timer = Timer(1.4)
         quiz_timer.start()
->>>>>>> de2df674ca30e287197e5c6be536afa49fba3fbf
         while 1:
             self.screenshot()
 
