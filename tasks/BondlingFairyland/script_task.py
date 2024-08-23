@@ -568,7 +568,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         :return:
         """
         logger.info('Create room')
-        # 盘子满了要点一下按钮，待补
+    
         if not self.appear(self.I_CREATE_TEAM):
             logger.warning('No create room button')
             return False
@@ -594,6 +594,10 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
             self.screenshot()
             if self.appear(self.I_CREATE_TEAM):
                 break
+            # 盘子满了要补一下
+            if self.appear_then_click(self.I_PLATE_ENSURE,interval=1):
+                continue
+            # 点击求援
             if self.appear_then_click(self.I_BALL_HELP, interval=1):
                 continue
         # 创建房间
@@ -790,7 +794,7 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    config = Config('xiaohao')
+    config = Config('zhu')
     device = Device(config)
     task = ScriptTask(config, device)
     image = task.screenshot()

@@ -665,7 +665,7 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    c = Config('xiaohao1')
+    c = Config('zhu')
     d = Device(c)
     t = GeneralInvite(c, d)
 
@@ -674,7 +674,7 @@ if __name__ == '__main__':
     # print(t.appear(t.I_FIRE, threshold=0.8))
     # print(t.I_BOND_ADD_1.match(img))
     # print(t.I_ADD_2.match(img))
-    print(t.is_in_room(False))
+    t.run_invite(config=c)
     # print(t.appear(t.I_ADD_2,threshold = 0.8))
 
 
