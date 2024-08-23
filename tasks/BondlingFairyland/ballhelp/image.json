@@ -16,5 +16,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "plate_ensure",
+    "imageName": "ballhelp_plate_ensure.png",
+    "roiFront": "670,403,178,60",
+    "roiBack": "670,403,178,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]
