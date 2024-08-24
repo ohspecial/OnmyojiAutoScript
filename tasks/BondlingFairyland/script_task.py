@@ -691,8 +691,6 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         不会返回成功
         '''
         logger.info('Start run member')
-        self.screenshot()
-        
         # 开始等待队长拉人
         wait_time = self.config.bondling_fairyland.invite_config.wait_time
         wait_timer = Timer(wait_time.minute * 60,count=wait_time.minute * 60)
@@ -701,6 +699,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         success = True
         while 1:
             # 等待超时,结束任务
+            self.screenshot()
+
             if wait_timer.reached():
                 success = False
                 self.run_team_failed()
