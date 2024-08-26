@@ -697,6 +697,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         wait_timer.start()
 
         success = True
+        # 等待邀请，需要长时间等待
+        self.device.stuck_record_add('PAUSE')
         while 1:
             # 等待超时,结束任务
             self.screenshot()
@@ -706,6 +708,7 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
                 self.run_team_failed()
             
             if self.check_then_accept():
+                self.device.stuck_record_clear()
                 break
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
@@ -714,29 +717,29 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
 
             if self.current_count >= bondling_config.limit_count:
                 success = False
-                logger.info('bondling count limit out')
+                logger.info('Bondling count limit out')
                 break
             if datetime.now() - self.start_time >= self.limit_time:
                 success = False
-                logger.info('bondling time limit out')
+                logger.info('Bondling time limit out')
                 break
             
             if self.check_then_accept():
                 continue
 
-            if self.is_in_room():
+            if self.is_in_room(is_screenshot=False):
                 self.device.stuck_record_clear()
                 if self.wait_battle(wait_time=self.config.bondling_fairyland.invite_config.wait_time):
                     self.run_battle(battle_config)
                 else:
-                    break
+                    logger.warning("Room destory,wait again")
+                    continue
             # 队长秒开的时候，检测是否进入到战斗中
             elif self.check_take_over_battle(False, battle_config):
                 continue
 
         if not success:
             self.run_team_failed()
-        return success
 
     def in_catch_ui(self, screenshot=False) -> bool:
         """
@@ -792,7 +795,7 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    config = Config('xiaohao')
+    config = Config('zhu')
     device = Device(config)
     task = ScriptTask(config, device)
     image = task.screenshot()

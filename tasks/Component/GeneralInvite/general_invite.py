@@ -13,6 +13,7 @@ from tasks.base_task import BaseTask
 from tasks.Component.GeneralInvite.assets import GeneralInviteAssets
 from tasks.Component.GeneralInvite.config_invite import InviteConfig, InviteNumber, FindMode
 from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
+from tasks.BondlingFairyland.assets import BondlingFairylandAssets
 from module.logger import logger
 
 
@@ -36,7 +37,7 @@ class RoomType(str, Enum):
     NORMAL_5 = 'normal_5'
 
 
-class GeneralInvite(BaseTask, GeneralInviteAssets):
+class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
     timer_invite = None
     timer_wait = None
     timer_emoji = None  # 等待期间如果没有操作的话，可能会导致长时间无响应报错
@@ -99,7 +100,6 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
 
             fire = False  # 是否开启挑战
-            self.device.save_screenshot()
             # 如果这个房间最多只容纳两个人（意思是只可以邀请一个人），且已经邀请一个人了，那就开启挑战
             # 探索房间
             if self.room_type == RoomType.NORMAL_2 and not self.appear(self.I_ADD_2):
@@ -226,8 +226,6 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         :param pre_type: 可以先指定这个类型，如果不指定，就自动检查
         :return:
         """
-        im = self.device.save_screenshot()
-
         def check_3(img) -> bool:
             appear = False
             if self.I_ADD_1.match(img) and self.I_ADD_2.match(img):
@@ -620,13 +618,16 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         success = True
         while 1:
             self.screenshot()
-
-            # 如果自己在探索界面或者是庭院，那就是房间已经被销毁了
-            if self.appear(self.I_GI_HOME) or self.appear(self.I_GI_EXPLORE):
+            # 如果自己在探索界面或者是庭院或者是契灵界面的求援按钮，那就是房间已经被销毁了
+            if self.appear(self.I_GI_HOME) or self.appear(self.I_GI_EXPLORE) :
                 logger.warning('Room destroyed')
                 success = False
                 break
 
+            if self.appear(self.I_STONE_ENTER) or self.appear(self.I_BALL_HELP):
+                logger.warning('Room destroyed')
+                success = False
+                break
 
             if self.timer_wait.reached():
                 logger.warning('Wait battle time out')
