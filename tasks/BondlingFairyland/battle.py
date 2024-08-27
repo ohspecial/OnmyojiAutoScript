@@ -35,10 +35,14 @@ class BondlingBattle(GeneralBattle, BondlingFairylandAssets):
         中途接入战斗，并且接管
         :return:  赢了返回True， 输了返回False, 不是在战斗中返回None
         """
+        
         if is_screenshot:
             self.screenshot()
         if not self.is_in_battle():
             return None
+        self.current_count += 1
+        logger.info(f"Current count: {self.current_count}")
+        
         if self.check_load():
             # 首先要判断进入战斗的界面
             self.green_mark(battle_config.green_enable, battle_config.green_mark)
