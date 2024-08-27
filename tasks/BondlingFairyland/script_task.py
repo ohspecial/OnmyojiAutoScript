@@ -743,6 +743,8 @@ class ScriptTask(GameUi, BondlingBattle, SwitchSoul,GeneralRoom,GeneralInvite, B
         if not success:
             self.run_team_failed()
 
+    
+
     def in_catch_ui(self, screenshot=False) -> bool:
         """
         判断是否在结契的总界面
