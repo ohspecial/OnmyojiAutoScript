@@ -17,7 +17,6 @@ from tasks.Orochi.assets import OrochiAssets
 from tasks.Orochi.assets import OrochiAssets
 
 class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle,OrochiAssets):
-class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle,OrochiAssets):
 
     def run(self):
         self.ui_get_current_page()
