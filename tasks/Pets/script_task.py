@@ -2,7 +2,6 @@
 # @author runhey
 # github https://github.com/runhey
 import random
-import random
 from module.logger import logger
 from module.exception import TaskEnd
 from datetime import time, datetime, timedelta
@@ -13,7 +12,6 @@ from tasks.GameUi.page import page_main, page_soul_zones, page_shikigami_records
 from tasks.Pets.assets import PetsAssets
 from tasks.Pets.config import PetsConfig,GoToOrochiConfig
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
-from tasks.Orochi.assets import OrochiAssets
 from tasks.Orochi.assets import OrochiAssets
 
 class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle,OrochiAssets):
@@ -202,7 +200,7 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle,OrochiAssets):
                     if not self.appear(self.I_REWARD):
                         break
                 return True
-            def battle_wait(self, random_click_swipt_enable: bool) -> bool:
+    def battle_wait(self, random_click_swipt_enable: bool) -> bool:
         """
             重写战斗等待
             # https://github.com/runhey/OnmyojiAutoScript/issues/95
