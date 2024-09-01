@@ -214,6 +214,7 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
         wait_timer.start()
 
         success = True
+        self.device.stuck_record_add('BATTLE_STATUS_S')
         while 1:
             self.screenshot()
 
@@ -223,6 +224,7 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                 return success
 
             if self.check_then_accept():
+                self.device.stuck_record_clear()
                 break
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
