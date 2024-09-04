@@ -98,7 +98,6 @@ class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
                 self.appear_then_click(self.I_GI_EMOJI_1)
                 self.appear_then_click(self.I_GI_EMOJI_2)
 
-
             fire = False  # 是否开启挑战
             # 如果这个房间最多只容纳两个人（意思是只可以邀请一个人），且已经邀请一个人了，那就开启挑战
             # 探索房间
@@ -138,6 +137,15 @@ class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
                 if self.room_type != RoomType.NORMAL_2_1:
                     self.click_fire()
                 return True
+
+            if self.timer_invite and self.timer_invite.reached():
+                if is_first:
+                    logger.info('Invitation is triggered every 20s')
+                    self.timer_invite.reset()
+                else:
+                    logger.info('Wait for 30s and invite again')
+                    self.timer_invite = None
+                self.invite_friends(config)
 
     def ensure_enter(self) -> bool:
         """
