@@ -34,17 +34,17 @@ class ActivityShikigamiAssets:
 
 	# Image Rule Assets
 	# 进入活动 
-	I_SHI = RuleImage(roi_front=(64,216,1110,326), roi_back=(64,216,1110,326), threshold=0.7, method="Template matching", file="./tasks/ActivityShikigami/as/as_shi.png")
+	I_SHI = RuleImage(roi_front=(440,169,50,43), roi_back=(337,115,301,424), threshold=0.7, method="Template matching", file="./tasks/ActivityShikigami/as/as_shi.png")
 	# 左上角返回 
 	I_BACK_GREEN = RuleImage(roi_front=(23,27,44,44), roi_back=(23,27,44,44), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_back_green.png")
 	# 进入爬塔 
-	I_BATTLE = RuleImage(roi_front=(456,151,35,165), roi_back=(393,81,138,315), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_battle.png")
+	I_BATTLE = RuleImage(roi_front=(898,200,35,165), roi_back=(861,134,138,315), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_battle.png")
 	# 归鹿之途 
 	I_DRUM = RuleImage(roi_front=(885,310,29,145), roi_back=(885,310,29,145), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_drum.png")
 	# 上锁图标 
-	I_LOCK = RuleImage(roi_front=(827,655,25,32), roi_back=(827,655,25,32), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_lock.png")
+	I_LOCK = RuleImage(roi_front=(829.5,655,20,32), roi_back=(793,641,47,56), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_lock.png")
 	# 还未上锁图片 
-	I_UNLOCK = RuleImage(roi_front=(823,654,28,28), roi_back=(776,610,112,87), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_unlock.png")
+	I_UNLOCK = RuleImage(roi_front=(823,654,23,23), roi_back=(782,640,69,50), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_unlock.png")
 	# 点击战斗 
 	I_FIRE = RuleImage(roi_front=(1134,587,84,78), roi_back=(1134,587,84,78), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_fire.png")
 	# 体力按钮 
@@ -61,8 +61,6 @@ class ActivityShikigamiAssets:
 	I_NEW = RuleImage(roi_front=(1004,192,65,52), roi_back=(1004,192,65,52), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_new.png")
 	# description 
 	I_ENTER = RuleImage(roi_front=(441,199,38,30), roi_back=(431,182,62,61), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_enter.png")
-	# description 
-	I_ENTER1 = RuleImage(roi_front=(446,200,34.5,33.5), roi_back=(433,185,66,57), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_enter1.png")
 
 
 	# Ocr Rule Assets
