@@ -18,7 +18,7 @@ from module.logger import logger
 from module.exception import TaskEnd
 
 
-class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets):
+class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
 
     def run(self) -> None:
         config = self.config.activity_shikigami
