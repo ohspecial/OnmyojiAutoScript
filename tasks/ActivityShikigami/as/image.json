@@ -21,7 +21,7 @@
     "itemName": "battle",
     "imageName": "as_battle.png",
     "roiFront": "456,151,35,165",
-    "roiBack": "456,151,35,165",
+    "roiBack": "393,81,138,315",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "进入爬塔"
@@ -66,7 +66,7 @@
     "itemName": "ap",
     "imageName": "as_ap.png",
     "roiFront": "1122,516,29,26",
-    "roiBack": "1122,516,29,26",
+    "roiBack": "1092,487,103,71",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "体力按钮"
@@ -75,7 +75,7 @@
     "itemName": "ap_activity",
     "imageName": "as_ap_activity.png",
     "roiFront": "1128,517,21,25",
-    "roiBack": "1128,517,21,25",
+    "roiBack": "1090,500,84,54",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动体力"
@@ -84,7 +84,7 @@
     "itemName": "switch",
     "imageName": "as_switch.png",
     "roiFront": "1211,518,23,23",
-    "roiBack": "1211,518,23,23",
+    "roiBack": "1200,497,69,56",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "切换按键"
