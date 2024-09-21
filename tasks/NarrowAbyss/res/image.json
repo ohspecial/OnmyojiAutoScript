@@ -1,0 +1,146 @@
+[
+  {
+    "itemName": "ryou_shenshe",
+    "imageName": "res_ryou_shenshe.png",
+    "roiFront": "872,659,62,25",
+    "roiBack": "872,659,62,25",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "阴阳竂->神社"
+  },
+  {
+    "itemName": "ryou_narrow_abyss",
+    "imageName": "res_ryou_narrow_abyss.png",
+    "roiFront": "707,492,110,27",
+    "roiBack": "707,492,110,27",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "神社->狭间暗域"
+  },
+  {
+    "itemName": "narrow_dragon",
+    "imageName": "res_narrow_dragon.png",
+    "roiFront": "224,200,57,155",
+    "roiBack": "224,200,57,155",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "狭间_神龙入口"
+  },
+  {
+    "itemName": "narrow_peacock",
+    "imageName": "res_narrow_peacock.png",
+    "roiFront": "515,149,58,170",
+    "roiBack": "515,149,58,170",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "狭间_孔雀入口"
+  },
+  {
+    "itemName": "narrow_fox",
+    "imageName": "res_narrow_fox.png",
+    "roiFront": "811,173,56,179",
+    "roiBack": "811,173,56,179",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "狭间_白藏主入口"
+  },
+  {
+    "itemName": "narrow_leopard",
+    "imageName": "res_narrow_leopard.png",
+    "roiFront": "1141,165,50,161",
+    "roiBack": "1141,165,50,161",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "狭间_黑豹入口"
+  },
+  {
+    "itemName": "narrow_navigation",
+    "imageName": "res_narrow_navigation.png",
+    "roiFront": "1199,374,50,44",
+    "roiBack": "1199,374,50,44",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "战报"
+  },
+  {
+    "itemName": "narrow_shiki",
+    "imageName": "res_narrow_shiki.png",
+    "roiFront": "1199,462,47,53",
+    "roiBack": "1199,462,47,53",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "式神录"
+  },
+  {
+    "itemName": "narrow_abyss",
+    "imageName": "res_narrow_abyss.png",
+    "roiFront": "711,489,107,38",
+    "roiBack": "711,489,107,38",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "狭间暗域"
+  },
+  {
+    "itemName": "open_narrow_abyss",
+    "imageName": "res_open_narrow_abyss.png",
+    "roiFront": "1133,602,74,58",
+    "roiBack": "1133,602,74,58",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "开启狭间暗域"
+  },
+  {
+    "itemName": "narrow_map",
+    "imageName": "res_narrow_map.png",
+    "roiFront": "306,147,170,48",
+    "roiBack": "306,147,170,48",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "战报页面"
+  },
+  {
+    "itemName": "narrow_map_exit",
+    "imageName": "res_narrow_map_exit.png",
+    "roiFront": "1154,96,32,32",
+    "roiBack": "1154,96,32,32",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "战报退出按钮"
+  },
+  {
+    "itemName": "narrow_fire",
+    "imageName": "res_narrow_fire.png",
+    "roiFront": "1121,605,77,50",
+    "roiBack": "1121,605,77,50",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "挑战按钮"
+  },
+  {
+    "itemName": "narrow_goto_enemy",
+    "imageName": "res_narrow_goto_enemy.png",
+    "roiFront": "1120,610,75,45",
+    "roiBack": "1120,610,75,45",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "前往"
+  },
+  {
+    "itemName": "change_area",
+    "imageName": "res_change_area.png",
+    "roiFront": "993,610,63,61",
+    "roiBack": "993,610,63,61",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "ensure_button",
+    "imageName": "res_ensure_button.png",
+    "roiFront": "672,405,169,55",
+    "roiBack": "672,405,169,55",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  }
+]
