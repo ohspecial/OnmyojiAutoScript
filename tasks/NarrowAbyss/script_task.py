@@ -79,30 +79,34 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, NarrowAbyssAssets):
         # 进入狭间
         self.goto_narrowabbsy()
         # 第一次默认选择神龙暗域
-        self.select_boss(AreaType.PEACOCK)
-        # 正常已经进入狭间，准备攻打精英、副将、首领
-        find_list = [EmemyType.BOSS, EmemyType.GENERAL, EmemyType.ELITE]
+        self.select_boss(AreaType.DRAGON)
         
+        # 等待可进攻时间
+        self.wait_until_appear(self.I_IS_ATTACK)
+
+        # 准备攻打精英、副将、首领
         while 1:
-            # 寻找敌人
-            print(len(find_list))
-            if len(find_list) == 0:
-                # 当前区域已经全部攻打，退出循环
+            # 点击战报按钮
+            find_list = [EmemyType.BOSS, EmemyType.GENERAL, EmemyType.ELITE]
+            for enemy_type in find_list:
+                self.find_enemy(enemy_type)
+            logger.info(f"current fight times: boss {self.boss_fight_count} times, 
+                                                general {self.general_fight_count}  times, 
+                                                elite {self.elite_fight_count} times")
+            # 正常应该打完一个区域了，检查攻打次数，如没打够则切换到下一个区域，默认神龙 -> 孔雀 -> 白藏主 -> 黑豹
+            if self.boss_fight_count >= 2 and self.general_fight_count >= 4 and self.elite_fight_count >= 6:
+                success = True
                 break
-            if self.find_enemy(find_list.pop(0)):
-                continue
-        # 正常应该打完一个区域了，切换到下个区域
-        self.change_area(AreaType.LEOPARD)
-        # 切换好后应该重置战斗目标
-        find_list = [EmemyType.BOSS, EmemyType.GENERAL, EmemyType.ELITE]
-        while 1:
-            # 寻找敌人
-            if len(find_list) == 0:
-                # 当前区域已经全部攻打，退出循环
-                break
-            if self.find_enemy(find_list.pop(0)):
-                continue
-        # 正常应该打完一个区域了，切换到下个区域    
+            else:
+                current_area = self.get_current_area()
+                if current_area == AreaType.DRAGON:
+                    self.change_area(AreaType.PEACOCK)
+                elif current_area == AreaType.PEACOCK:
+                    self.change_area(AreaType.FOX)
+                elif current_area == AreaType.FOX:  
+                    self.change_area(AreaType.LEOPARD)
+        
+
         # 保持好习惯，一个任务结束了就返回到庭院，方便下一任务的开始
         # self.goto_main()
 
@@ -113,6 +117,21 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, NarrowAbyssAssets):
             self.set_next_run(task='NarrowAbyss', finish=True, server=True, success=False)
         raise TaskEnd
 
+    def get_current_area(self) -> AreaType:
+        ''' 获取当前区域
+        :return AreaType
+        '''
+        self.screenshot()
+        if self.appear(self.I_PEACOCK_AREA):
+            return AreaType.PEACOCK
+        elif self.appear(self.I_DRAGON_AREA):
+            return AreaType.DRAGON
+        elif self.appear(self.I_FOX_AREA):
+            return AreaType.FOX
+        elif self.appear(self.I_LEOPARD_AREA):
+            return AreaType.LEOPARD
+        else:
+            raise GamePageUnknownError("Unknown area")
 
     def change_area(self, area_name: AreaType) -> bool:
         ''' 切换到下个区域
@@ -121,41 +140,30 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, NarrowAbyssAssets):
         while 1:
             self.screenshot()
             # 点击战报按钮
-            if self.appear_then_click(self.I_NARROW_NAVIGATION,interval=1):
+            if self.appear_then_click(self.I_CHANGE_AREA,interval=1):
                 continue
-            # 点击下个区域
+            self.select_boss(area_name)
             if area_name == AreaType.PEACOCK:
-                self.click(self.C_PEACOCK_AREA,interval=2)
-                if self.appear_then_click(self.I_CHANGE_AREA):
+                if self.appear(self.I_PEACOCK_AREA):
+                    break
+                else:
                     continue
-                if self.appear_then_click(self.I_ENSURE_BUTTON):
-                    continue                
-                # 应该要判断是否进入了下个区域再退出，判断标题
-                break
             elif area_name == AreaType.DRAGON:
-                self.click(self.C_DRAGON_AREA,interval=2)
-                if self.appear_then_click(self.I_CHANGE_AREA):
+                if self.appear(self.I_DRAGON_AREA):
+                    break
+                else:
                     continue
-                if self.appear_then_click(self.I_ENSURE_BUTTON):
-                    continue
-                break
             elif area_name == AreaType.FOX:
-                self.click(self.C_FOX_AREA,interval=2)
-                if self.appear_then_click(self.I_CHANGE_AREA):
+                if self.appear(self.I_FOX_AREA):
+                    break
+                else:
                     continue
-                if self.appear_then_click(self.I_ENSURE_BUTTON):
-                    continue
-                break
             elif area_name == AreaType.LEOPARD:
-                self.click(self.C_LEOPARD_AREA,interval=2)
-                if self.appear_then_click(self.I_CHANGE_AREA):
+                if self.appear(self.I_LEOPARD_AREA):
+                    break
+                else:
                     continue
-                if self.appear_then_click(self.I_ENSURE_BUTTON):
-                    continue
-                break
-            else:
-                logger.error(f"unknown area type: {area_name}")
-                return False
+        return True
     # def goto_main(self):
     #     ''' 保持好习惯，一个任务结束了就返回庭院，方便下一任务的开始或者是出错重启
     #      FIXME 退出道馆。注意：有的时候有退出确认框，有的时候没有。未找到规律。
@@ -375,6 +383,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, NarrowAbyssAssets):
         logger.info(f"run general fight") 
         while 1:
             if len(general_list) != 0:
+                print(f"general_list: {general_list}")
                 self.click_emeny_area(general_list.pop(0))
                 self.general_fight_count += 1
                 self.run_general_battle_back()
@@ -428,24 +437,26 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, NarrowAbyssAssets):
                 break
         logger.info(f"Click {self.I_EXIT.name}")
 
-        # 点击返回确认
+        # 点击返回确认,有时不用点击胜利界面
         while 1:
             self.screenshot()
             if self.appear_then_click(self.I_EXIT_ENSURE, interval=1.5):
                 continue
-            if self.appear(self.I_WIN, interval=1.5):
+            if self.appear_then_click(self.I_WIN, interval=1.5):
+                continue
+            if self.appear(self.I_NARROW_NAVIGATION):
                 break
         logger.info(f"Click {self.I_EXIT_ENSURE.name}")
 
-        # 点击胜利确认
-        self.wait_until_appear(self.I_WIN)
-        while 1:
-            self.screenshot()
-            if self.appear_then_click(self.I_WIN, interval=1.5):
-                continue
-            if not self.appear(self.I_WIN):
-                break
-        logger.info(f"Click {self.I_WIN.name}")
+        # # 点击胜利确认
+        # self.wait_until_appear(self.I_WIN)
+        # while 1:
+        #     self.screenshot()
+        #     if self.appear_then_click(self.I_WIN, interval=1.5):
+        #         continue
+        #     if not self.appear(self.I_WIN):
+        #         break
+        # logger.info(f"Click {self.I_WIN.name}")
 
         return True
 
@@ -469,8 +480,8 @@ if __name__ == "__main__":
     config = Config('zhu')
     device = Device(config)
     t = ScriptTask(config, device)
-    t.find_enemy(EmemyType.GENERAL)
     # t.run()
+    t.find_enemy(EmemyType.GENERAL)
     # test_ocr_locate_dokan_target()
     # test_anti_detect_random_click()
     # test_goto_main()

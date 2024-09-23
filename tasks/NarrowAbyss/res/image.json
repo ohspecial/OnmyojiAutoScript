@@ -142,5 +142,59 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "is_attack",
+    "imageName": "res_is_attack.png",
+    "roiFront": "586,62,73,27",
+    "roiBack": "586,62,73,27",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "进攻中"
+  },
+  {
+    "itemName": "peacock_area",
+    "imageName": "res_peacock_area.png",
+    "roiFront": "577,14,127,36",
+    "roiBack": "577,14,127,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "leopard_area",
+    "imageName": "res_leopard_area.png",
+    "roiFront": "589,13,104,39",
+    "roiBack": "589,13,104,39",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "黑豹领域"
+  },
+  {
+    "itemName": "fox_area",
+    "imageName": "res_fox_area.png",
+    "roiFront": "581,18,121,29",
+    "roiBack": "581,18,121,29",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "白藏主领域"
+  },
+  {
+    "itemName": "change_area",
+    "imageName": "res_change_area.png",
+    "roiFront": "511,20,27,27",
+    "roiBack": "511,20,27,27",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "更换领域"
+  },
+  {
+    "itemName": "dragon_area",
+    "imageName": "res_dragon_area.png",
+    "roiFront": "584,15,111,34",
+    "roiBack": "584,15,111,34",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "神龙领域"
   }
 ]

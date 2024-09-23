@@ -68,6 +68,18 @@ class NarrowAbyssAssets:
 	I_CHANGE_AREA = RuleImage(roi_front=(993,610,63,61), roi_back=(993,610,63,61), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_change_area.png")
 	# description 
 	I_ENSURE_BUTTON = RuleImage(roi_front=(672,405,169,55), roi_back=(672,405,169,55), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_ensure_button.png")
+	# 进攻中 
+	I_IS_ATTACK = RuleImage(roi_front=(586,62,73,27), roi_back=(586,62,73,27), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_is_attack.png")
+	# description 
+	I_PEACOCK_AREA = RuleImage(roi_front=(577,14,127,36), roi_back=(577,14,127,36), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_peacock_area.png")
+	# 黑豹领域 
+	I_LEOPARD_AREA = RuleImage(roi_front=(589,13,104,39), roi_back=(589,13,104,39), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_leopard_area.png")
+	# 白藏主领域 
+	I_FOX_AREA = RuleImage(roi_front=(581,18,121,29), roi_back=(581,18,121,29), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_fox_area.png")
+	# 更换领域 
+	I_CHANGE_AREA = RuleImage(roi_front=(511,20,27,27), roi_back=(511,20,27,27), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_change_area.png")
+	# 神龙领域 
+	I_DRAGON_AREA = RuleImage(roi_front=(584,15,111,34), roi_back=(584,15,111,34), threshold=0.8, method="Template matching", file="./tasks/NarrowAbyss/res/res_dragon_area.png")
 
 
 	# List Rule Assets
