@@ -28,7 +28,7 @@ from module.exception import GamePageUnknownError
 from tasks.AbyssShadows.config import AbyssShadowsConfig, AbyssShadows
 from tasks.AbyssShadows.assets import AbyssShadowsAssets
 
-class AreaType(AbyssShadowsAssets):
+class AreaType:
     """ 暗域类型 """
     DRAGON = AbyssShadowsAssets.I_ABYSS_DRAGON  # 神龙暗域
     PEACOCK = AbyssShadowsAssets.I_ABYSS_PEACOCK  # 孔雀暗域
@@ -42,7 +42,7 @@ class EmemyType(Enum):
     GENERAL = 2  #  副将
     ELITE = 3  #  精英
 
-class CilckArea(AbyssShadowsAssets):
+class CilckArea:
     """ 点击区域 """
     GENERAL_1 = AbyssShadowsAssets.C_GENERAL_1_CLICK_AREA
     GENERAL_2 = AbyssShadowsAssets.C_GENERAL_2_CLICK_AREA
@@ -58,6 +58,10 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
     boss_fight_count = 0  # 首领战斗次数
     general_fight_count = 0  # 副将战斗次数
     elite_fight_count = 0  # 精英战斗次数
+    
+    
+
+    
     
     def run(self):
         """ 狭间暗域主函数
@@ -111,10 +115,13 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                     self.change_area(AreaType.FOX)
                 elif current_area == AreaType.FOX:  
                     self.change_area(AreaType.LEOPARD)
+                else:
+                    logger.warning("all enemy types have been defeated, but not enough emeny to fight, exit")
+                    break
         
 
         # 保持好习惯，一个任务结束了就返回到庭院，方便下一任务的开始
-        # self.goto_main()
+        self.goto_main()
 
         # 设置下次运行时间
         if success:
@@ -154,40 +161,14 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                 break
         return True
     
-    # def goto_main(self):
-    #     ''' 保持好习惯，一个任务结束了就返回庭院，方便下一任务的开始或者是出错重启
-    #      FIXME 退出道馆。注意：有的时候有退出确认框，有的时候没有。未找到规律。
-    #            先试试用确认框的，若是实在不行，就改成等道馆时间结束后，系统自动退出
-    #            但是如果出错了，需要重启任务时必须走GameUi.ui_goto(page_main)，
-    #            那样有或者无确认框不确定性还是会导致ui_goto()出错
-    #     '''
-    #     # self.ui_current = page_dokan
-    #     # self.ui_goto(page_main)
+    def goto_main(self):
+        ''' 保持好习惯，一个任务结束了就返回庭院，方便下一任务的开始或者是出错重启
+        '''
+        self.ui_get_current_page()
+        logger.info("Exiting abyss_shadows")
+        self.ui_goto(page_main)
 
-    #     max_try = 3
-    #     while 1:
-    #         self.screenshot()
-    #         if self.appear_then_click(GeneralBattle.I_EXIT, interval=1.5):
-    #             logger.info(f"Click {GeneralBattle.I_EXIT.name}")
-    #             continue
-    #         # 点了后EXIT后，可能无确认框
-    #         if self.appear_then_click(self.I_RYOU_DOKAN_EXIT_ENSURE, interval=1.5):
-    #             logger.info(f"Click {self.I_RYOU_DOKAN_EXIT_ENSURE}")
-    #             break
-    #         else:
-    #             max_try -= 1
-    #             time.sleep(1.2)
-
-    #         if max_try <= 0:
-    #             break
-
-    #     # 退出道馆地图
-    #     while 1:
-    #         self.screenshot()
-    #         # 确认后会跳到竂地图，再点击左上角的蓝色的返回，但是不知道这个返回有没有确认
-    #         if self.appear_then_click(GameUi.I_BACK_BL, interval=2.5):
-    #             logger.info(f"Click {GameUi.I_BACK_BL.name}")
-    #             break
+       
 
     def goto_abyss_shadows(self) -> bool:
         ''' 进入狭间
