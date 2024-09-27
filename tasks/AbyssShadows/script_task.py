@@ -86,15 +86,15 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         self.select_boss(AreaType.DRAGON)
         
         # 等待可进攻时间
-        while 1:
-            self.screenshot()
-            self.device.stuck_record_add('BATTLE_STATUS_S')
-            if self.appear(self.I_IS_ATTACK):
-                self.device.stuck_record_clear()
-                break
-            else:
-                self.device.stuck_record_clear()
-        self.wait_until_appear(self.I_IS_ATTACK)
+        # while 1:
+        #     self.screenshot()
+        #     # self.device.stuck_record_add('BATTLE_STATUS_S')
+        #     if self.appear(self.I_IS_ATTACK):
+        #         self.device.stuck_record_clear()
+        #         break
+        #     else:
+        #         self.device.stuck_record_clear()
+        # self.wait_until_appear(self.I_IS_ATTACK)
 
         # 准备攻打精英、副将、首领
         while 1:
@@ -395,7 +395,7 @@ if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
 
-    config = Config('zhu')
+    config = Config('xiaohao')
     device = Device(config)
     t = ScriptTask(config, device)
     t.run()
