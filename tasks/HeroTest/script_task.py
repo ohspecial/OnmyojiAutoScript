@@ -24,6 +24,16 @@ class ScriptTask(GameUi, BaseActivity, HeroTestAssets,SwitchSoul):
         config = self.config.hero_test
         global is_update
         global is_skill
+         # 自动换御魂
+        if config.switch_soul_config.enable:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul(config.switch_soul_config.switch_group_team)
+        if config.switch_soul_config.enable_switch_by_name:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul_by_name(config.switch_soul_config.group_name, config.switch_soul_config.team_name)
+
         if config.herotest.layer.value == "鬼兵演武":
             is_update = True
             is_skill = False
