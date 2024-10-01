@@ -20,8 +20,8 @@
   {
     "itemName": "abyss_dragon",
     "imageName": "res_abyss_dragon.png",
-    "roiFront": "224,200,57,155",
-    "roiBack": "224,200,57,155",
+    "roiFront": "229,176,52,150",
+    "roiBack": "212,164,86,200",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "狭间_神龙入口"
@@ -29,8 +29,8 @@
   {
     "itemName": "abyss_peacock",
     "imageName": "res_abyss_peacock.png",
-    "roiFront": "515,149,58,170",
-    "roiBack": "515,149,58,170",
+    "roiFront": "520.5,196,53,165",
+    "roiBack": "505,179,84,201",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "狭间_孔雀入口"
@@ -38,8 +38,8 @@
   {
     "itemName": "abyss_fox",
     "imageName": "res_abyss_fox.png",
-    "roiFront": "811,173,56,179",
-    "roiBack": "811,173,56,179",
+    "roiFront": "814.5,190,54,144",
+    "roiBack": "804,172,75,198",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "狭间_白藏主入口"
@@ -47,8 +47,8 @@
   {
     "itemName": "abyss_leopard",
     "imageName": "res_abyss_leopard.png",
-    "roiFront": "1141,165,50,161",
-    "roiBack": "1141,165,50,161",
+    "roiFront": "1144,199,50,161",
+    "roiBack": "1126,163,86,218",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "狭间_黑豹入口"
