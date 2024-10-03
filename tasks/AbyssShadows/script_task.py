@@ -261,6 +261,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         success = True
         logger.info(f"run boss fight") 
         if self.click_emeny_area(CilckArea.BOSS):
+            logger.info(f"Click {CilckArea.BOSS.name}")
             self.run_general_battle_back()
             self.boss_fight_count += 1
             logger.info(f'Fight, boss_fight_count {self.boss_fight_count} times')
@@ -272,16 +273,15 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         ''' 副将战斗
         :return 
         '''
-        if self.general_fight_count >= 4:
-            logger.info(f"general fight count {self.general_fight_count} times, skip")
-            return True
         general_list = [CilckArea.GENERAL_1, CilckArea.GENERAL_2]
         logger.info(f"run general fight") 
         for general in general_list:
             # 副将战斗次数达到4个时，退出循环
             if self.general_fight_count >= 4:
+                logger.info(f"general fight count {self.general_fight_count} times, skip")
                 break
             if self.click_emeny_area(general):
+                logger.info(f"Click {general.name}")
                 self.general_fight_count += 1
                 self.run_general_battle_back()
                 logger.info(f'Fight, general_fight_count {self.general_fight_count} times')
@@ -292,16 +292,15 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         ''' 精英战斗
         :return 
         '''
-        if self.elite_fight_count >= 6:
-            logger.info(f"elite fight count {self.elite_fight_count} times, skip")
-            return True
         elite_list = [CilckArea.ELITE_1, CilckArea.ELITE_2, CilckArea.ELITE_3]
         logger.info(f"run elite fight")  
         for elite in elite_list:
             # 精英战斗次数达到6个时，退出循环
             if self.elite_fight_count >= 6:
+                logger.info(f"elite fight count {self.elite_fight_count} times, skip")
                 break
             if self.click_emeny_area(elite):
+                logger.info(f"Click {elite.name}")
                 self.elite_fight_count += 1
                 self.run_general_battle_back()
                 logger.info(f'Fight, elite_fight_count {self.elite_fight_count} times')
@@ -318,10 +317,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         while 1:
             self.screenshot()
             if self.appear_then_click(self.I_ABYSS_NAVIGATION, interval=1.5):
+                logger.info(f"Click {self.I_ABYSS_NAVIGATION.name}")
                 continue
             if self.appear(self.I_ABYSS_MAP):
+                logger.info(f"find abyss map, exit")
                 break
-        logger.info(f"Click {self.I_ABYSS_NAVIGATION.name}")
 
         # 点击攻打区域
         while 1:
@@ -362,13 +362,16 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         while 1:
             self.screenshot()
             if self.appear_then_click(self.I_ABYSS_FIRE,interval=1):
-                # 挑战敌人后，如果是奖励次数上限，会出现确认框             
+                  
+                logger.info(f"Click {self.I_ABYSS_FIRE.name}")        
+                # 挑战敌人后，如果是奖励次数上限，会出现确认框   
+                # 这个图没有确认过，调用其他地方的，可能位置有偏差
                 if self.appear_then_click(self.I_ENSURE_BUTTON, interval=1):
                     logger.info(f"Click {self.I_ENSURE_BUTTON.name}")
                 continue
             if self.appear(self.I_PREPARE_HIGHLIGHT):
                 break
-            logger.info(f"Click {self.I_ABYSS_FIRE.name}")
+            
         return suceess
 
     def run_general_battle_back(self) -> bool:
