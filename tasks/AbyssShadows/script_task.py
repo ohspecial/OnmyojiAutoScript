@@ -216,8 +216,13 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         click_times = 0
         while 1:
             self.screenshot()
-            # 点击战报按钮
-            if self.appear_then_click(area_name,interval=1):
+            # 区域图片与入口图片不一致，使用点击进去
+            if self.appear(self.I_ABYSS_DRAGON):
+                match area_name:
+                    case AreaType.DRAGON: self.click(self.C_ABYSS_DRAGON)
+                    case AreaType.PEACOCK: self.click(self.C_ABYSS_PEACOCK)
+                    case AreaType.FOX: self.click(self.C_ABYSS_FOX)
+                    case AreaType.LEOPARD: self.click(self.C_ABYSS_LEOPARD)
                 click_times += 1
                 logger.info(f"click {area_name} times: {click_times}")
                 if click_times >= 3:    
