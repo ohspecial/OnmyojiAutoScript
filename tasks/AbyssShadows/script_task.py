@@ -4,6 +4,7 @@
 # @note     draft version without full test
 # github    https://github.com/roarhill/oas
 
+from datetime import datetime
 import random
 import numpy as np
 from enum import Enum
@@ -78,7 +79,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         #     self.ui_get_current_page()
         #     self.ui_goto(page_shikigami_records)
         #     self.run_switch_soul_by_name(cfg.switch_soul_config.group_name, cfg.switch_soul_config.team_name)
-
+        today = datetime.now().weekday()
+        if today not in [4, 5, 6]:
+            logger.info("Today is weekend, exit")
+            self.set_next_run(task='AbyssShadows', finish=False, server=True, success=False)
+            raise TaskEnd("Today is weekend, exit")
         success = True
         # 进入狭间
         self.goto_abyss_shadows()
