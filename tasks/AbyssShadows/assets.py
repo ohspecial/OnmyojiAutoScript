@@ -49,13 +49,13 @@ class AbyssShadowsAssets:
 	# 神社->狭间暗域 
 	I_RYOU_ABYSS_SHADOWS = RuleImage(roi_front=(707,492,110,27), roi_back=(707,492,110,27), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_ryou_abyss_shadows.png")
 	# 狭间_神龙入口 
-	I_ABYSS_DRAGON = RuleImage(roi_front=(232.5,196,55,151), roi_back=(190,147,140,283), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_dragon.png")
+	I_ABYSS_DRAGON = RuleImage(roi_front=(227,211,55,151), roi_back=(190,147,140,283), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_dragon.png")
 	# 狭间_孔雀入口 
-	I_ABYSS_PEACOCK = RuleImage(roi_front=(526,189,48,165), roi_back=(476,138,145,312), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_peacock.png")
+	I_ABYSS_PEACOCK = RuleImage(roi_front=(521,152,48,165), roi_back=(465,104,145,312), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_peacock.png")
 	# 狭间_白藏主入口 
-	I_ABYSS_FOX = RuleImage(roi_front=(822,184,49,144), roi_back=(789,130,148,249), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_fox.png")
+	I_ABYSS_FOX = RuleImage(roi_front=(815,174,49,144), roi_back=(789,130,148,249), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_fox.png")
 	# 狭间_黑豹入口 
-	I_ABYSS_LEOPARD = RuleImage(roi_front=(1140,190,50,162), roi_back=(1093,143,138,297), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_leopard.png")
+	I_ABYSS_LEOPARD = RuleImage(roi_front=(1142,166,50,162), roi_back=(1093,143,138,297), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_leopard.png")
 	# 战报 
 	I_ABYSS_NAVIGATION = RuleImage(roi_front=(1200,372,50,44), roi_back=(1200,372,50,44), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_navigation.png")
 	# 式神录 

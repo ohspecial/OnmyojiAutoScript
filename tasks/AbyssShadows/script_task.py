@@ -25,7 +25,7 @@ from module.atom.image_grid import ImageGrid
 from module.base.utils import point2str
 from module.base.timer import Timer
 from module.exception import GamePageUnknownError
-
+from pathlib import Path
 from tasks.AbyssShadows.config import AbyssShadowsConfig, AbyssShadows
 from tasks.AbyssShadows.assets import AbyssShadowsAssets
 
@@ -36,12 +36,38 @@ class AreaType:
     FOX = AbyssShadowsAssets.I_ABYSS_FOX  # 白藏主暗域
     LEOPARD = AbyssShadowsAssets.I_ABYSS_LEOPARD # 黑豹暗域
 
+    @cached_property
+    def name(self) -> str:
+        """
+
+        :return:
+        """
+        return Path(self.file).stem.upper()
+
+    def __str__(self):
+        return self.name
+
+    __repr__ = __str__
+
 class EmemyType(Enum):
 
     """ 敌人类型 """
     BOSS = 1  #  首领
     GENERAL = 2  #  副将
     ELITE = 3  #  精英
+
+    @cached_property
+    def name(self) -> str:
+        """
+
+        :return:
+        """
+        return Path(self.file).stem.upper()
+
+    def __str__(self):
+        return self.name
+    
+    __repr__ = __str__
 
 class CilckArea:
     """ 点击区域 """
@@ -51,6 +77,20 @@ class CilckArea:
     ELITE_2 = AbyssShadowsAssets.C_ELITE_2_CLICK_AREA
     ELITE_3 = AbyssShadowsAssets.C_ELITE_3_CLICK_AREA
     BOSS= AbyssShadowsAssets.C_BOSS_CLICK_AREA
+
+    @cached_property
+    def name(self) -> str:
+        """
+
+        :return:
+        """
+        return Path(self.file).stem.upper()
+
+    def __str__(self):
+        return self.name
+    
+    __repr__ = __str__
+
 
 class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
     
@@ -90,6 +130,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         # 第一次默认选择神龙暗域
         if not self.select_boss(AreaType.DRAGON):
             logger.warning("failed to select boss, exit")
+            self.goto_main()
             self.set_next_run(task='AbyssShadows', finish=True, server=True, success=False)
             raise TaskEnd("failed to select boss, exit")
         
@@ -176,9 +217,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
             # 切换区域界面
             if self.appear(self.I_ABYSS_DRAGON):
                 self.select_boss(area_name)
+                logger.info(f"switch to {area_name.name}")
                 continue      
             # 点击战报按钮
             if self.appear_then_click(self.I_CHANGE_AREA,interval=4):
+                logger.info(f"Click {self.I_CHANGE_AREA.name}")
                 continue
                   
         return True
@@ -227,21 +270,27 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         ''' 选择暗域类型
         :return 
         '''
+        click_times = 0
         while 1:
             self.screenshot()
             # 区域图片与入口图片不一致，使用点击进去
+            if click_times >= 1:
+                logger.warning(f"Failed to enter abyss_shadows, exit")
+                return False
             if self.appear(self.I_ABYSS_DRAGON):
                 match area_name:
-                    case AreaType.DRAGON: self.click(self.C_ABYSS_DRAGON)
-                    case AreaType.PEACOCK: self.click(self.C_ABYSS_PEACOCK)
-                    case AreaType.FOX: self.click(self.C_ABYSS_FOX)
-                    case AreaType.LEOPARD: self.click(self.C_ABYSS_LEOPARD)
+                    case AreaType.DRAGON: self.click(self.C_ABYSS_DRAGON,interval=1)
+                    case AreaType.PEACOCK: self.click(self.C_ABYSS_PEACOCK,interval=1)
+                    case AreaType.FOX: self.click(self.C_ABYSS_FOX,interval=1)
+                    case AreaType.LEOPARD: self.click(self.C_ABYSS_LEOPARD,interval=1)
+                click_times += 1
+                print(f"click {area_name.name} {click_times} times")
             else:
                 logger.warning("failed to enter abyss_shadows, exit")
                 return False
             if self.appear(self.I_ABYSS_NAVIGATION):
                 break
-        logger.info(f"select boss: {area_name}")
+        logger.info(f"select boss: {area_name.name}")
         
         return True
 
@@ -328,7 +377,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         
         :return 
         '''
-        logger.info(f"click emeny area: {click_area}")
+        logger.info(f"click emeny area: {click_area.name}")
         # 点击战报
         while 1:
             self.screenshot()

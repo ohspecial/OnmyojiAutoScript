@@ -20,7 +20,7 @@
   {
     "itemName": "abyss_dragon",
     "imageName": "res_abyss_dragon.png",
-    "roiFront": "232.5,196,55,151",
+    "roiFront": "227,211,55,151",
     "roiBack": "190,147,140,283",
     "method": "Template matching",
     "threshold": 0.8,
@@ -29,8 +29,8 @@
   {
     "itemName": "abyss_peacock",
     "imageName": "res_abyss_peacock.png",
-    "roiFront": "526,189,48,165",
-    "roiBack": "476,138,145,312",
+    "roiFront": "521,152,48,165",
+    "roiBack": "465,104,145,312",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "狭间_孔雀入口"
@@ -38,7 +38,7 @@
   {
     "itemName": "abyss_fox",
     "imageName": "res_abyss_fox.png",
-    "roiFront": "822,184,49,144",
+    "roiFront": "815,174,49,144",
     "roiBack": "789,130,148,249",
     "method": "Template matching",
     "threshold": 0.8,
@@ -47,7 +47,7 @@
   {
     "itemName": "abyss_leopard",
     "imageName": "res_abyss_leopard.png",
-    "roiFront": "1140,190,50,162",
+    "roiFront": "1142,166,50,162",
     "roiBack": "1093,143,138,297",
     "method": "Template matching",
     "threshold": 0.8,
