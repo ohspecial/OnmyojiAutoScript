@@ -284,7 +284,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                     case AreaType.FOX: self.click(self.C_ABYSS_FOX,interval=1)
                     case AreaType.LEOPARD: self.click(self.C_ABYSS_LEOPARD,interval=1)
                 click_times += 1
-                print(f"click {area_name.name} {click_times} times")
+                logger.info(f"click {area_name.name} {click_times} times")
             else:
                 logger.warning("failed to enter abyss_shadows, exit")
                 return False
