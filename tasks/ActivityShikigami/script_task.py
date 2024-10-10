@@ -13,33 +13,17 @@ from tasks.Component.BaseActivity.config_activity import ApMode
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.GameUi.page import page_main, page_shikigami_records
 from tasks.GameUi.game_ui import GameUi
-from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
+
 from module.logger import logger
 from module.exception import TaskEnd
 from module.base.protect import random_sleep
 
 
-class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
+class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
 
     def run(self) -> None:
+
         config = self.config.activity_shikigami
-        logger.info('running ActivityShikigami')
-        # 御魂切换方式一
-        if self.config.activity_shikigami.switch_soul_config.enable:
-            logger.info('enter switch soul by group')
-            self.ui_get_current_page()
-            self.ui_goto(page_shikigami_records)
-            self.run_switch_soul(config.switch_soul_config.switch_group_team)
-
-        # 御魂切换方式二
-        if self.config.activity_shikigami.switch_soul_config.enable_switch_by_name:
-            logger.info('enter switch soul by name')
-            self.ui_get_current_page()
-            self.ui_goto(page_shikigami_records)
-            self.run_switch_soul_by_name(config.switch_soul_config.group_name,
-                                         config.switch_soul_config.team_name)
-
-        
         self.limit_time: timedelta = config.general_climb.limit_time
         if isinstance(self.limit_time, time):
             self.limit_time = timedelta(hours=self.limit_time.hour, minutes=self.limit_time.minute,
@@ -81,11 +65,9 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
         else:
             logger.info("Unlock team")
             while 1:
-                img = self.screenshot()
+                self.screenshot()
                 if self.appear_then_click(self.I_LOCK, interval=1):
                     continue
-                # 保存截图
-                self.device.save_screenshot()
                 if self.appear(self.I_UNLOCK):
                     break
 
@@ -163,12 +145,8 @@ class ScriptTask(GameUi, BaseActivity, ActivityShikigamiAssets,SwitchSoul):
             # 2024-04-04 --------------end
             if self.appear_then_click(self.I_SHI, interval=1):
                 continue
-            # if self.appear_then_click(self.I_ENTER1,interval=1):
-            #     continue
-            # if self.appear_then_click(self.I_ENTER,interval=1):
-            #     continue
-            # if self.appear_then_click(self.I_DRUM, interval=1):
-            #     continue
+            if self.appear_then_click(self.I_DRUM, interval=1):
+                continue
             if self.appear_then_click(self.I_BATTLE, interval=1):
                 continue
 
@@ -279,7 +257,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('xiaohao')
+    c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
 

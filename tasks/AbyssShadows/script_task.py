@@ -26,7 +26,7 @@ from module.base.utils import point2str
 from module.base.timer import Timer
 from module.exception import GamePageUnknownError
 from pathlib import Path
-from tasks.AbyssShadows.config import AbyssShadowsConfig, AbyssShadows
+from tasks.AbyssShadows.config import AbyssShadows
 from tasks.AbyssShadows.assets import AbyssShadowsAssets
 
 class AreaType:
@@ -105,9 +105,9 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         #     self.run_switch_soul_by_name(cfg.switch_soul_config.group_name, cfg.switch_soul_config.team_name)
         today = datetime.now().weekday()
         if today not in [4, 5, 6]:
-            logger.info("Today is weekend, exit")
+            logger.info(f"Today is not abyss shadows day, exit")
             self.set_next_run(task='AbyssShadows', finish=False, server=True, success=False)
-            raise TaskEnd("Today is weekend, exit")
+            raise TaskEnd
         success = True
         # 进入狭间
         self.goto_abyss_shadows()
@@ -473,7 +473,7 @@ if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
 
-    config = Config('zhu')
+    config = Config('xiaohao')
     device = Device(config)
     t = ScriptTask(config, device)
     t.run()

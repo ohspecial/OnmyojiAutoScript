@@ -95,7 +95,7 @@ velocity: {self._v}"""
             _current_omega = 0.
             match _class:
                 case CI.BUFF_004: _current_omega = 2.2
-                case CI.BUFF_006: _current_omega = 2.1 if _cx >= 640 else 0
+                case CI.BUFF_006: _current_omega = 2.2
                 case CI.BUFF_007: _current_omega = 2.0 if invite_friend and _cx <= 1000 else 0
                 case CI.BUFF_002: _current_omega = 2.0 if self._omega >= 1.5 else 0
                 case CI.BUFF_003: _current_omega = 2.0 if self._omega >= 1.5 else 0

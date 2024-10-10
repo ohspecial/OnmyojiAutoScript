@@ -30,7 +30,7 @@
     "itemName": "drum",
     "imageName": "as_drum.png",
     "roiFront": "885,310,29,145",
-    "roiBack": "885,310,29,145",
+    "roiBack": "860,244,87,232",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "归鹿之途"
@@ -38,8 +38,8 @@
   {
     "itemName": "lock",
     "imageName": "as_lock.png",
-    "roiFront": "829.5,655,20,32",
-    "roiBack": "793,641,47,56",
+    "roiFront": "827,655,25,32",
+    "roiBack": "749,592,139,116",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "上锁图标"
@@ -47,8 +47,8 @@
   {
     "itemName": "unlock",
     "imageName": "as_unlock.png",
-    "roiFront": "823,654,23,23",
-    "roiBack": "782,640,69,50",
+    "roiFront": "823,654,28,28",
+    "roiBack": "776,610,112,87",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "还未上锁图片"
@@ -57,7 +57,7 @@
     "itemName": "fire",
     "imageName": "as_fire.png",
     "roiFront": "1134,587,84,78",
-    "roiBack": "1134,587,84,78",
+    "roiBack": "1107,522,142,174",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "点击战斗"
@@ -93,7 +93,7 @@
     "itemName": "buy_jade",
     "imageName": "as_buy_jade.png",
     "roiFront": "1004,192,38,42",
-    "roiBack": "1004,192,38,42",
+    "roiBack": "836,619,38,42",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "购买活动的体力"
@@ -102,7 +102,7 @@
     "itemName": "add_max",
     "imageName": "as_add_max.png",
     "roiFront": "17,24,33,37",
-    "roiBack": "17,24,33,37",
+    "roiBack": "974,524,57,54",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "增加到最大"
@@ -111,16 +111,7 @@
     "itemName": "new",
     "imageName": "as_new.png",
     "roiFront": "1004,192,65,52",
-    "roiBack": "1004,192,65,52",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
-    "itemName": "enter",
-    "imageName": "as_enter.png",
-    "roiFront": "441,199,38,30",
-    "roiBack": "431,182,62,61",
+    "roiBack": "0,0,100,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
