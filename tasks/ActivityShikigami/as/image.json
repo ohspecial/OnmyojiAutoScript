@@ -2,8 +2,8 @@
   {
     "itemName": "shi",
     "imageName": "as_shi.png",
-    "roiFront": "440,169,50,43",
-    "roiBack": "337,115,301,424",
+    "roiFront": "524,205,33,34",
+    "roiBack": "64,115,1110,427",
     "method": "Template matching",
     "threshold": 0.7,
     "description": "进入活动"
@@ -20,8 +20,8 @@
   {
     "itemName": "battle",
     "imageName": "as_battle.png",
-    "roiFront": "1111,180,35,165",
-    "roiBack": "861,134,350,315",
+    "roiFront": "290,209,35,145",
+    "roiBack": "248,146,138,315",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "进入爬塔"
@@ -65,7 +65,7 @@
   {
     "itemName": "ap",
     "imageName": "as_ap.png",
-    "roiFront": "1122,516,29,26",
+    "roiFront": "1127,509,23,24",
     "roiBack": "1092,487,103,71",
     "method": "Template matching",
     "threshold": 0.8,
@@ -74,7 +74,7 @@
   {
     "itemName": "ap_activity",
     "imageName": "as_ap_activity.png",
-    "roiFront": "1128,517,21,25",
+    "roiFront": "1124,514,21,21",
     "roiBack": "1090,500,84,54",
     "method": "Template matching",
     "threshold": 0.8,
@@ -83,7 +83,7 @@
   {
     "itemName": "switch",
     "imageName": "as_switch.png",
-    "roiFront": "1211,518,23,23",
+    "roiFront": "1212,514,23,23",
     "roiBack": "1200,497,69,56",
     "method": "Template matching",
     "threshold": 0.8,
