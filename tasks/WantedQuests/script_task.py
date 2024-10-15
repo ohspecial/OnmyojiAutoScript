@@ -181,12 +181,13 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             wq_number = int(match.group(2))
             result[1] = wq_destination
             result[2] = wq_number
-            if type_wq == '探索':
-                result[0] = 0
-            elif type_wq == '挑战':
+            # 修改优先级
+            if type_wq == '挑战':
                 result[0] = 1 if num_challenge >= 10 else -1
             elif type_wq == '秘闻':
                 result[0] = 2
+            elif type_wq == '探索':
+                result[0] = 0
             logger.info(f'[Wanted Quests] type: {type_wq} destination: {wq_destination} number: {wq_number} ')
             return tuple(result) if result[0] != -1 else None
 
