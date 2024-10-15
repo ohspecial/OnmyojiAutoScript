@@ -113,23 +113,16 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         self.goto_abyss_shadows()
         # 第一次默认选择神龙暗域
         if not self.select_boss(AreaType.DRAGON):
-            logger.warning("Failed to select boss, exit")
+            logger.warning("Failed to enter abyss shadows")
             self.goto_main()
-            self.set_next_run(task='AbyssShadows', finish=True, server=True, success=False)
-            raise TaskEnd("Failed to select boss, exit")
+            self.set_next_run(task='AbyssShadows', finish=False, server=True, success=False)
+            raise TaskEnd
         
-        # # 等待可进攻时间  TODO: 待优化，没空调试
-        # if not self.appear(self.I_IS_ATTACK):
-        #     self.device.stuck_record_add('BATTLE_STATUS_S')
-        #     while 1:
-        #         self.screenshot()
-        #         if self.wait_until_appear(self.I_IS_ATTACK, timeout=30):
-        #             self.device.stuck_record_clear()
-        #             break
-        #         else:
-        #             self.device.stuck_record_clear()
-        #             continue
-            
+        # 等待可进攻时间  TODO: 待优化
+        # self.device.stuck_record_add('BATTLE_STATUS_S')
+        # # 集结中图片
+        # self.wait_until_disappear(s)
+        # self.device.stuck_record_clear()
 
         # 准备攻打精英、副将、首领
         while 1:
@@ -176,17 +169,18 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         ''' 获取当前区域
         :return AreaType
         '''
-        self.screenshot()
-        if self.appear(self.I_PEACOCK_AREA):
-            return AreaType.PEACOCK
-        elif self.appear(self.I_DRAGON_AREA):
-            return AreaType.DRAGON
-        elif self.appear(self.I_FOX_AREA):
-            return AreaType.FOX
-        elif self.appear(self.I_LEOPARD_AREA):
-            return AreaType.LEOPARD
-        else:
-            raise GamePageUnknownError("Unknown area")
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_PEACOCK_AREA):
+                return AreaType.PEACOCK
+            elif self.appear(self.I_DRAGON_AREA):
+                return AreaType.DRAGON
+            elif self.appear(self.I_FOX_AREA):
+                return AreaType.FOX
+            elif self.appear(self.I_LEOPARD_AREA):
+                return AreaType.LEOPARD
+            else:
+                continue
 
     def change_area(self, area_name: AreaType) -> bool:
         ''' 切换到下个区域
@@ -258,21 +252,22 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         while 1:
             self.screenshot()
             # 区域图片与入口图片不一致，使用点击进去
-            if click_times >= 2:
-                return False
+            
             if self.appear(self.I_ABYSS_DRAGON):
                 match area_name:
-                    case AreaType.DRAGON: self.click(self.C_ABYSS_DRAGON)
-                    case AreaType.PEACOCK: self.click(self.C_ABYSS_PEACOCK)
-                    case AreaType.FOX: self.click(self.C_ABYSS_FOX)
-                    case AreaType.LEOPARD: self.click(self.C_ABYSS_LEOPARD)
-                click_times += 1
-                logger.info(f"Click {area_name.name} {click_times} times")
+                    case AreaType.DRAGON: is_click = self.click(self.C_ABYSS_DRAGON,interval=2)
+                    case AreaType.PEACOCK: is_click = self.click(self.C_ABYSS_PEACOCK,interval=2)
+                    case AreaType.FOX: is_click = self.click(self.C_ABYSS_FOX,interval=2)
+                    case AreaType.LEOPARD: is_click = self.click(self.C_ABYSS_LEOPARD,interval=2)
+                if is_click:
+                    click_times += 1
+                    logger.info(f"Click {area_name.name} {click_times} times")
+                if click_times >= 3:
+                    logger.info(f"select boss: {area_name.name} failed")
+                    return False
                 continue
             if self.appear(self.I_ABYSS_NAVIGATION):
                 break
-        logger.info(f"select boss: {area_name.name}")
-        
         return True
 
     def find_enemy(self, enemy_type: EmemyType) -> bool:
@@ -473,7 +468,7 @@ if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
 
-    config = Config('xiaohao')
+    config = Config('zhu')
     device = Device(config)
     t = ScriptTask(config, device)
     t.run()
