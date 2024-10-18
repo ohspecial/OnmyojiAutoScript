@@ -32,7 +32,18 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
     want_strategy_excluding: list[list] = []  # 不需要执行的
 
     def run(self):
-        con = self.config
+        con = self.config.wanted_quests
+        # 御魂切换方式一
+        if con.switch_soul.enable:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul(con.switch_soul.switch_group_team)
+        # 御魂切换方式二
+        if self.config.true_orochi.switch_soul.enable_switch_by_name:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul_by_name(con.switch_soul.group_name,
+                                         con.switch_soul.team_name)
         if not self.pre_work():
             # 无法完成预处理 很有可能你已经完成了悬赏任务
             logger.warning('Cannot pre-work')
