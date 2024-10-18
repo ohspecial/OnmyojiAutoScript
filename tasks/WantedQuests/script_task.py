@@ -187,7 +187,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             elif type_wq == '秘闻':
                 result[0] = 2
             elif type_wq == '探索':
-                result[0] = 0
+                result[0] = -1
             logger.info(f'[Wanted Quests] type: {type_wq} destination: {wq_destination} number: {wq_number} ')
             return tuple(result) if result[0] != -1 else None
 
