@@ -196,5 +196,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "神龙领域"
+  },
+  {
+    "itemName": "wait_to_start",
+    "imageName": "res_wait_to_start.png",
+    "roiFront": "588,64,70,26",
+    "roiBack": "588,64,70,26",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]

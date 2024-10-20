@@ -5,7 +5,6 @@
 # github    https://github.com/roarhill/oas
 
 from pydantic import BaseModel, Field
-from enum import Enum
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
 from tasks.Component.config_base import ConfigBase, Time

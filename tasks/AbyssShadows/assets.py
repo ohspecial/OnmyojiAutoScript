@@ -88,6 +88,8 @@ class AbyssShadowsAssets:
 	I_CHANGE_AREA = RuleImage(roi_front=(511,20,27,27), roi_back=(511,20,27,27), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_change_area.png")
 	# 神龙领域 
 	I_DRAGON_AREA = RuleImage(roi_front=(584,15,111,34), roi_back=(584,15,111,34), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_dragon_area.png")
+	# description 
+	I_WAIT_TO_START = RuleImage(roi_front=(588,64,70,26), roi_back=(588,64,70,26), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_wait_to_start.png")
 
 
 	# List Rule Assets

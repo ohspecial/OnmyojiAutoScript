@@ -82,8 +82,7 @@ class CilckArea:
 
 class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
     
-    # team_switched: bool = False
-    # green_mark_done: bool = False
+
     boss_fight_count = 0  # 首领战斗次数
     general_fight_count = 0  # 副将战斗次数
     elite_fight_count = 0  # 精英战斗次数
@@ -95,14 +94,14 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         """
         cfg: AbyssShadows = self.config.abyss_shadows_config
 
-        # if cfg.switch_soul_config.enable:
-        #     self.ui_get_current_page()
-        #     self.ui_goto(page_shikigami_records)
-        #     self.run_switch_soul(cfg.switch_soul_config.switch_group_team)
-        # if cfg.switch_soul_config.enable_switch_by_name:
-        #     self.ui_get_current_page()
-        #     self.ui_goto(page_shikigami_records)
-        #     self.run_switch_soul_by_name(cfg.switch_soul_config.group_name, cfg.switch_soul_config.team_name)
+        if cfg.switch_soul_config.enable:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul(cfg.switch_soul_config.switch_group_team)
+        if cfg.switch_soul_config.enable_switch_by_name:
+            self.ui_get_current_page()
+            self.ui_goto(page_shikigami_records)
+            self.run_switch_soul_by_name(cfg.switch_soul_config.group_name, cfg.switch_soul_config.team_name)
         today = datetime.now().weekday()
         if today not in [4, 5, 6]:
             logger.info(f"Today is not abyss shadows day, exit")
@@ -118,11 +117,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
             self.set_next_run(task='AbyssShadows', finish=False, server=True, success=False)
             raise TaskEnd
         
-        # 等待可进攻时间  TODO: 待优化
-        # self.device.stuck_record_add('BATTLE_STATUS_S')
-        # # 集结中图片
-        # self.wait_until_disappear(s)
-        # self.device.stuck_record_clear()
+        # 等待可进攻时间  
+        self.device.stuck_record_add('BATTLE_STATUS_S')
+        # 集结中图片
+        self.wait_until_disappear(self.I_WAIT_TO_START)
+        self.device.stuck_record_clear()
 
         # 准备攻打精英、副将、首领
         while 1:
@@ -220,14 +219,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         self.ui_get_current_page()
         logger.info("Entering abyss_shadows")
         self.ui_goto(page_guild)
-        # # 查找狭间
-        # activity = "狭间"
-        # pos = self.list_find(self.L_RYOU_ACTIVITY_LIST, activity)
-        # if pos:
-        #     logger.info(f"Enter abyss_shadows map: pos = {pos}")
-        #     self.device.click(x=pos[0], y=pos[1])
-        #     return True
-        # logger.info("abyss_shadows not found")
+        
         while 1:
             self.screenshot()
             # 进入神社
@@ -368,11 +360,10 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         while 1:
             self.screenshot()
             
-            # 如果点3次还没进去就表示目标已死亡
+            # 如果点3次还没进去就表示目标已死亡,跳过
             if click_times >= 3:
                 logger.warning(f"Failed to click {click_area}")
-                success = False
-                break
+                return 
             # 出现前往按钮就退出
             if self.appear(self.I_ABYSS_GOTO_ENEMY):
                 break
@@ -381,7 +372,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                 continue
             if self.appear_then_click(self.I_ENSURE_BUTTON,interval=1):
                 continue
-            # 有时出现bug，点了前往之后不动，需要再点一次，没想到怎么解决
+            # TODO 有时出现bug，点了前往之后不动，需要再点一次，带解决
 
         
         # 点击前往按钮
@@ -406,7 +397,6 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                   
                 logger.info(f"Click {self.I_ABYSS_FIRE.name}")        
                 # 挑战敌人后，如果是奖励次数上限，会出现确认框   
-                # 这个图没有确认过，调用其他地方的，可能位置有偏差
                 if self.appear_then_click(self.I_ENSURE_BUTTON, interval=1):
                     logger.info(f"Click {self.I_ENSURE_BUTTON.name}")
                 continue
@@ -439,7 +429,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                 break
         logger.info(f"Click {self.I_EXIT.name}")
 
-        # 点击返回确认,有时不用点击胜利界面
+        # 点击返回确认
         while 1:
             self.screenshot()
             if self.appear_then_click(self.I_EXIT_ENSURE, interval=1.5):
@@ -449,16 +439,6 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
             if self.appear(self.I_ABYSS_NAVIGATION):
                 break
         logger.info(f"Click {self.I_EXIT_ENSURE.name}")
-
-        # # 点击胜利确认
-        # self.wait_until_appear(self.I_WIN)
-        # while 1:
-        #     self.screenshot()
-        #     if self.appear_then_click(self.I_WIN, interval=1.5):
-        #         continue
-        #     if not self.appear(self.I_WIN):
-        #         break
-        # logger.info(f"Click {self.I_WIN.name}")
 
         return True
 
@@ -472,5 +452,3 @@ if __name__ == "__main__":
     device = Device(config)
     t = ScriptTask(config, device)
     t.run()
-    # t.find_enemy(EmemyType.GENERAL)
-
