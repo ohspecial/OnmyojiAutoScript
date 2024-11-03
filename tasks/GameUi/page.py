@@ -3,6 +3,7 @@ import traceback
 from tasks.GameUi.assets import GameUiAssets as G
 from tasks.RyouToppa.assets import RyouToppaAssets
 
+
 class Page:
     parent = None
 

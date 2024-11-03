@@ -22,25 +22,28 @@ from tasks.Secret.script_task import ScriptTask as SecretScriptTask
 from tasks.WantedQuests.config import WantedQuestsConfig, CooperationType, CooperationSelectMask, \
     CooperationSelectMaskDescription
 from tasks.WantedQuests.assets import WantedQuestsAssets
+from tasks.WantedQuests.explore import WQExplore, ExploreWantedBoss
 from tasks.Component.Costume.config import MainType
 from typing import List
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 
 
-class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets, SwitchSoul):
+class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
+    want_strategy_excluding: list[list] = []  # 不需要执行的
 
     def run(self):
-        con = self.config.model.wanted_quests
-        # 自动换御魂
-        if con.switch_soul_config.enable:
+        con = self.config.wanted_quests
+        # 御魂切换方式一
+        if con.switch_soul.enable:
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
-            self.run_switch_soul(con.switch_soul_config.switch_group_team)
-        if con.switch_soul_config.enable_switch_by_name:
+            self.run_switch_soul(con.switch_soul.switch_group_team)
+        # 御魂切换方式二
+        if self.config.true_orochi.switch_soul.enable_switch_by_name:
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
-            self.run_switch_soul_by_name(con.switch_soul_config.group_name, con.switch_soul_config.team_name)
-
+            self.run_switch_soul_by_name(con.switch_soul.group_name,
+                                         con.switch_soul.team_name)
         if not self.pre_work():
             # 无法完成预处理 很有可能你已经完成了悬赏任务
             logger.warning('Cannot pre-work')
@@ -62,24 +65,32 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets, SwitchSoul
             if self.ocr_appear(self.O_WQ_TEXT_1, interval=1):
                 cu, re, total = self.O_WQ_NUM_1.ocr(self.device.image)
                 if cu == re == total == 0:
-                    logger.warning('OCR failed and skip this round')
+                    logger.warning('OCR failed and have a try')
                     ocr_error_count += 1
+                    # 尝试打一次
+                    unknown_num = self.O_WQ_NUM_UNKNOWN_1.ocr(self.device.image)
+                    if unknown_num > 14:
+                        self.execute_mission(self.O_WQ_TEXT_1, 1, number_challenge)
                 if cu > total:
                     logger.warning('Current number of wanted quests is greater than total number')
                     cu = cu % 10
                 if cu < total and re != 0:
-                    self.execute_mission(self.O_WQ_TEXT_1, total, number_challenge)
+                    self.execute_mission(self.O_WQ_TEXT_1, min(total, 20), number_challenge)
 
             if self.ocr_appear(self.O_WQ_TEXT_2, interval=1):
                 cu, re, total = self.O_WQ_NUM_2.ocr(self.device.image)
                 if cu == re == total == 0:
-                    logger.warning('OCR failed and skip this round')
+                    logger.warning('OCR failed and have a try')
                     ocr_error_count += 1
+                    # 尝试打一次
+                    unknown_num = self.O_WQ_NUM_UNKNOWN_2.ocr(self.device.image)
+                    if unknown_num > 14:
+                        self.execute_mission(self.O_WQ_TEXT_2, 1, number_challenge)
                 if cu > total:
                     logger.warning('Current number of wanted quests is greater than total number')
                     cu = cu % 10
                 if cu < total and re != 0:
-                    self.execute_mission(self.O_WQ_TEXT_2, total, number_challenge)
+                    self.execute_mission(self.O_WQ_TEXT_2, min(total, 20), number_challenge)
                 continue
 
             if self.appear(self.I_WQ_CHECK_TASK):
@@ -175,8 +186,13 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets, SwitchSoul
             :return:
             (type, destination, number, goto_button)
             (类型, 地点层级，可以打败的数量，前往按钮)
-            类型： 探索0, 挑战1， 秘闻2
+            类型： 挑战0, 秘闻1， 探索2
             """
+            layer_limit = {
+                # 低层不限制
+                # "壹", "贰", "叁", "肆", "伍", "陆",
+                "柒", "捌", "玖", "拾"
+            }
             result = [-1, '', -1, GOTO_BUTTON[index]]
             type_wq = OCR_WQ_TYPE[index].ocr(self.device.image)
             info_wq_1 = OCR_WQ_INFO[index].ocr(self.device.image)
@@ -187,13 +203,17 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets, SwitchSoul
                 return None
             wq_destination = match.group(1)
             wq_number = int(match.group(2))
+            # 跳过高层秘闻
+            if wq_destination[-1] in layer_limit:
+                logger.warning('This secret layer is too high')
+                return None
             result[1] = wq_destination
             result[2] = wq_number
-            if type_wq == '探索':
-                result[0] = -1
-            elif type_wq == '挑战':
-                result[0] = 1 if num_challenge >= 10 else -1
+            if type_wq == '挑战':
+                result[0] = 0 if num_challenge >= 10 else -1
             elif type_wq == '秘闻':
+                result[0] = 1
+            elif type_wq == '探索':
                 result[0] = 2
             logger.info(f'[Wanted Quests] type: {type_wq} destination: {wq_destination} number: {wq_number} ')
             return tuple(result) if result[0] != -1 else None
@@ -216,6 +236,7 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets, SwitchSoul
             info_wq = extract_info(i)
             if info_wq:
                 info_wq_list.append(info_wq)
+        info_wq_list = [item for item in info_wq_list if item not in self.want_strategy_excluding]
         if not info_wq_list:
             logger.warning('No wanted quests can be challenged')
             return False
@@ -223,18 +244,19 @@ class ScriptTask(SecretScriptTask, GeneralInvite, WantedQuestsAssets, SwitchSoul
         info_wq_list.sort(key=lambda x: x[0])
         best_type, destination, once_number, goto_button = info_wq_list[0]
         do_number = 1 if once_number >= num_want else num_want // once_number + (1 if num_want % once_number > 0 else 0)
-        match best_type:
-            case 0:
-                self.explore(goto_button, do_number)
-            case 1:
-                self.challenge(goto_button, do_number)
-            case 2:
-                self.secret(goto_button, do_number)
-            case _:
-                logger.warning('No wanted quests can be challenged')
-
-    def explore(self, goto, num):
-        self.challenge(goto, num)
+        try:
+            match best_type:
+                case 0:
+                    self.challenge(goto_button, do_number)
+                case 1:
+                    self.secret(goto_button, do_number)
+                case 2:
+                    self.explore(goto_button, do_number)
+                case _:
+                    logger.warning('No wanted quests can be challenged')
+        except ExploreWantedBoss:
+            logger.warning('The extreme case. The quest only needs to challenge one final boss, so skip it')
+            self.want_strategy_excluding.append(info_wq_list[0])
 
     def challenge(self, goto, num):
         self.ui_click(goto, self.I_WQC_FIRE)
@@ -437,7 +459,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('回归')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()

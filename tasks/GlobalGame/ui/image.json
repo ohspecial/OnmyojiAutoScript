@@ -97,5 +97,23 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "勾选"
+  },
+  {
+    "itemName": "ui_exit_ensure",
+    "imageName": "ui_ui_exit_ensure.png",
+    "roiFront": "691,378,167,52",
+    "roiBack": "627,339,357,180",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "ui_exit_bondling_ensure",
+    "imageName": "ui_ui_exit_bondling_ensure.png",
+    "roiFront": "670,399,177,66",
+    "roiBack": "628,366,294,164",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]

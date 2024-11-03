@@ -67,7 +67,9 @@ class ScriptTask(GameUi, QuizAssets, ActivityShikigamiAssets, Debugger):
             self.screenshot()
             if self.appear(self.I_START):
                 break
-            if self.appear_then_click(self.I_SHI, interval=1):
+            # if self.appear_then_click(self.I_SHI, interval=1):
+            #     continue
+            if self.appear_then_click(self.I_ENTER, interval=1):
                 continue
             if self.appear_then_click(self.I_ENTRY, interval=1):
                 continue
@@ -88,6 +90,7 @@ class ScriptTask(GameUi, QuizAssets, ActivityShikigamiAssets, Debugger):
                 start_cnt += 1
                 continue
         self.last_select_1, self.last_select_2, self.last_select_3, self.last_select_4 = '', '', '', ''
+
 
         quiz_timer = Timer(1.4)
         quiz_timer.start()

@@ -4,6 +4,7 @@
 import random
 from time import sleep
 from datetime import time, datetime, timedelta
+from module.base.timer import Timer
 
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.GeneralInvite.general_invite import GeneralInvite
@@ -114,16 +115,6 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                 if self.appear_then_click(self.I_OROCHI_LOCK, interval=1):
                     continue
 
-
-
-
-
-
-
-
-
-
-
     def run_leader(self):
         logger.info('Start run leader')
         self.ui_get_current_page()
@@ -211,9 +202,7 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
         self.ui_get_current_page()
         self.ui_goto(page_main)
 
-        if not success:
-            return False
-        return True
+        return success
 
     def run_member(self):
         logger.info('Start run member')
@@ -221,7 +210,24 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
         # self.ui_goto(page_soul_zones)
         # self.orochi_enter()
         # self.check_lock(self.config.orochi.general_battle_config.lock_team_enable)
+        # 开始等待队长拉人
+        wait_time = self.config.orochi.invite_config.wait_time
+        wait_timer = Timer(wait_time.minute * 60)
+        wait_timer.start()
 
+        success = True
+        self.device.stuck_record_add('BATTLE_STATUS_S')
+        while 1:
+            self.screenshot()
+
+            # 等待超时
+            if wait_timer.reached():
+                success = False
+                return success
+
+            if self.check_then_accept():
+                self.device.stuck_record_clear()
+                break
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
         while 1:
@@ -265,7 +271,7 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
 
         self.ui_get_current_page()
         self.ui_goto(page_main)
-        return True
+        return success
 
     def run_alone(self):
         logger.info('Start run alone')

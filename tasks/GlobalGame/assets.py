@@ -61,5 +61,9 @@ class GlobalGameAssets:
 	I_UI_UNCHECK = RuleImage(roi_front=(567,343,33,36), roi_back=(497,303,216,100), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_uncheck.png")
 	# 勾选 
 	I_UI_CHECK = RuleImage(roi_front=(564,341,40,38), roi_back=(512,329,164,78), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_check.png")
+	# description 
+	I_UI_EXIT_ENSURE = RuleImage(roi_front=(691,378,167,52), roi_back=(627,339,357,180), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_exit_ensure.png")
+	# description 
+	I_UI_EXIT_BONDLING_ENSURE = RuleImage(roi_front=(670,399,177,66), roi_back=(628,366,294,164), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_exit_bondling_ensure.png")
 
 

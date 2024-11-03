@@ -1,6 +1,7 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
+from pathlib import Path
 import numpy as np
 
 from time import sleep
@@ -89,6 +90,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 if self.appear(self.I_G_JADE):
                     click_button = self.I_G_ACCEPT
                 else:
+                    logger.info(f"Ignore other invitation")
                     click_button = self.I_G_IGNORE
             case FriendInvitation.JADE_AND_FOOD:
                 # 如果是接受勾协和粮协
@@ -96,6 +98,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 if self.appear(self.I_G_JADE) or self.appear(self.I_G_CAT_FOOD) or self.appear(self.I_G_DOG_FOOD):
                     click_button = self.I_G_ACCEPT
                 else:
+                    logger.info(f"Ignore other invitation")
                     click_button = self.I_G_IGNORE
             case FriendInvitation.IGNORE:
                 # 如果是忽略
@@ -110,7 +113,10 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             if not self.appear(target=click_button):
                 logger.info('Deal with invitation done')
                 break
-            if self.appear_then_click(click_button, interval=0.8):
+            if self.appear_then_click(target=click_button, interval=0.8,threshold=0.8):
+                # 把悬赏加入任务列表
+                if click_button == self.I_G_ACCEPT:
+                    self.set_next_run(task='WantedQuests', success=True, finish=False, target=datetime.now())
                 continue
         # 有的时候长战斗 点击后会取消战斗状态
         self.device.detect_record = detect_record

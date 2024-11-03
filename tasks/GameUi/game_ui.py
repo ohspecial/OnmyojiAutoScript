@@ -13,6 +13,8 @@ from tasks.GameUi.assets import GameUiAssets
 from tasks.GameUi.page import *
 from tasks.Restart.assets import RestartAssets
 from tasks.base_task import BaseTask
+from tasks.Component.GeneralInvite.assets import GeneralInviteAssets as GIA
+
 from tasks.SixRealms.assets import SixRealmsAssets
 from module.logger import logger
 from module.exception import (GameNotRunningError, GamePageUnknownError, RequestHumanTakeover)
@@ -139,6 +141,11 @@ class GameUi(BaseTask, GameUiAssets):
                 if self.appear_then_click(close, interval=1.5):
                     logger.info('Trying to switch to supported page')
                     timeout = Timer(10, count=20).start()
+                    # 部分页面有退出按钮
+                    if self.appear_then_click(self.I_UI_EXIT_ENSURE,interval=2):
+                        continue
+                    if self.appear_then_click(self.I_UI_EXIT_BONDLING_ENSURE,interval=2):
+                        continue
             # Unknown page but able to handle
             # logger.info("Unknown ui page")
             # if self.appear_then_click(GOTO_MAIN, offset=(30, 30), interval=2) or self.ui_additional():
@@ -248,6 +255,9 @@ class GameUi(BaseTask, GameUiAssets):
                         self.ui_button_interval_reset(button)
                         confirm_timer.reset()
                         clicked = True
+                        # 部分页面需要确认退出
+                        if self.appear_then_click(GIA.I_GI_SURE, interval=0.8):
+                            pass
                         break
 
             if clicked:

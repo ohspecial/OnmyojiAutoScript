@@ -52,6 +52,15 @@ class BondlingFairylandAssets:
 
 
 	# Image Rule Assets
+	# 创建队伍 
+	I_CREATE_TEAM = RuleImage(roi_front=(529,487,220,58), roi_back=(529,487,220,58), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ballhelp/ballhelp_create_team.png")
+	# description 
+	I_BATTLE_EMO = RuleImage(roi_front=(41,409,31,36), roi_back=(41,409,31,36), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ballhelp/ballhelp_battle_emo.png")
+	# description 
+	I_PLATE_ENSURE = RuleImage(roi_front=(670,403,178,60), roi_back=(670,403,178,60), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ballhelp/ballhelp_plate_ensure.png")
+
+
+	# Image Rule Assets
 	# description 
 	I_BF_SEARSH = RuleImage(roi_front=(1133,577,100,100), roi_back=(1133,577,100,100), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/bf/bf_bf_searsh.png")
 	# description 
