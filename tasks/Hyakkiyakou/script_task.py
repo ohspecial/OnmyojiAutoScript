@@ -138,6 +138,8 @@ class ScriptTask(GameUi, HyaSlave):
 
             self.one()
             hya_count += 1
+            logger.info(f'Hyakkiyakou count: {hya_count}')
+
 
         while 1:
             self.screenshot()
