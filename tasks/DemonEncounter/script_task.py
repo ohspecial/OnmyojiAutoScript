@@ -357,6 +357,12 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         config = self.con
         while 1:
             self.screenshot()
+            if self.appear(self.I_BOSS_FIRE):
+                # 发现BOSS
+                logger.info('Boss found')
+                self.execute_boss()
+                return None  # 退出循环
+                
             if not self.appear(self.I_DE_LOCATION):
                 logger.info('Battle Start')
                 break
