@@ -47,6 +47,9 @@
       "enable_mail": true,
       "enable_soul": true,
       "enable_ap": true
+    },
+    "login_character_config": {
+      "character": ""
     }
   },
   "global_game": {
@@ -87,6 +90,7 @@
     "boss": {
       "boss_number": 3,
       "boss_reward": false,
+      "reward_floor": "一星",
       "use_collect": false
     },
     "general_battle": {
@@ -202,6 +206,7 @@
     "raid_config": {
       "limit_time": "00:30:00",
       "limit_count": 50,
+      "next_ryoutoppa_time": "07:00:00",
       "skip_difficult": true,
       "ryou_access": false,
       "random_delay": false
@@ -449,9 +454,10 @@
     "wanted_quests_config": {
       "before_end": "00:00:00",
       "invite_friend_name": "",
-      "cooperation_type": "Any"
+      "cooperation_type": "Any",
+      "battle_priority": "挑战 > 秘闻 > 探索"
     },
-    "switch_soul": {
+    "switch_soul_config": {
       "enable": false,
       "switch_group_team": "-1,-1",
       "enable_switch_by_name": false,
@@ -656,6 +662,14 @@
       "enable_switch_by_name": false,
       "group_name": "",
       "team_name": ""
+    },
+    "invite_config": {
+      "invite_number": "one",
+      "friend_1": "",
+      "friend_2": "",
+      "find_mode": "auto_find",
+      "wait_time": "00:02:00",
+      "default_invite": true
     }
   },
   "six_realms": {
@@ -937,7 +951,8 @@
       "hya_info": false,
       "continuous_learning": false,
       "hya_save_result": false,
-      "hya_interval": 300
+      "hya_interval": 300,
+      "hya_screenshot_method": "window_background"
     }
   },
   "hero_test": {
@@ -988,6 +1003,7 @@
       "find_true_orochi": true,
       "current_success": 0
     },
+    
     "switch_soul": {
       "enable": false,
       "switch_group_team": "-1,-1",
@@ -1198,36 +1214,13 @@
       "server_update": "09:00:00",
       "float_time": "00:00:00"
     },
+    "hunt_time": {
+      "kirin_time": "19:00:00",
+      "netherworld_time": "19:00:00"
+    },
     "hunt_config": {
       "kirin_group_team": "-1,-1",
       "netherworld_group_team": "-1,-1"
-    }
-  },
-   "abyss_shadows": {
-    "scheduler": {
-      "enable": false,
-      "next_run": "2023-01-01 00:00:00",
-      "priority": 5,
-      "success_interval": "01 00:00:00",
-      "failure_interval": "01 00:00:00",
-      "server_update": "09:00:00",
-      "float_time": "00:00:00"
-    },
-    "general_battle_config": {
-      "lock_team_enable": false,
-      "preset_enable": false,
-      "preset_group": 1,
-      "preset_team": 1,
-      "green_enable": false,
-      "green_mark": "green_left1",
-      "random_click_swipt_enable": false
-    },
-    "switch_soul_config": {
-      "enable": false,
-      "switch_group_team": "-1,-1",
-      "enable_switch_by_name": false,
-      "group_name": "",
-      "team_name": ""
     }
   },
   "dokan": {
@@ -1262,6 +1255,37 @@
       "group_name": "",
       "team_name": ""
     }
+  },
+  "abyss_shadows": {
+    "scheduler": {
+      "enable": false,
+      "next_run": "2023-01-01 00:00:00",
+      "priority": 5,
+      "success_interval": "01 00:00:00",
+      "failure_interval": "01 00:00:00",
+      "server_update": "09:00:00",
+      "float_time": "00:00:00"
+    },
+    "abyss_shadows_time": {
+      "custom_run_time_friday": "19:00:00",
+      "custom_run_time_saturday": "19:00:00",
+      "custom_run_time_sunday": "19:00:00"
+    },
+    "general_battle_config": {
+      "lock_team_enable": false,
+      "preset_enable": false,
+      "preset_group": 1,
+      "preset_team": 1,
+      "green_enable": false,
+      "green_mark": "green_left1",
+      "random_click_swipt_enable": false
+    },
+    "switch_soul_config": {
+      "enable": false,
+      "switch_group_team": "-1,-1",
+      "enable_switch_by_name": false,
+      "group_name": "",
+      "team_name": ""
+    }
   }
-  
 }

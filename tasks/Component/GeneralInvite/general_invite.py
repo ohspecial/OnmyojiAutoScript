@@ -205,6 +205,9 @@ class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
             if not self.appear(self.I_GI_SURE) and self.appear_then_click(self.I_BACK_YELLOW, interval=0.8):
                 self.wait_until_appear(self.I_GI_SURE, wait_time=0.8)
                 continue
+            if not self.appear(self.I_GI_SURE) and self.appear_then_click(self.I_BACK_YELLOW_SEA, interval=0.8):
+                self.wait_until_appear(self.I_GI_SURE, wait_time=0.8)
+                continue
         return True
 
     def click_fire(self):
@@ -214,7 +217,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
                 break
             if self.appear_then_click(self.I_FIRE, interval=1, threshold=0.7):
                 continue
-
+            if self.appear_then_click(self.I_FIRE_SEA, interval=1, threshold=0.7):
+                continue
     @cached_property
     def room_type(self) -> RoomType:
         """
@@ -380,6 +384,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
                 continue
        
             
+            if self.appear_then_click(self.I_ADD_SEA, interval=1):
+                continue
 
         friend_class = []
         class_ocr = [self.O_F_LIST_1, self.O_F_LIST_2, self.O_F_LIST_3, self.O_F_LIST_4]
