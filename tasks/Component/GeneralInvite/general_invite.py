@@ -382,8 +382,6 @@ class GeneralInvite(BaseTask, GeneralInviteAssets,BondlingFairylandAssets):
                 continue
             if self.appear_then_click(self.I_BOND_ADD_1, interval=2):
                 continue
-       
-            
             if self.appear_then_click(self.I_ADD_SEA, interval=1):
                 continue
 
