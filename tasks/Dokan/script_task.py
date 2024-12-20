@@ -93,15 +93,22 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets, RichManAssets):
         # 攻击优先顺序
         attack_priority: int = cfg.dokan_config.dokan_attack_priority
 
-        # 自动换御魂
-        if cfg.switch_soul_config.enable:
-            self.ui_get_current_page()
-            self.ui_goto(page_shikigami_records)
-            self.run_switch_soul(cfg.switch_soul_config.switch_group_team)
-        if cfg.switch_soul_config.enable_switch_by_name:
-            self.ui_get_current_page()
-            self.ui_goto(page_shikigami_records)
-            self.run_switch_soul_by_name(cfg.switch_soul_config.group_name, cfg.switch_soul_config.team_name)
+        # 周几检测
+        if cfg.dokan_config.monday_to_thursday:
+            if datetime.now().weekday() >= 4:
+                logger.warning("weekend, exit")
+                self.next_run(True)
+                return
+
+        # # 自动换御魂
+        # if cfg.switch_soul_config.enable:
+        #     self.ui_get_current_page()
+        #     self.ui_goto(page_shikigami_records)
+        #     self.run_switch_soul(cfg.switch_soul_config.switch_group_team)
+        # if cfg.switch_soul_config.enable_switch_by_name:
+        #     self.ui_get_current_page()
+        #     self.ui_goto(page_shikigami_records)
+        #     self.run_switch_soul_by_name(cfg.switch_soul_config.group_name, cfg.switch_soul_config.team_name)
 
         # 进入道馆
         self.goto_dokan()
@@ -114,7 +121,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets, RichManAssets):
             # 检测当前界面的场景（时间关系，暂时没有做庭院、町中等主界面的场景检测, 应考虑在GameUI.game_ui.ui_get_current_page()里实现）
             in_dokan, current_scene = self.get_current_scene()
 
-            # 如果当前不在道馆，或者被人工操作退出道馆了，重新尝试进入道馆
+            # 检测到不在道馆场景, 则等待2秒再继续循环
             if not in_dokan:
                 self.goto_dokan()
                 continue
@@ -284,14 +291,16 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets, RichManAssets):
 
         return True, DokanScene.RYOU_DOKAN_SCENE_UNKNOWN
 
-    def dokan_battle(self, cfg: Dokan):
+    def dokan_battle(self, cfg: Dokan, count=None):
         """ 道馆战斗
         道馆集结结束后会自动进入战斗，打完一个也会自动进入下一个，因此直接点击右下角的开始
 
         :return: 战斗成功(True) or 战斗失败(False) or 区域不可用（False）
+        @type count: int 战斗次数限制
         """
-        config: GeneralBattleConfig = cfg.general_battle_config
-
+        battle_config: GeneralBattleConfig = cfg.general_battle_config
+        if not count:
+            count = 999
         # 正式进攻会设定 2s - 10s 的随机延迟，避免攻击间隔及其相近被检测为脚本。
         # if cfg.dokan_config.random_delay:
         #     self.anti_detect(False, False, True)
@@ -585,6 +594,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets, RichManAssets):
     def dokan_choose_attack_priority(self, attack_priority: int) -> bool:
         """ 选择优先攻击
         : return
+        : return
         """
         logger.hr('Try to choose attack priority')
         max_try = 5
@@ -615,50 +625,52 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, DokanAssets, RichManAssets):
         return True
 
     def anti_detect(self, random_move: bool = True, random_click: bool = True, random_delay: bool = True):
-        '''额外的防封测试
+        """额外的防封测试
 
         准备找个号做做爬楼活动的每天300次试试
-        '''
-        res = False
+        """
+        result = False
         # 三个行为中，任何一个生效了都返回True, 否则返回False
         if random_move:
             self.random_click_swipt()
-            res = True
+            result = True
         if random_click:
             # 0到2秒之间的随机浮点数
-            sleep = random.uniform(0, 2)
+            sleep_time = random.uniform(0, 2)
             # 只保留2位小数
-            sleep = round(sleep, 2)
+            sleep_time = round(sleep_time, 2)
             if not self.config.dokan.dokan_config.anti_detect_click_fixed_random_area:
                 # 多搞几个安全点击区域
                 num = random.randint(0, 5)
                 if num == 0:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA, interval=sleep_time)
                 elif num == 1:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA2, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA2, interval=sleep_time)
                 elif num == 2:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA3, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA3, interval=sleep_time)
                 elif num == 3:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA, interval=sleep_time)
                 else:
-                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA2, interval=sleep)
+                    self.click(click=self.C_DOKAN_RANDOM_CLICK_AREA2, interval=sleep_time)
             else:
+                # 假设安全区域是绿色的
+                safe_color_lower = np.array([45, 25, 25])  # HSV颜色空间的绿色下界
                 # 假设安全区域是绿色的
                 safe_color_lower = np.array([45, 25, 25])  # HSV颜色空间的绿色下界
                 safe_color_upper = np.array([90, 255, 255])  # HSV颜色空间的绿色上界
                 pos = detect_safe_area2(self.device.image, safe_color_lower, safe_color_upper, 3, True)
-                logger.info(f"random click area: {pos}, delay: {sleep}")
+                logger.info(f"random click area: {pos}, delay: {sleep_time}")
                 self.click(pos)
 
-            res = True
+            result = True
         if random_delay:
             # 0到2秒之间的随机浮点数
-            sleep = random.uniform(0, 5)
+            sleep_time = random.uniform(0, 5)
             # 只保留2位小数
-            sleep = round(sleep, 2)
-            time.sleep(sleep)
-            res = True
-        return res
+            sleep_time = round(sleep_time, 2)
+            time.sleep(sleep_time)
+            result = True
+        return result
 
     def goto_main(self):
         ''' 保持好习惯，一个任务结束了就返回庭院，方便下一任务的开始或者是出错重启
