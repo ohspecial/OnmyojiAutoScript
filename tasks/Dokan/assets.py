@@ -11,8 +11,6 @@ class DokanAssets:
 
 
 	# Click Rule Assets
-	# 选择寮 
-	C_DOKAN_READY_SEL = RuleClick(roi_front=(1113,179,100,100), roi_back=(1113,179,100,100), name="dokan_ready_sel")
 	# 道馆随机点击安全区域 
 	C_DOKAN_RANDOM_CLICK_AREA = RuleClick(roi_front=(142,294,107,150), roi_back=(142,294,107,150), name="dokan_random_click_area")
 	# 道馆随机点击安全区域1：竂友突破信息 
@@ -84,8 +82,6 @@ class DokanAssets:
 	I_DOKAN_ABANDONED_TOPPA_TITLE = RuleImage(roi_front=(1020,160,260,80), roi_back=(1020,160,260,80), threshold=0.8, method="Template matching", file="./tasks/Dokan/res/res_ryou_dokan_abandoned_toppa_title.png")
 	# 状态：道馆胜利 
 	I_RYOU_DOKAN_WIN = RuleImage(roi_front=(628,60,45,33), roi_back=(628,60,45,33), threshold=0.8, method="Template matching", file="./tasks/Dokan/res/res_ryou_dokan_win.png")
-	# 打馆主失败 
-	I_RYOU_DOKAN_FAIL = RuleImage(roi_front=(454,44,56,46), roi_back=(454,44,56,46), threshold=0.8, method="Template matching", file="./tasks/Dokan/res/res_ryou_dokan_fail.png")
 	# 状态：进入战斗，待开始，右下角图标。 
 	I_RYOU_DOKAN_IN_FIELD2 = RuleImage(roi_front=(1131,562,88,48), roi_back=(1131,562,88,48), threshold=0.8, method="Template matching", file="./tasks/Dokan/res/res_ryou_dokan_in_field2.png")
 	# 馆主战,第一阵容 
@@ -161,16 +157,6 @@ class DokanAssets:
 
 
 	# Ocr Rule Assets
-	# 道馆开启状态 
-	O_DOKAN_STATUS = RuleOcr(roi=(492,628,222,44), area=(492,628,222,44), mode="Full", method="Default", keyword="", name="dokan_status")
-	# 选择寮1 
-	O_DOKAN_READY_SEL1 = RuleOcr(roi=(1156,105,80,28), area=(1156,105,80,28), mode="Digit", method="Default", keyword="", name="dokan_ready_sel1")
-	# 选择寮2 
-	O_DOKAN_READY_SEL2 = RuleOcr(roi=(1156,255,80,28), area=(1156,255,80,28), mode="Digit", method="Default", keyword="", name="dokan_ready_sel2")
-	# 选择寮3 
-	O_DOKAN_READY_SEL3 = RuleOcr(roi=(1156,400,80,28), area=(1156,400,80,28), mode="Digit", method="Default", keyword="", name="dokan_ready_sel3")
-	# 选择寮4 
-	O_DOKAN_READY_SEL4 = RuleOcr(roi=(1156,545,80,28), area=(1156,545,80,28), mode="Digit", method="Default", keyword="", name="dokan_ready_sel4")
 	# 道馆地图里找文字：万 
 	O_DOKAN_MAP = RuleOcr(roi=(270,130,740,460), area=(270,130,740,460), mode="Full", method="Default", keyword="万", name="dokan_map")
 	# 道馆里找文字：后开战 
