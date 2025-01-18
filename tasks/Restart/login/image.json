@@ -20,8 +20,8 @@
   {
     "itemName": "login_red_close",
     "imageName": "login_login_red_close.png",
-    "roiFront": "912,0,360,290",
-    "roiBack": "912,0,360,290",
+    "roiFront": "800,0,480,290",
+    "roiBack": "800,0,480,290",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
@@ -106,5 +106,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "登录界面 弹出框 阴阳师精灵"
+  },
+  {
+    "itemName": "charactars",
+    "imageName": "login_charactars.png",
+    "roiFront": "246,535,100,31",
+    "roiBack": "219,523,173,57",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "已有角色"
   }
 ]
