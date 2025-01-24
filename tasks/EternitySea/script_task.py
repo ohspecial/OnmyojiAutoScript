@@ -40,6 +40,8 @@ class ScriptTask(
     def run(self) -> None:
         self._two_teams_switch_sous(self._task_config.switch_soul_config_1)
         self._two_teams_switch_sous(self._task_config.switch_soul_config_2)
+        self.ui_get_current_page()
+        self.ui_goto(page_main)
         match self._task_config.eternity_sea_config.user_status:
             case UserStatus.LEADER: success = self.run_leader()
             case UserStatus.MEMBER: success = self.run_member()
