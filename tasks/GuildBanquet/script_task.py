@@ -38,7 +38,7 @@ class ScriptTask(GameUi, GuildBanquetAssets):
         if not self.check_runtime():
             # 如果不是宴会日则设置下次运行时间
             self.plan_next_run()
-            raise TaskEnd('GuildBanquet')
+            raise TaskEnd
         
         self.ui_get_current_page()
         self.ui_goto(page_guild)
@@ -51,14 +51,16 @@ class ScriptTask(GameUi, GuildBanquetAssets):
             self.device.stuck_record_add('BATTLE_STATUS_S')
         else:
             # 如果没有找到FLAG，可能是宴会时间没开始，5分钟后尝试再次查找
+            # TODO 限定重复次数
             time_now = datetime.now()
             time_later = time_now + timedelta(minutes=5)
             self.set_next_run(task='GuildBanquet',
                               finish=True,
                               target=time_later)
-            raise TaskEnd('GuildBanquet')
+            raise TaskEnd
         # 开始宴会
         while True:
+            self.screenshot()
             if self.appear(self.I_ANSWER_SCORE, interval=5):
                 logger.info("Wait in place or answer the question manually")
             
@@ -74,9 +76,9 @@ class ScriptTask(GameUi, GuildBanquetAssets):
                 self.device.stuck_record_add('BATTLE_STATUS_S')
         self.ui_get_current_page()
         self.ui_goto(page_main)
-        self.set_next_run(task="GuildBanquet",finish=True,success=True,target=datetime())
-        raise TaskEnd("GuildBanquet")
-        
+        self.plan_next_run()
+        raise TaskEnd
+    
     def check_runtime(self) -> bool:
         """
         检查日期和时间, 是否是宴会日
