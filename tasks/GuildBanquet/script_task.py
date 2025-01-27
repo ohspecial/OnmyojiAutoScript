@@ -51,7 +51,6 @@ class ScriptTask(GameUi, GuildBanquetAssets):
             self.device.stuck_record_add('BATTLE_STATUS_S')
         else:
             # 如果没有找到FLAG，可能是宴会时间没开始，5分钟后尝试再次查找
-            # TODO 限定重复次数
             time_now = datetime.now()
             time_later = time_now + timedelta(minutes=5)
             self.set_next_run(task='GuildBanquet',
@@ -61,9 +60,15 @@ class ScriptTask(GameUi, GuildBanquetAssets):
         # 开始宴会
         while True:
             self.screenshot()
-            if self.appear(self.I_ANSWER_SCORE, interval=5):
+            # 如果发现集结则表示在宴会中，没有则宴会结束
+            if self.appear(self.I_FLAG, interval=10):
                 logger.info("Wait in place or answer the question manually")
-            
+            else:
+                logger.info("Guild banquet end")
+                break
+            # 等待5分钟，如果在这段时间内没有找到FLAG，则认为宴会结束
+            wait_count = 0
+            wait_timer = Timer(300)
             if wait_timer.reached():
                 wait_timer.reset()
                 if wait_count >= 2:
@@ -92,12 +97,20 @@ class ScriptTask(GameUi, GuildBanquetAssets):
     def plan_next_run(self):
         # 安排次日宴会，便于复用
         today = datetime.now().weekday()
+        # 如果当日时间超过22点，说明配置时间可能出错，设置下次失败运行时间
+        if datetime.now().hour < 22:
+            self.set_next_run(task="GuildBanquet", success=False)
+            logger.error("Guild banquet time config error, set next run fail")
+            raise TaskEnd
         
         if today < self.banquet_day_1:
+            logger.info(f"Plan next run: {self.banquet_day_1_start_time}")
             self.custom_next_run(task='GuildBanquet', custom_time=self.banquet_day_1_start_time, time_delta=self.banquet_day_1 - today) 
         elif self.banquet_day_1 <= today < self.banquet_day_2:
+            logger.info(f"Plan next run: {self.banquet_day_2_start_time}")
             self.custom_next_run(task='GuildBanquet', custom_time=self.banquet_day_2_start_time, time_delta=self.banquet_day_2 - today)
         elif self.banquet_day_2 <= today:
+            logger.info(f"Plan next run: {self.banquet_day_1_start_time}")
             self.custom_next_run(task='GuildBanquet', custom_time=self.banquet_day_1_start_time, time_delta=7 - today + self.banquet_day_1) 
         logger.info(f"Plan next run") 
         
