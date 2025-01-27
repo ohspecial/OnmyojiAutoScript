@@ -66,9 +66,6 @@ class ScriptTask(GameUi, GuildBanquetAssets):
             else:
                 logger.info("Guild banquet end")
                 break
-            # 等待5分钟，如果在这段时间内没有找到FLAG，则认为宴会结束
-            wait_count = 0
-            wait_timer = Timer(300)
             if wait_timer.reached():
                 wait_timer.reset()
                 if wait_count >= 2:
@@ -101,7 +98,6 @@ class ScriptTask(GameUi, GuildBanquetAssets):
         if datetime.now().hour < 22:
             self.set_next_run(task="GuildBanquet", success=False)
             logger.error("Guild banquet time config error, set next run fail")
-            raise TaskEnd
         
         if today < self.banquet_day_1:
             logger.info(f"Plan next run: {self.banquet_day_1_start_time}")
@@ -112,8 +108,7 @@ class ScriptTask(GameUi, GuildBanquetAssets):
         elif self.banquet_day_2 <= today:
             logger.info(f"Plan next run: {self.banquet_day_1_start_time}")
             self.custom_next_run(task='GuildBanquet', custom_time=self.banquet_day_1_start_time, time_delta=7 - today + self.banquet_day_1) 
-        logger.info(f"Plan next run") 
-        
+    
     def get_key_from_value(self, dict, value):
         return [k for k, v in dict.items() if v == value][0]
     
