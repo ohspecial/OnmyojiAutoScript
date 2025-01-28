@@ -27,7 +27,6 @@ class ScriptTask(GameUi, GuildBanquetAssets):
 
     def run(self):
         self.run_time = self.config.guild_banquet.guild_banquet_time
-        print(self.run_time)
         # 第一天宴会日期及时间
         self.banquet_day_1 = self.get_key_from_value(weekday_dict, self.run_time.day_1.value)
         self.banquet_day_1_start_time = self.run_time.run_time_1
@@ -65,6 +64,7 @@ class ScriptTask(GameUi, GuildBanquetAssets):
                 logger.info("Wait in place or answer the question manually")
             else:
                 logger.info("Guild banquet end")
+                self.set_config()
                 break
             if wait_timer.reached():
                 wait_timer.reset()
@@ -90,14 +90,16 @@ class ScriptTask(GameUi, GuildBanquetAssets):
         # 判断当前日期是否是寮宴会日
         if day_of_week in [self.banquet_day_1, self.banquet_day_2]:
             return True
-
-    def plan_next_run(self):
-        # 安排次日宴会，便于复用
-        today = datetime.now().weekday()
+        
         # 如果当日时间超过22点，说明配置时间可能出错，设置下次失败运行时间
         if datetime.now().hour < 22:
             self.set_next_run(task="GuildBanquet", success=False)
             logger.error("Guild banquet time config error, set next run fail")
+            return False
+
+    def plan_next_run(self):
+        # 安排次日宴会，便于复用
+        today = datetime.now().weekday()
         
         if today < self.banquet_day_1:
             logger.info(f"Plan next run: {self.banquet_day_1_start_time}")
@@ -112,7 +114,36 @@ class ScriptTask(GameUi, GuildBanquetAssets):
     def get_key_from_value(self, dict, value):
         return [k for k, v in dict.items() if v == value][0]
     
-    
+    def set_config(self):
+        try:
+            # 当结束宴会时，设置下次宴会时间，宴会时间设置为运行结束时间提前15分钟
+            next_time = datetime.now() - timedelta(minutes=15)
+            today = datetime.now().weekday()
+
+            # 修改配置文件
+            if today == self.banquet_day_1:
+                self.run_time.run_time_1 = next_time
+            elif today == self.banquet_day_2:
+                self.run_time.run_time_2 = next_time
+            elif today < self.banquet_day_1:
+                self.run_time.day_1.value = today
+                self.run_time.run_time_1 = next_time
+            elif today > self.banquet_day_2:
+                self.run_time.day_2.value = today
+                self.run_time.run_time_2 = next_time
+            else:
+                # 如果当前时间在两个配置时间之间，则默认把工作日设置第一天，周末设为第二天
+                if today <= 4:  # 工作日
+                    self.run_time.day_1.value = today
+                    self.run_time.run_time_1 = next_time
+                else:  # 周末
+                    self.run_time.day_2.value = today
+                    self.run_time.run_time_2 = next_time
+            logger.info(f"Set next run time config success")
+        except Exception as e:
+            logger.error(f"Error setting banquet config: {e}")
+            raise TaskEnd
+
 
 if __name__ == '__main__':
     from module.config.config import Config

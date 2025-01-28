@@ -10,9 +10,7 @@ from module.atom.list import RuleList
 class GuildBanquetAssets: 
 
 
-	# Image Rule Assets
-	# 答题成绩 
-	I_ANSWER_SCORE = RuleImage(roi_front=(152,93,48,56), roi_back=(152,93,48,56), threshold=0.8, method="Template matching", file="./tasks/GuildBanquet/res/res_answer_score.png")
+	# Image Rule Assets 
 	# description 
 	I_FLAG = RuleImage(roi_front=(1035,12,33,60), roi_back=(1035,12,33,60), threshold=0.8, method="Template matching", file="./tasks/GuildBanquet/res/res_flag.png")
 
