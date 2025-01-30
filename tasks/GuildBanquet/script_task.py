@@ -1,8 +1,8 @@
 # This Python file uses the following encoding: utf-8
 # @author ohspecial
 # github https://github.com/ohspecial
-from time import sleep
 from datetime import datetime ,timedelta
+from enum import Enum
 
 from module.exception import TaskEnd
 from module.logger import logger
@@ -12,7 +12,7 @@ from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_guild, page_main
 from tasks.GuildBanquet.assets import GuildBanquetAssets
 
-weekday_dict = {
+WEEKDAYDICT = {
     0: '星期一',
     1: '星期二',
     2: '星期三',
@@ -22,17 +22,25 @@ weekday_dict = {
     6: '星期日'
 }
 
+class Weekday(str,Enum):
+    Monday: str = "星期一"
+    Tuesday: str = "星期二" 
+    Wednesday: str = "星期三"
+    Thursday: str = "星期四"
+    Friday: str = "星期五"
+    Saturday: str = "星期六"
+    Sunday: str = "星期日"
     
 class ScriptTask(GameUi, GuildBanquetAssets):
 
     def run(self):
         self.run_time = self.config.guild_banquet.guild_banquet_time
         # 第一天宴会日期及时间
-        self.banquet_day_1 = self.get_key_from_value(weekday_dict, self.run_time.day_1.value)
+        self.banquet_day_1 = self.get_key_from_value(WEEKDAYDICT, self.run_time.day_1.value)
         self.banquet_day_1_start_time = self.run_time.run_time_1
         
         # 第二天宴会日期及时间
-        self.banquet_day_2 = self.get_key_from_value(weekday_dict, self.run_time.day_2.value)
+        self.banquet_day_2 = self.get_key_from_value(WEEKDAYDICT, self.run_time.day_2.value)
         self.banquet_day_2_start_time = self.run_time.run_time_2
         if not self.check_runtime():
             # 如果不是宴会日则设置下次运行时间
@@ -114,32 +122,43 @@ class ScriptTask(GameUi, GuildBanquetAssets):
     def get_key_from_value(self, dict, value):
         return [k for k, v in dict.items() if v == value][0]
     
+    def get_weekday_enum(self, value: str) -> Weekday:
+        for day in Weekday:
+            if day.value == value:
+                return day
+        
     def set_config(self):
+        """
+        修改周几配置时会出现警告
+        UserWarning: Pydantic serializer warnings:
+  Expected `enum` but got `Weekday` with value `<Weekday.Thursday: '星期四'>` - serialized value may not be as expected
+        """
         try:
-            # 当结束宴会时，设置下次宴会时间，宴会时间设置为运行结束时间提前15分钟
+            # 当结束宴会时，设置宴会时间的日期及时间，宴会时间设置为运行结束时间提前15分钟
             next_time = datetime.now() - timedelta(minutes=15)
-            today = datetime.now().weekday()
-
+            today = datetime.now().weekday()          
             # 修改配置文件
             if today == self.banquet_day_1:
                 self.run_time.run_time_1 = next_time
             elif today == self.banquet_day_2:
-                self.run_time.run_time_2 = next_time
+                self.run_time.run_time_1 = next_time
             elif today < self.banquet_day_1:
-                self.run_time.day_1.value = today
+                self.run_time.day_1 = self.get_weekday_enum(WEEKDAYDICT.get(today))
                 self.run_time.run_time_1 = next_time
             elif today > self.banquet_day_2:
-                self.run_time.day_2.value = today
+                self.run_time.day_2 = self.get_weekday_enum(WEEKDAYDICT.get(today))    
                 self.run_time.run_time_2 = next_time
             else:
                 # 如果当前时间在两个配置时间之间，则默认把工作日设置第一天，周末设为第二天
                 if today <= 4:  # 工作日
-                    self.run_time.day_1.value = today
+                    self.run_time.day_1 = self.get_weekday_enum(WEEKDAYDICT.get(today))
                     self.run_time.run_time_1 = next_time
                 else:  # 周末
-                    self.run_time.day_2.value = today
+                    self.run_time.day_2 = self.get_weekday_enum(WEEKDAYDICT.get(today))       
                     self.run_time.run_time_2 = next_time
-            logger.info(f"Set next run time config success")
+            logger.info(f"Set next run time: {self.run_time}")
+            
+            self.config.save()
         except Exception as e:
             logger.error(f"Error setting banquet config: {e}")
             raise TaskEnd

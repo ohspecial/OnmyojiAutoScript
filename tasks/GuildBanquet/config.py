@@ -2,8 +2,8 @@
 # @author ohspecial
 # github https://github.com/ohspecial
 from enum import Enum  
-from datetime import timedelta
-from pydantic import BaseModel, Field
+
+from pydantic import Field, BaseModel
 
 from tasks.Component.config_scheduler import Scheduler
 from tasks.Component.config_base import ConfigBase, Time
@@ -18,7 +18,6 @@ class Weekday(str,Enum):
     Saturday: str = "星期六"
     Sunday: str = "星期日"
 
-
 class GuildBanquetTime(BaseModel):
     # 自定义运行时间
     day_1: Weekday = Field(
@@ -31,8 +30,6 @@ class GuildBanquetTime(BaseModel):
         description="每周第2次运行时间设置",
     )
     run_time_2: Time = Field(default=Time(hour=19, minute=0, second=0))
-
-
 
 
 class GuildBanquet(ConfigBase):
