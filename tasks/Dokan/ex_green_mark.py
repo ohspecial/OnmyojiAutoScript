@@ -263,9 +263,9 @@ class ExtendGreenMark(GeneralBattle):
         self.screenshot()
         # 若未初始化，直接返回，不检测绿标状态
         if self._state == GreenMarkState.NOT_INIT or self._state is None:
-            return self.device.image
+            return self.device.image                                   
 
-        # 检测式神名区域
+        # 检测式神名区域 
         if self._green_mark_click_roi is None and (self._shikigami_name is not None and self._shikigami_name != ""):
             self._green_mark_click_roi = self.detect_name_position(self.device.image, self._shikigami_name)
             if self._green_mark_click_roi is not None:

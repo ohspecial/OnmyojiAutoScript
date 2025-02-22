@@ -68,8 +68,18 @@ class BestDemonConfig(BaseModel):
 class UtilizeScheduler(Scheduler):
     priority: int = Field(default=2, description='priority_help')
 
+class GeneralDemonConfig(BaseModel):
+    # 是否切换阵容
+    switch_preset_enable: bool = Field(default=False, description='按照御魂配置更换阵容，周一无效')
+    # 按式神名字绿标
+    green_enable: bool = Field(default=False, description='是否开启绿标,若开启则需在下面输入绿标名称')
+    green_mark_shikigami_name: str = Field(default="", description='green_mark_shikigami_name_help')
+
+    
 class DemonEncounter(ConfigBase):
     scheduler: UtilizeScheduler = Field(default_factory=UtilizeScheduler)
+    general_demon_config: GeneralDemonConfig = Field(default_factory=GeneralDemonConfig)
     best_demon_boss_config: BestDemonBossSelect = Field(default_factory=BestDemonBossSelect)
     demon_soul_config: DemonConfig = Field(default_factory=DemonConfig)
     best_demon_soul_config: BestDemonConfig = Field(default_factory=BestDemonConfig)
+    

@@ -2,6 +2,7 @@
 # @author runhey
 # github https://github.com/runhey
 import time
+from time import sleep
 
 from enum import Enum
 from cached_property import cached_property
@@ -13,12 +14,16 @@ from module.exception import TaskEnd
 from module.base.timer import Timer
 
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
+from tasks.DemonEncounter.config import GeneralDemonConfig
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_demon_encounter, page_shikigami_records
 from tasks.DemonEncounter.assets import DemonEncounterAssets
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.DemonEncounter.data.answer import Answer
+
+# 导入道馆绿标模块
+from tasks.Dokan.ex_green_mark import ExtendGreenMark
 
 class LanternClass(Enum):
     BATTLE = 0  # 打怪  --> 无法判断因为怪的图片不一样，用排除法
@@ -30,7 +35,7 @@ class LanternClass(Enum):
     BOSS = 6  # 大鬼王
 
 
-class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
+class ScriptTask(ExtendGreenMark,GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
 
     def run(self):
         if not self.check_time():
@@ -114,6 +119,46 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         logger.hr('Start boss battle', 1)
         # 判断今天是周几
         today = datetime.now().weekday()
+        
+        # 普通逢魔御魂
+        soul_config = self.config.demon_encounter.demon_soul_config
+        # 极逢魔御魂
+        best_soul_config = self.config.demon_encounter.best_demon_soul_config
+
+        # 极逢魔选择
+        best_demon_boss_config = self.config.demon_encounter.best_demon_boss_config
+
+        group, team = None, None
+        if today == 0:
+            # 获取group,team
+            if best_soul_config.enable and best_demon_boss_config.best_demon_kiryou_select:
+                group, team = best_soul_config.best_demon_kiryou_utahime.split(",")
+            else:
+                group, team = soul_config.demon_kiryou_utahime.split(",")
+        elif today == 1:
+            if best_soul_config.enable and best_demon_boss_config.best_demon_shinkirou_select:
+                group, team = best_soul_config.best_demon_shinkirou.split(",")
+            else:
+                group, team = soul_config.demon_shinkirou.split(",")
+        elif today == 2:
+            if best_soul_config.enable and best_demon_boss_config.best_demon_tsuchigumo_select:
+                group, team = best_soul_config.best_demon_tsuchigumo.split(",")
+            else:
+                group, team = soul_config.demon_tsuchigumo.split(",")
+        elif today == 3:
+            if best_soul_config.enable and best_demon_boss_config.best_demon_gashadokuro_select:
+                group, team = best_soul_config.best_demon_gashadokuro.split(",")
+            else:
+                group, team = soul_config.demon_gashadokuro.split(",")
+        elif today == 4:
+            if best_soul_config.enable and best_demon_boss_config.best_demon_namazu_select:
+                group, team = best_soul_config.best_demon_namazu.split(",")
+            else:
+                group, team = soul_config.demon_namazu.split(",")
+        elif today == 5:
+            group, team = soul_config.demon_oboroguruma.split(",")
+        elif today == 6:
+            group, team = soul_config.demon_nightly_aramitama.split(",")
 
         while 1:
             self.screenshot()
@@ -163,7 +208,16 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                 self.ui_click(self.I_BOSS_CONFIRM, self.I_BOSS_GATHER)
                 break
             if self.appear(self.I_BOSS_GATHER):
+                # 更换预设队伍，周一不更换预设队伍
+                if self.config.demon_encounter.general_demon_config.switch_preset_enable and today != 0:
+                    # 点击进入预设队伍界面
+                    self.appear_then_click(self.I_BOSS_GATHER)
+                    
+                    if group and team:
+                        self.switch_preset_team_by_name(group, team)
+                    
                 break
+                
             if boss_fire_count >= 5:
                 logger.warning('Boss battle already done')
                 self.ui_click_until_disappear(self.I_UI_BACK_RED)
@@ -181,7 +235,7 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         # 延长时间并在战斗结束后改回来
         self.device.stuck_timer_long = Timer(480, count=480).start()
         config = self.con
-        self.run_general_battle(config)
+        self.boss_battle(config)
         self.device.stuck_timer_long = Timer(300, count=300).start()
 
         # 等待回到挑战boss主界面
@@ -252,6 +306,111 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                     self._boss(match_click[i])
             time.sleep(1)
 
+   
+    def switch_preset_team_by_name(self, groupName, teamName):
+        """
+        保证在式神录的界面
+        :return:
+        """
+        logger.hr('Switch soul by name')
+        # 点击预设按钮
+        while 1:
+            self.screenshot()
+
+            if self.appear(self.I_PRESET_ENSURE):
+                break
+            # 首个队伍没有满足5个式神，未出现预设按钮的情况下跳出循环
+            if self.appear(self.I_PRESENT_LESS_THAN_5):
+                break
+            if self.appear_then_click(self.I_BOSS_PRESET, threshold=0.8, interval=1):
+                continue
+            if self.ocr_appear(self.O_PRESET):
+                self.click(self.O_PRESET, interval=1)
+                continue
+        logger.info("Click preset button")
+        
+        # 滑动至分组最上层
+        last_group_text = ''
+        while 1:
+            self.screenshot()
+            compare1 = self.O_SS_GROUP_NAME.detect_and_ocr(self.device.image)
+            now_group_text = str([result.ocr_text for result in compare1])
+            if now_group_text == last_group_text:
+                break
+            self.swipe(self.S_SS_GROUP_SWIPE_UP, 2)
+            sleep(2.5)
+            last_group_text = now_group_text
+        logger.info('Swipe to top of group')
+
+        # 判断有无目标分组
+        while 1:
+            self.screenshot()
+            # 获取当前分组名
+            results = self.O_SS_GROUP_NAME.detect_and_ocr(self.device.image)
+            text1 = [result.ocr_text for result in results]
+            # 判断当前分组有无目标分组
+            result = set(text1).intersection({groupName})
+            # 有则跳出检测
+            if result and len(result) > 0:
+                break
+            self.swipe(self.S_SS_GROUP_SWIPE_DOWN)
+            sleep(1.5)
+        logger.info('Swipe down to find target group')
+
+        # 选中分组
+        while 1:
+            self.screenshot()
+            self.O_SS_GROUP_NAME.keyword = groupName
+            if self.ocr_appear_click(self.O_SS_GROUP_NAME):
+                break
+        logger.info(f'Select group {groupName}')
+
+        # 滑动至阵容最上层
+        last_team_text = ''
+        while 1:
+            self.screenshot()
+            compare1 = self.O_SS_TEAM_NAME.detect_and_ocr(self.device.image)
+            now_team_text = str([result.ocr_text for result in compare1])
+            # 向上滑动
+            if now_team_text == last_team_text:
+                break
+            self.swipe(self.S_SS_TEAM_SWIPE_DOWN, 1.5)
+            sleep(2)
+            last_team_text = now_team_text
+        logger.info('Swipe to top of team')
+
+        # 判断当前分组有无目标阵容
+        while 1:
+            self.screenshot()
+            # 获取当前阵容名
+            results = self.O_SS_TEAM_NAME.detect_and_ocr(self.device.image)
+            text1 = [result.ocr_text for result in results]
+            # 判断当前分组有无目标阵容
+            result = set(text1).intersection({teamName})
+            # 有则跳出检测
+            if result and len(result) > 0:
+                break
+            self.swipe(self.S_SS_TEAM_SWIPE_UP, 0.3)
+        logger.info('Swipe up to find target team')
+
+        # 选中分组
+        while 1:
+            self.screenshot()
+            self.O_SS_TEAM_NAME.keyword = teamName
+            if self.ocr_appear_click(self.O_SS_TEAM_NAME):
+                break
+        logger.info(f'Select team {teamName}')
+        
+        # 点击预设确认
+        self.wait_until_appear(self.I_PRESET_ENSURE, wait_time=1)
+        while 1:
+            self.screenshot()
+            if not self.appear(self.I_PRESET_ENSURE):
+                break
+            if self.appear_then_click(self.I_PRESET_ENSURE, threshold=0.8, interval=0.2):
+                continue
+        logger.info("Click preset ensure")
+        
     @cached_property
     def con(self) -> GeneralBattleConfig:
         return GeneralBattleConfig()
@@ -484,7 +643,73 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         else:
             return True
 
-    def battle_wait(self, random_click_swipt_enable: bool) -> bool:
+    def boss_battle(self, config: GeneralDemonConfig = None) -> bool:
+        """
+        首领战斗，兼容绿标
+        """
+        def anti_wait_long_time():
+            self.device.stuck_record_add("BATTLE_STATUS_S")
+            
+        # 本人选择的策略是只要进来了就算一次，不管是不是打完了
+        logger.hr("General battle start", 2)
+        self.current_count += 1
+        logger.info(f"Current count: {self.current_count}")
+        if config is None:
+            config = GeneralDemonConfig()
+        demon_config = self.config.demon_encounter.general_demon_config
+        # 战斗刚开始，需要添加绿标
+        need_green_mark = demon_config.green_enable
+        # 绿标区域初始化标识，只初始化一次绿标区域
+        need_init_green_mark_area = demon_config.green_enable
+        
+        
+        # 点击准备按钮
+        self.wait_until_appear(self.I_PREPARE_HIGHLIGHT)
+        self.wait_until_appear(self.I_BUFF)
+        occur_prepare_button = False
+        while 1:
+            self.screenshot()
+            if not self.appear(self.I_BUFF):
+                break
+            if self.appear_then_click(self.I_PREPARE_HIGHLIGHT, interval=1.5):
+                occur_prepare_button = True
+                continue
+            # if occur_prepare_button and self.ocr_appear_click(self.O_BATTLE_PREPARE, interval=2):
+            #     continue
+        logger.info("Click prepare ensure button")
+
+        # 照顾一下某些模拟器慢的
+        time.sleep(0.1)
+
+        # 点击绿标
+        while 1:
+            if demon_config.green_enable:
+                self.green_mark_screenshot(anti_wait_long_time)
+            else:
+                self.screenshot()
+                
+            if need_init_green_mark_area:
+                need_init_green_mark_area = False
+                # 初始化 green_mark
+                self.init_green_mark_from_cfg(demon_config.green_mark_shikigami_name,
+                                            demon_config.green_enable)
+                continue
+            
+            if need_green_mark:
+                need_green_mark = False
+                # 缩短第一次绿标的检测时s间，在短时间内触发标记动作
+                self.set_disappear_count(self.MAX_DISAPPEAR_COUNT - 10)
+                break
+            
+            
+        self.stop_green_mark()
+        win = self.battle_wait() 
+        if win:
+            return True
+        else:
+            return False
+        
+    def battle_wait(self, random_click_swipt_enable = False) -> bool:
         # 重写
         self.device.stuck_record_add('BATTLE_STATUS_S')
         self.device.click_record_clear()
@@ -519,14 +744,16 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                 logger.warning('Obtain battle timeout')
                 return True
 
+    def need_green_mark(self):
+        """重写 ex_green_mark中的need_green_mark，不需要判断是否绿标条件"""
+        return True
 
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('du')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
 
     t.run()
-    # t.battle_wait(True)

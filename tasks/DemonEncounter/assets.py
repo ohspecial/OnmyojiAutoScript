@@ -46,6 +46,8 @@ class DemonEncounterAssets:
 	I_BOSS_KILLED = RuleImage(roi_front=(654,596,35,68), roi_back=(614,537,123,176), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_killed.png")
 	# 极逢魔集结挑战 
 	I_BEST_BOSS_FIRE = RuleImage(roi_front=(1087,562,100,36), roi_back=(1087,562,100,36), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_best_boss_fire.png")
+	# 逢魔预设 
+	I_BOSS_PRESET = RuleImage(roi_front=(26,634,39,50), roi_back=(26,634,39,50), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_preset.png")
 
 
 	# Ocr Rule Assets

@@ -1072,7 +1072,7 @@ class ScriptTask(ExtendGreenMark, GameUi, SwitchSoul, DokanSceneDetector):
                                                   self.config.dokan.general_battle_config.green_mark)
                 if need_green_mark:
                     need_green_mark = False
-                    # 缩短第一次绿标的检测时间，在短时间内触发标记动作
+                    # 缩短第一次绿标的检测时s间，在短时间内触发标记动作
                     self.set_disappear_count(self.MAX_DISAPPEAR_COUNT - 10)
 
                 # 正式进攻会设定 2s - 10s 的随机延迟，避免攻击间隔及其相近被检测为脚本。
