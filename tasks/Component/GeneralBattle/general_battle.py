@@ -169,6 +169,10 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         win: bool = False
         while 1:
             self.screenshot()
+            # 检查御魂溢出
+            if self.appear_then_click(self.I_OVER_GHOST, interval=1):
+                continue
+
             # 如果出现赢 就点击, 第二个是针对封魔的图片
             if self.appear(self.I_WIN, threshold=0.8) or self.appear(self.I_DE_WIN):
                 logger.info("Battle result is win")
@@ -201,7 +205,11 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         while 1:
             self.screenshot()
             if win:
-                # 点击赢了
+                # 检查御魂溢出
+                if self.appear_then_click(self.I_OVER_GHOST, interval=1):
+                    continue
+                    
+                # 点击赢了        
                 action_click = random.choice([self.C_WIN_1, self.C_WIN_2, self.C_WIN_3])
                 if self.appear_then_click(self.I_WIN, action=action_click, interval=0.5):
                     continue
