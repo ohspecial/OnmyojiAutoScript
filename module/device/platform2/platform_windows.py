@@ -330,6 +330,7 @@ class PlatformWindows(PlatformBase, EmulatorManager):
                 # 如果有新窗口，使新窗口闪烁
                 logger.info(f'Flash new window: {new_window}')
                 flash_window(new_window, flash=True)
+
         logger.info('Emulator start completed')
         return True
 

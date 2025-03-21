@@ -75,6 +75,7 @@ class Device(BaseModel):
                                              description='emulator_window_minimize_help')
 
 
+
 if __name__ == '__main__':
     d = Device()
     print(d.json())
