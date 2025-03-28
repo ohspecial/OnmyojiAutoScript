@@ -49,11 +49,6 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
         # self.soul(is_open=True)
         # self.close_buff()
 
-
-        self.open_buff()
-        self.soul(is_open=True)
-        self.close_buff()
-
         self.home_main()
 
         # 选择是游戏的体力还是活动的体力
@@ -132,9 +127,9 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
                 logger.info("General battle success")
 
         self.main_home()
-        self.open_buff()
-        self.soul(is_open=False)
-        self.close_buff()
+        # self.open_buff()
+        # self.soul(is_open=False)
+        # self.close_buff()
         if config.general_climb.active_souls_clean:
             self.set_next_run(task='SoulsTidy', success=False, finish=False, target=datetime.now())
         self.set_next_run(task="ActivityShikigami", success=True)
