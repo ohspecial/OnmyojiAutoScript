@@ -35,7 +35,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             self.ui_goto(page_shikigami_records)
             self.run_switch_soul(con.switch_soul.switch_group_team)
         # 御魂切换方式二
-        if self.config.true_orochi.switch_soul.enable_switch_by_name:
+        if con.switch_soul.enable_switch_by_name:
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
             self.run_switch_soul_by_name(con.switch_soul_config.group_name, con.switch_soul_config.team_name)
@@ -600,7 +600,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('回归')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
     t.run()
