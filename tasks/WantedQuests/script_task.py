@@ -36,7 +36,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             self.unwanted_boss_name_list = re.split(r"[，,]", unwanted_boss_names)
 
         # 自动换御魂
-        if con.switch_soul_config.enable:
+        if con.switch_soul.enable:
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
             self.run_switch_soul(con.switch_soul.switch_group_team)
@@ -44,7 +44,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         if con.switch_soul.enable_switch_by_name:
             self.ui_get_current_page()
             self.ui_goto(page_shikigami_records)
-            self.run_switch_soul_by_name(con.switch_soul_config.group_name, con.switch_soul_config.team_name)
+            self.run_switch_soul_by_name(con.switch_soul.group_name, con.switch_soul.team_name)
 
         preSuc = False
         if (self.get_config()).cooperation_only:
