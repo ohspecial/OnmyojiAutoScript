@@ -249,6 +249,7 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
     def click_battle(self):
         while 1:
             self.screenshot()
+            print(self.appear(self.I_SE_FIRE))
             if not self.appear(self.I_SE_FIRE):
                 break
             if self.appear_then_click(self.I_SE_FIRE, interval=1):
@@ -295,7 +296,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()

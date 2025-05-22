@@ -35,7 +35,7 @@ from module.server.i18n import I18n
 
 class Script:
     def __init__(self, config_name: str ='oas') -> None:
-        self.device = None
+        self.device = Device(config=Config(config_name=config_name))
         logger.hr('Start', level=0)
         self.server = None
         self.state_queue: Queue = None
@@ -66,6 +66,7 @@ class Script:
     def device(self) -> "Device":
         try:
             from module.device.device import Device
+            print(self.config)
             device = Device(config=self.config)
             return device
         except RequestHumanTakeover:
@@ -501,6 +502,8 @@ class Script:
 
 
 if __name__ == "__main__":
-    script = Script("oas1")
-    print(script.gui_task_list())
-    print(script.config.gui_menu)
+    script = Script("zhu")
+    # print(script.gui_task_list())
+    # print(script.config.gui_menu)
+    print(script.device)
+    print(script.device.screenshot())

@@ -247,7 +247,8 @@ class Device(Platform, Screenshot, Control, AppControl):
 
 
 if __name__ == "__main__":
-    device = Device(config="oas1")
+    device = Device(config="zhu")
+    print(device.config.script.device.screenshot_method)
     # cv2.imshow("imgSrceen", device.screenshot())  # 显示
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
