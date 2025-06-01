@@ -1,12 +1,9 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-import os
 import random
 from datetime import datetime, timedelta, time
 
-from module.atom.image import RuleImage
-from tasks.ActivityShikigami import YourAutomationClass
 from tasks.base_task import BaseTask
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.AreaBoss.assets import AreaBossAssets
@@ -20,33 +17,6 @@ from tasks.GameUi.game_ui import GameUi
 from module.logger import logger
 from module.exception import TaskEnd
 from module.base.protect import random_sleep
-
-
-def _load_image_rules():
-    image_rules = []
-    image_folder = "./tasks/ActivityShikigami/auto/"
-
-    supported_formats = ('.png', '.jpg', '.jpeg')
-
-    # 遍历图片文件夹
-    for filename in os.listdir(image_folder):
-        if not filename.lower().endswith(supported_formats):
-            continue
-
-        # 构建完整路径
-        file_path = os.path.join(image_folder, filename)
-
-        # 创建RuleImage对象并添加到列表
-        image_rule = RuleImage(
-            roi_front=(0, 0, 1280, 720),  # 保持与原来相同的ROI参数
-            roi_back=(0, 0, 1280, 720),
-            threshold=0.8,
-            method="Template matching",
-            file=file_path
-        )
-        image_rules.append(image_rule)
-
-    return image_rules
 
 
 class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
@@ -75,24 +45,6 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
         self.ui_get_current_page()
         self.ui_goto(page_main)
 
-        # 动态加载所有图片（支持png/jpg/jpeg格式）
-        image_rules = _load_image_rules()
-        while 1:
-            self.screenshot()
-            for image_rule in image_rules:
-                new_rule = RuleImage(
-                    roi_front=(0, 0, 1280, 720),
-                    roi_back=image_rule.roi_back,
-                    threshold=image_rule.threshold,
-                    method=image_rule.method,
-                    file=image_rule.file
-                )
-                # logger.info(f"尝试点击图片: {new_rule.roi_front} {new_rule.file}")
-                if self.appear_then_click(new_rule, interval=1):
-                    print(f"成功点击图片: {os.path.basename(image_rule.file)}")
-                    self.device.stuck_record_add('BATTLE_STATUS_S')
-                    break
-
         # self.open_buff()
         # self.soul(is_open=True)
         # self.close_buff()
@@ -104,6 +56,7 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
         self.switch(current_ap)
 
         # 设定是否锁定阵容
+
         if config.general_battle.lock_team_enable:
             logger.info("Lock team")
             while 1:
@@ -154,7 +107,6 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
             # 随机休息
             if config.general_climb.random_sleep:
                 random_sleep()
-
             # 点击战斗
             logger.info("Click battle")
             while 1:
@@ -176,9 +128,9 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
                 logger.info("General battle success")
 
         self.main_home()
-        self.open_buff()
-        self.soul(is_open=False)
-        self.close_buff()
+        # self.open_buff()
+        # self.soul(is_open=False)
+        # self.close_buff()
         if config.general_climb.active_souls_clean:
             self.set_next_run(task='SoulsTidy', success=False, finish=False, target=datetime.now())
         self.set_next_run(task="ActivityShikigami", success=True)
@@ -319,89 +271,13 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
     #         # 如果开启战斗过程随机滑动
     #         if random_click_swipt_enable:
     #             self.random_click_swipt()
-    def battle_wait(self, random_click_swipt_enable: bool) -> bool:
-        """
-        等待战斗结束 ！！！
-        很重要 这个函数是原先写的， 优化版本在tasks/Secret/script_task下。本着不改动原先的代码的原则，所以就不改了
-        :param random_click_swipt_enable:
-        :return:
-        """
-        # 有的时候是长战斗，需要在设置stuck检测为长战斗
-        # 但是无需取消设置，因为如果有点击或者滑动的话 handle_control_check会自行取消掉
-        self.device.stuck_record_add('BATTLE_STATUS_S')
-        self.device.click_record_clear()
-        # 战斗过程 随机点击和滑动 防封
-        logger.info("Start battle process")
-        win: bool = False
-        while 1:
-            self.screenshot()
-            # 如果出现赢 就点击
-            if self.appear(self.I_WIN, threshold=0.8) or self.appear(self.I_DE_WIN):
-                logger.info("Battle result is win")
-                win = True
-                break
-
-            # 如果出现失败 就点击，返回False
-            if self.appear(self.I_FALSE, threshold=0.8):
-                logger.info("Battle result is false")
-                win = False
-                break
-
-            # 如果领奖励
-            if self.appear(self.I_REWARD, threshold=0.6):
-                win = True
-                break
-
-            # 如果领奖励出现金币
-            if self.appear(self.I_REWARD_GOLD, threshold=0.8):
-                win = True
-                break
-            # 如果开启战斗过程随机滑动
-            if random_click_swipt_enable:
-                self.random_click_swipt()
-
-        # 再次确认战斗结果
-        logger.info("Reconfirm the results of the battle")
-        while 1:
-            self.screenshot()
-            if win:
-                # 点击赢了
-                action_click = random.choice([self.C_WIN_1, self.C_WIN_2, self.C_WIN_3])
-                if self.appear_then_click(self.I_WIN, action=action_click, interval=0.5):
-                    continue
-                if not self.appear(self.I_WIN):
-                    break
-            else:
-                # 如果失败且 点击失败后
-                if self.appear_then_click(self.I_FALSE, threshold=0.6):
-                    continue
-                if not self.appear(self.I_FALSE, threshold=0.6):
-                    return False
-        # 最后保证能点击 获得奖励
-        self.ui_click(self.I_WIN, self.I_REWARD)
-        if not self.wait_until_appear(self.I_REWARD):
-            # 有些的战斗没有下面的奖励，所以直接返回
-            logger.info("There is no reward, Exit battle")
-            return win
-        logger.info("Get reward")
-        while 1:
-            self.screenshot()
-            # 如果出现领奖励
-            action_click = random.choice([self.C_REWARD_1, self.C_REWARD_2, self.C_REWARD_3])
-            if self.appear_then_click(self.I_REWARD, action=action_click, interval=1.5) or \
-                    self.appear_then_click(self.I_REWARD_GOLD, action=action_click, interval=1.5):
-                continue
-            if not self.appear(self.I_REWARD) and not self.appear(self.I_REWARD_GOLD):
-                break
-
-        return win
 
 
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('mi')
+    c = Config('oas1')
     d = Device(c)
     t = ScriptTask(c, d)
 
