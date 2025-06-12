@@ -86,7 +86,7 @@ class BondlingFairylandAssets:
 
 	# Image Rule Assets
 	# 镇墓兽 
-	I_TOMB_GUARD = RuleImage(roi_front=(847,518,30,31), roi_back=(832,501,64,60), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_tomb_guard.png")
+	I_TOMB_GUARD = RuleImage(roi_front=(292,278,29,97), roi_back=(292,278,29,97), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_tomb_guard.png")
 	# 茨球 
 	I_SNOWBALL = RuleImage(roi_front=(532,375,44,48), roi_back=(512,353,94,93), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_snowball.png")
 	# 小黑 
