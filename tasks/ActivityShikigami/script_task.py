@@ -128,6 +128,7 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
                 logger.info("General battle success")
 
         self.main_home()
+        # 某些活动需要开启御魂加成
         # self.open_buff()
         # self.soul(is_open=False)
         # self.close_buff()

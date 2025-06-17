@@ -543,7 +543,7 @@ class ScriptTask(ExtendGreenMark,GameUi, GeneralBattle, DemonEncounterAssets, Sw
                     break
                 # 如果没有出现红色关闭按钮，说明答题结束
                 if not self.appear(self.I_LETTER_CLOSE):
-                    time.sleep(0.5)
+                    time.sleep(1.8)
                     self.screenshot()
                     if self.appear(self.I_LETTER_CLOSE):
                         continue
@@ -552,7 +552,7 @@ class ScriptTask(ExtendGreenMark,GameUi, GeneralBattle, DemonEncounterAssets, Sw
                         return
 
                 # 一直点击
-                self.click(answer_click, interval=1)
+                self.click(answer_click, interval=1.5)
             time.sleep(0.5)
 
     def _battle(self, target_click):
