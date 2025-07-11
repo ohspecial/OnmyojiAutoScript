@@ -150,8 +150,8 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
                 break
             if self.appear_then_click(self.I_SHI, interval=1):
                 continue
-            if self.ocr_appear_click(self.O_ENTRY_ACTIVITY, interval=1):
-                continue
+            # if self.ocr_appear_click(self.O_ENTRY_ACTIVITY, interval=1):
+            #     continue
             if self.appear_then_click(self.I_BATTLE, interval=1):
                 continue
 

@@ -52,7 +52,7 @@ class ScriptTask(GameUi, SwitchSoul):
         image_templates = self._load_image_template()
 
         click_count = 0
-        click_count_max = 3
+        click_count_max = 5
         last_clicked_file = None  # 记录上一次点击的文件名
 
         while 1:
@@ -73,14 +73,13 @@ class ScriptTask(GameUi, SwitchSoul):
                 )
                 if self.appear_then_click(new_rule, interval=1):
                     current_file = os.path.basename(image_template.file)
-                    logger.info(f"成功点击图片: {current_file}")
+                    # logger.info(f"成功点击图片: {current_file}")
                     # 判断是否连续点击同一图片
                     if current_file == last_clicked_file:
-                        time.sleep(1)
                         click_count += 1
                         if click_count >= click_count_max:
                             logger.info(f"连续点击同一图片达到最大次数，退出循环")
-                            # self.push_text(content='活动任务结束')
+                            self.push_notify(content='任务完成')
                             return
                     else:
                         click_count = 0  # 点击不同图片时重置计数
@@ -113,6 +112,7 @@ class ScriptTask(GameUi, SwitchSoul):
             image_templates.append(image_rule)
 
         logger.info(f"加载图片模板集合: {image_templates}")
+        logger.info(f"加载图片模板数量: {len(image_templates)}")
         return image_templates
 
 
