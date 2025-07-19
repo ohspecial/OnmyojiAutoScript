@@ -4,5 +4,23 @@
     "roiFront": "584,279,100,100",
     "roiBack": "584,279,100,100",
     "description": "战斗数据"
+  },
+  {
+    "itemName": "duel_green_left_1",
+    "roiFront": "301,375,67,104",
+    "roiBack": "301,375,67,104",
+    "description": "从左开始第1个绿标"
+  },
+  {
+    "itemName": "duel_green_left_5",
+    "roiFront": "987,395,67,104",
+    "roiBack": "987,395,67,104",
+    "description": "从左开始第五个绿标"
+  },
+  {
+    "itemName": "duel_green_left_full",
+    "roiFront": "0,0,0,0",
+    "roiBack": "0,0,0,0",
+    "description": "补充点击位置"
   }
 ]

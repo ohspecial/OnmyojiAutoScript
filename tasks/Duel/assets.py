@@ -11,8 +11,48 @@ class DuelAssets:
 
 
 	# Click Rule Assets
+	# 清明 
+	C_QM_ZHAN = RuleClick(roi_front=(263,435,60,75), roi_back=(263,435,60,75), name="qm_zhan")
+	# 神乐 
+	C_SL_ZHAN = RuleClick(roi_front=(520,434,60,75), roi_back=(520,434,60,75), name="sl_zhan")
+	# 源博雅 
+	C_YBY_ZHAN = RuleClick(roi_front=(775,435,60,75), roi_back=(775,435,60,75), name="yby_zhan")
+	# 八百比丘尼 
+	C_BBBQN_ZHAN = RuleClick(roi_front=(1030,437,60,75), roi_back=(1030,437,60,75), name="bbbqn_zhan")
+
+
+	# Image Rule Assets
+	# 进入阴阳术 
+	I_YINYANGSHU = RuleImage(roi_front=(970,633,100,49), roi_back=(970,633,100,49), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/Screenshots_yinyangshu.png")
+	# 进入阴阳术成功 
+	I_YINYANGSHUOK = RuleImage(roi_front=(98,3,100,38), roi_back=(98,3,100,38), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/Screenshots_yinyangshuok.png")
+	# 点击阴阳师 
+	I_YINYANGSHI = RuleImage(roi_front=(80,615,58,67), roi_back=(80,615,58,67), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/Screenshots_yinyangshi.png")
+	# 点击英杰 
+	I_YINGJIE = RuleImage(roi_front=(80,615,58,67), roi_back=(80,615,58,67), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/Screenshots_yingjie.png")
+	# 交替 
+	I_JIAOTI = RuleImage(roi_front=(32,380,52,42), roi_back=(32,380,52,42), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/Screenshots_jiaoti.png")
+	# 进入阴阳师交换页面 
+	I_YYSJIOAHUAN = RuleImage(roi_front=(89,13,176,42), roi_back=(89,13,176,42), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/Screenshots_yysjioahuan.png")
+	# 清明（出战） 
+	I_QM_ZHAN = RuleImage(roi_front=(263,435,60,75), roi_back=(263,435,60,75), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/qm_zhan.png")
+	# 神乐（出战） 
+	I_SL_ZHAN = RuleImage(roi_front=(520,434,60,75), roi_back=(520,434,60,75), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/sl_zhan.png")
+	# 源博雅（出战） 
+	I_YBY_ZHAN = RuleImage(roi_front=(775,435,60,75), roi_back=(775,435,60,75), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/yby_zhan.png")
+	# 八百比丘尼（出战） 
+	I_BBBQN_ZHAN = RuleImage(roi_front=(1030,437,60,75), roi_back=(1030,437,60,75), threshold=0.8, method="Template matching", file="./tasks/Duel/changeyys/bbbqn_zhan.png")
+
+
+	# Click Rule Assets
 	# 战斗数据 
 	C_D_BATTLE_DATA = RuleClick(roi_front=(584,279,100,100), roi_back=(584,279,100,100), name="d_battle_data")
+	# 从左开始第1个绿标 
+	C_DUEL_GREEN_LEFT_1 = RuleClick(roi_front=(301,375,67,104), roi_back=(301,375,67,104), name="duel_green_left_1")
+	# 从左开始第五个绿标 
+	C_DUEL_GREEN_LEFT_5 = RuleClick(roi_front=(987,395,67,104), roi_back=(987,395,67,104), name="duel_green_left_5")
+	# 补充点击位置 
+	C_DUEL_GREEN_LEFT_FULL = RuleClick(roi_front=(0,0,0,0), roi_back=(0,0,0,0), name="duel_green_left_full")
 
 
 	# Image Rule Assets
@@ -52,8 +92,16 @@ class DuelAssets:
 	I_D_CELEB_HONOR = RuleImage(roi_front=(665,531,25,30), roi_back=(652,517,52,53), threshold=0.75, method="Template matching", file="./tasks/Duel/duel/duel_d_celeb_honor.png")
 	# 练 
 	I_BATTLE_WITH_TRAIN = RuleImage(roi_front=(1161,588,78,81), roi_back=(1114,547,163,172), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_battle_with_train.png")
+	# 斗技模式（普通） 
+	I_BATTLE_TYPE_COMMON = RuleImage(roi_front=(439,278,90,88), roi_back=(439,278,90,88), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_battle_type_common.png")
 	# 活动的战斗按钮 
 	I_D_BATTLE2 = RuleImage(roi_front=(1171,592,69,78), roi_back=(1119,566,154,143), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_battle2.png")
+	# 区域找绿标1 
+	I_GREEN_MARK = RuleImage(roi_front=(124,207,1012,182), roi_back=(124,207,1012,182), threshold=0.6, method="Template matching", file="./tasks/Duel/duel/green_mark.png")
+	# 区域找绿标2 
+	I_GREEN_MARK_1 = RuleImage(roi_front=(124,207,1012,182), roi_back=(124,207,1012,182), threshold=0.6, method="Template matching", file="./tasks/Duel/duel/green_mark_1.png")
+	# 区域点击式神 
+	I_GREEN_MARK_IMG = RuleImage(roi_front=(114,238,1022,188), roi_back=(114,238,1022,188), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/green_mark_img.png")
 
 
 	# Ocr Rule Assets
@@ -65,5 +113,7 @@ class DuelAssets:
 	O_D_HAND = RuleOcr(roi=(31,639,63,45), area=(31,639,63,45), mode="Single", method="Default", keyword="手动", name="d_hand")
 	# 自动 
 	O_D_AUTO = RuleOcr(roi=(30,640,65,44), area=(30,640,65,44), mode="Single", method="Default", keyword="自动", name="d_auto")
+	# 绿标获取 
+	O_D_GREEN_MARKER = RuleOcr(roi=(111,202,1025,246), area=(111,202,1025,246), mode="Single", method="Default", keyword="456", name="d_green_marker")
 
 

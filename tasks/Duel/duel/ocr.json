@@ -34,5 +34,14 @@
     "method": "Default",
     "keyword": "自动",
     "description": "自动"
+  },
+  {
+    "itemName": "d_green_marker",
+    "roiFront": "111,202,1025,246",
+    "roiBack": "111,202,1025,246",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "456",
+    "description": "绿标获取"
   }
 ]

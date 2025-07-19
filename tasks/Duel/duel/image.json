@@ -162,6 +162,15 @@
     "description": "练"
   },
   {
+    "itemName": "battle_type_common",
+    "imageName": "duel_battle_type_common.png",
+    "roiFront": "439,278,90,88",
+    "roiBack": "439,278,90,88",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "斗技模式（普通）"
+  },
+  {
     "itemName": "d_battle2",
     "imageName": "duel_d_battle2.png",
     "roiFront": "1171,592,69,78",
@@ -169,5 +178,32 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动的战斗按钮"
+  },
+  {
+    "itemName": "green_mark",
+    "imageName": "green_mark.png",
+    "roiFront": "124,207,1012,182",
+    "roiBack": "124,207,1012,182",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "区域找绿标1"
+  },
+  {
+    "itemName": "green_mark_1",
+    "imageName": "green_mark_1.png",
+    "roiFront": "124,207,1012,182",
+    "roiBack": "124,207,1012,182",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "区域找绿标2"
+  },
+  {
+    "itemName": "green_mark_img",
+    "imageName": "green_mark_img.png",
+    "roiFront": "114,238,1022,188",
+    "roiBack": "114,238,1022,188",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "区域点击式神"
   }
 ]
