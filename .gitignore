@@ -273,3 +273,6 @@ adb_port.ini
 console.bat
 .vscode/*
 tasks/ActivityShikigami/__pycache__/config.cpython-310.pyc
+tasks/ActivityShikigami/__pycache__/assets.cpython-310.pyc
+tasks/ActivityShikigami/__pycache__/config.cpython-310.pyc
+tasks/ActivityShikigami/__pycache__/script_task.cpython-310.pyc

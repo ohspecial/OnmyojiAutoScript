@@ -27,6 +27,15 @@
     "description": "不尽山途"
   },
   {
+    "itemName": "battle_1",
+    "imageName": "as_battle_1.png",
+    "roiFront": "541,663,191,26",
+    "roiBack": "506,622,273,96",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "进入爬塔1"
+  },
+  {
     "itemName": "drum",
     "imageName": "as_drum.png",
     "roiFront": "327,627,145,28",
