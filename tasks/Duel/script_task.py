@@ -241,6 +241,9 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
         logger.hr('Duel start match')
         while 1:
             self.screenshot()
+            # 名士以上禁用
+            if self.appear_then_click(self.I_BAN, interval=1):
+                continue
             if self.appear(self.I_D_AUTO_ENTRY):
                 # 出现自动上阵
                 self.ui_click_until_disappear(self.I_D_AUTO_ENTRY)

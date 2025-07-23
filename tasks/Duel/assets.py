@@ -102,6 +102,8 @@ class DuelAssets:
 	I_GREEN_MARK_1 = RuleImage(roi_front=(124,207,1012,182), roi_back=(124,207,1012,182), threshold=0.6, method="Template matching", file="./tasks/Duel/duel/green_mark_1.png")
 	# 区域点击式神 
 	I_GREEN_MARK_IMG = RuleImage(roi_front=(114,238,1022,188), roi_back=(114,238,1022,188), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/green_mark_img.png")
+	# 禁用 
+	I_BAN = RuleImage(roi_front=(1112,537,100,100), roi_back=(1112,537,100,100), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_ban.png")
 
 
 	# Ocr Rule Assets
