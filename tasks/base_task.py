@@ -29,11 +29,12 @@ from tasks.GlobalGame.assets import GlobalGameAssets
 from tasks.GlobalGame.config_emergency import FriendInvitation, WhenNetworkAbnormal, WhenNetworkError
 from tasks.Component.Costume.costume_base import CostumeBase
 from tasks.Component.config_base import ConfigBase, Time
+from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 
 from module.exception import GameStuckError, ScriptError
 
 
-class BaseTask(GlobalGameAssets, CostumeBase):
+class BaseTask(GlobalGameAssets, CostumeBase,GeneralBattleAssets):
     config: Config = None
     device: Device = None
 
@@ -132,6 +133,10 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         :return:
         """
         self.device.screenshot()
+        # 御魂溢出
+        if self.appear_then_click(self.I_GREED_GHOST):
+            pass
+        
         # 判断勾协
         self._burst()
 
