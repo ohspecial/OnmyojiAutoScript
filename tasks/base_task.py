@@ -134,7 +134,7 @@ class BaseTask(GlobalGameAssets, CostumeBase,GeneralBattleAssets):
         """
         self.device.screenshot()
         # 御魂溢出
-        if self.appear_then_click(self.I_GREED_GHOST):
+        if self.appear_then_click(self.I_OVER_GHOST):
             pass
         
         # 判断勾协
