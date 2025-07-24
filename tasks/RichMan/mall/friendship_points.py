@@ -129,7 +129,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('test')
+    c = Config('zhu')
     d = Device(c)
     t = FriendshipPoints(c, d)
 

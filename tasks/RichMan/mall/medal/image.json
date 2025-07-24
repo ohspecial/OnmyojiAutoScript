@@ -29,8 +29,8 @@
   {
     "itemName": "me_souls",
     "imageName": "medal_me_souls.png",
-    "roiFront": "173,391,148,133",
-    "roiBack": "121,116,898,476",
+    "roiFront": "631,131,129,115",
+    "roiBack": "121,83,898,509",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "随机御魂"
@@ -47,8 +47,8 @@
   {
     "itemName": "me_challenge_pass",
     "imageName": "medal_me_challenge_pass.png",
-    "roiFront": "618,390,146,129",
-    "roiBack": "114,102,914,478",
+    "roiFront": "847,134,145,111",
+    "roiBack": "114,89,925,491",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "御灵挑战券"
