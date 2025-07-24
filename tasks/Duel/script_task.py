@@ -64,22 +64,27 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
                 # 任务执行时间超过限制时间，退出
                 logger.info('Duel task is over time')
                 break
-            if self.appear(self.I_D_CELEB_STAR) or self.appear(self.I_D_CELEB_HONOR):
-                logger.info('You are already a celeb（名仕）')
-                current_score = 3000
-                duel_week_over = True
+            # if self.appear(self.I_D_CELEB_STAR) or self.appear(self.I_D_CELEB_HONOR):
+            #     logger.info('You are already a celeb（名仕）')
+            #     current_score = 3000
+            #     duel_week_over = True
+            #     break
+            if con.honor_full_exit and self.check_honor():
+                # 荣誉满了，退出
+                logger.info('Duel task is over honor')
                 break
             current_score = self.check_score(con.target_score)
-            if not current_score:
-                # 分数够了，退出
-                logger.info('Duel task is over score')
-                break
+            # if not current_score:
+            #     分数够了，退出
+            #     logger.info('Duel task is over score')
+            #     break
             self.duel_one(current_score, con.green_enable, con.green_mark)
 
         # 记得退回去到町中
         self.ui_click(self.I_UI_BACK_YELLOW, self.I_CHECK_TOWN)
         # 调起花合战
         self.set_next_run(task='TalismanPass', target=datetime.now())
+        self.set_next_run(task='Duel', success=True, finish=True)
         raise TaskEnd('Duel')
 
     def duel_main(self, screenshot=False) -> bool:
@@ -225,8 +230,13 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
             self.screenshot()
             # if not self.appear(self.I_D_HELP):
             #     break
+            
+            
             if self.appear(self.I_D_AUTO_ENTRY) or self.appear(self.I_D_PREPARE):
                 break
+            # 名士以上禁用
+            if self.appear_then_click(self.I_BAN, interval=1):
+                continue
             if self.appear_then_click(self.I_BATTLE_TYPE_COMMON, interval=1):
                 continue
             if self.appear_then_click(self.I_D_BATTLE, interval=1):
@@ -241,9 +251,6 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
         logger.hr('Duel start match')
         while 1:
             self.screenshot()
-            # 名士以上禁用
-            if self.appear_then_click(self.I_BAN, interval=1):
-                continue
             if self.appear(self.I_D_AUTO_ENTRY):
                 # 出现自动上阵
                 self.ui_click_until_disappear(self.I_D_AUTO_ENTRY)
