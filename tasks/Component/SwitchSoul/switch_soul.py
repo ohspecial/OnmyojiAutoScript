@@ -184,7 +184,7 @@ class SwitchSoul(BaseTask, SwitchSoulAssets):
         last_group_text = ''
         while 1:
             self.screenshot()
-            compare1 = self.O_SS_GROUP_NAME.detect_and_ocr(self.device.image)
+            compare1 = self.O_SS_GROUP_NAME.ocr_single_line(self.device.image)
             now_group_text = str([result.ocr_text for result in compare1])
             if now_group_text == last_group_text:
                 break
@@ -294,11 +294,11 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('zhu')
     d = Device(c)
     s = SwitchSoul(c, d)
 
     s.click_preset()
     # s.switch_soul_one(4, 1)
     # s.switch_soul_by_name('契灵', '茨球')
-    s.switch_soul_by_name('默认分组', '队伍5')
+    s.switch_soul_by_name('逢魔', '通用')
