@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from module.base.timer import Timer
 from module.logger import logger
 from tasks.Component.GeneralBattle.config_general_battle import GreenMarkType
-from tasks.Component.GeneralBattle.general_battle import GeneralBattle
+from tasks.Component.GeneralBattle.general_battle import GeneralBattle, GeneralBattleAssets
 from tasks.Dokan.utils import retry
 
 
@@ -91,7 +91,7 @@ class GreenMarkState(int, Enum):
     DISAPPEARED = 3
 
 
-class ExtendGreenMark(GeneralBattle):
+class ExtendGreenMark(GeneralBattle, GeneralBattleAssets):
     # 式神名称
     _shikigami_name = ""
     # 绿标检测范围，x,y,w,h
@@ -129,7 +129,7 @@ class ExtendGreenMark(GeneralBattle):
                 return self.detect_name_position(self.device.image, self._shikigami_name)
 
             # 多试几次，避免识别失败
-            self._green_mark_click_roi = retry(detect_name_position_retry, 3)
+            self._green_mark_click_roi = retry(detect_name_position_retry, 5)
 
         #
         self._green_mark_detect_area = self.calc_green_mark_locate_area(self._green_mark_click_roi)
@@ -183,7 +183,7 @@ class ExtendGreenMark(GeneralBattle):
         name_list = names.split(',')
         for name in name_list:
             # 此处为了获取到OCR模型，随机选择一个了RuleOcr对象，可以使用任意的RuleOcr对象
-            res_list = self.O_EXP_50.model.detect_and_ocr(img, 0.7)
+            res_list = self.O_GREEN_MARK_AREA.detect_and_ocr(img, 0.7)
             # 增加日志输出，方便纠错
             output = [item.ocr_text for item in res_list]
             logger.info(f"detect res_list:{output}")
@@ -196,8 +196,8 @@ class ExtendGreenMark(GeneralBattle):
             # 经实验，点击式神名称位置，可能点击不到，故此做一个修正
             offset = [5, 30, -10, 0]
             # x,y,w,h
-            return [box[0, 0] + offset[0], box[0, 1] + offset[1], box[2, 0] - box[0, 0] + offset[2],
-                    box[2, 1] - box[0, 1] + offset[3]]
+            return [box[0][0] + offset[0], box[0][1] + offset[1], box[1][0] - box[0][0] + offset[2],
+                    box[1][1] - box[0][1] + offset[3]]
         return None
 
     def calc_green_mark_locate_area(self, roi, margin=None):

@@ -207,16 +207,17 @@ class ScriptTask(ExtendGreenMark,GameUi, GeneralBattle, DemonEncounterAssets, Sw
                 self.ui_click(self.I_BOSS_NO_SELECT, self.I_BOSS_SELECTED)
                 self.ui_click(self.I_BOSS_CONFIRM, self.I_BOSS_GATHER)
                 break
-            if self.appear(self.I_BOSS_GATHER):
-                # 更换预设队伍，周一不更换预设队伍
-                if self.config.demon_encounter.general_demon_config.switch_preset_enable and today != 0:
-                    # 点击进入预设队伍界面
-                    self.appear_then_click(self.I_BOSS_GATHER)
+            # 更换队伍没做好
+            # if self.appear(self.I_BOSS_GATHER):
+            #     # 更换预设队伍，周一不更换预设队伍
+            #     if self.config.demon_encounter.general_demon_config.switch_preset_enable and today != 0:
+            #         # 点击进入预设队伍界面
+            #         self.appear_then_click(self.I_BOSS_GATHER)
                     
-                    if group and team:
-                        self.switch_preset_team_by_name(group, team)
+            #         if group and team:
+            #             self.switch_preset_team_by_name(group, team)
                     
-                break
+            #     break
                 
             if boss_fire_count >= 5:
                 logger.warning('Boss battle already done')
@@ -670,7 +671,7 @@ class ScriptTask(ExtendGreenMark,GameUi, GeneralBattle, DemonEncounterAssets, Sw
         # 绿标区域初始化标识，只初始化一次绿标区域
         need_init_green_mark_area = demon_config.green_enable
         
-        
+        screenshot = self.screenshot()
         # 点击准备按钮
         self.wait_until_appear(self.I_PREPARE_HIGHLIGHT)
         self.wait_until_appear(self.I_BUFF)
@@ -764,4 +765,4 @@ if __name__ == '__main__':
     d = Device(c)
     t = ScriptTask(c, d)
 
-    t.run()
+    t.boss_battle()

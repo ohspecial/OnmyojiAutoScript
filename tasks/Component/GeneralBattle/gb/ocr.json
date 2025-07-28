@@ -16,5 +16,14 @@
     "method": "Default",
     "keyword": "预",
     "description": "预设,部分场景预设按钮上的文字为'预设'+数字,导致点击preset失败"
+  },
+  {
+    "itemName": "green_mark_area",
+    "roiFront": "1,345,1277,284",
+    "roiBack": "1,345,1277,284",
+    "mode": "Full",
+    "method": "Default",
+    "keyword": "",
+    "description": "初始化区域"
   }
 ]
