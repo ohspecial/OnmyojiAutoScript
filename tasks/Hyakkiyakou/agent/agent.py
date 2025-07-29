@@ -103,7 +103,8 @@ class Agent:
                 case CI.BUFF_005:  # freeze
                     weight = -1.
                     _cy += 100
-                case _: continue
+                    # 如果都不是以上的，默认按新式神处理，权重最高
+                case _: weight = 1.5 * weights[0]
             for priority in priorities:  # 我的代码在你之上
                 if priority == _class:
                     weight = 1.7
