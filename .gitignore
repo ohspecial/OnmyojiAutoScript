@@ -276,3 +276,6 @@ tasks/ActivityShikigami/__pycache__/config.cpython-310.pyc
 tasks/ActivityShikigami/__pycache__/assets.cpython-310.pyc
 tasks/ActivityShikigami/__pycache__/config.cpython-310.pyc
 tasks/ActivityShikigami/__pycache__/script_task.cpython-310.pyc
+module/gui/qml_rc.py
+module/gui/res_rc.py
+**.pyc
