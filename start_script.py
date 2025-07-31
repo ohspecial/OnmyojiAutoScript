@@ -9,7 +9,7 @@ import time
 def start_websocket(config_name):
 
     # 日志配置部分保持不变...
-    log_dir = rf"F:\OnmyojiAutoScript-easy-install\oyj\log"
+    log_dir = rf"F:\OnmyojiAutoScript-easy-install\oyj"
 
     # 配置日志：通过 handlers 实现文件+控制台输出
     file_handler = logging.FileHandler(os.path.join(log_dir, f"log_{config_name}.log"))
@@ -42,11 +42,11 @@ def start_websocket(config_name):
 
 
 if __name__ == "__main__":
-    # argv = ["", "zhu"]
+    argv = ["", "zhu"]
     # 保证通过命令行运行时传入参数，例如：python script.py MI
 
     config_name = sys.argv[1]
-
+    # config_name = argv[1]
     print(f'[{config_name}]启动...')
     start_websocket(config_name)
 
