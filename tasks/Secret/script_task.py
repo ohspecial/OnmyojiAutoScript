@@ -147,7 +147,6 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
         自动寻找挑战的层数并且选定 , 找不到会向下划一点
         :return: 如果找得到返回层数，找不到返回None
         """
-
         def set_layer_roi(ocr_target: RuleOcr, roi: tuple):
             ocr_target.roi[0] = int(roi[0]) - 225
             ocr_target.roi[1] = int(roi[1]) - 40
@@ -180,7 +179,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
             :param roi:
             :return:
             """
-            ocr_target.roi[0] = int(roi[0]) - 118
+            # 调整识别范围
+            ocr_target.roi[0] = int(roi[0]) - 115
             ocr_target.roi[1] = int(roi[1]) + 37
             # print(f'检测到的未通过ROI: {roi}')
             # print(f'检测到的勾玉数量ROI: {ocr_target.roi}')
