@@ -64,11 +64,12 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
                 # 任务执行时间超过限制时间，退出
                 logger.info('Duel task is over time')
                 break
-            # if self.appear(self.I_D_CELEB_STAR) or self.appear(self.I_D_CELEB_HONOR):
-            #     logger.info('You are already a celeb（名仕）')
-            #     current_score = 3000
-            #     duel_week_over = True
-            #     break
+            if self.appear(self.I_D_CELEB_STAR) or self.appear(self.I_D_CELEB_HONOR):
+                logger.info('You are already a celeb（名仕）')
+                # 如果当前时间不在斗技名仕时间，退出 
+                if not (time(12) <= datetime.now().time() <= time(14) or time(20) <= datetime.now().time() <= time(22)):
+                    logger.info('Duel task is over celeb time')
+                    break
             if con.honor_full_exit and self.check_honor():
                 # 荣誉满了，退出
                 logger.info('Duel task is over honor')
