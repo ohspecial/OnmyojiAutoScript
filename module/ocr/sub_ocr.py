@@ -74,19 +74,19 @@ class Single(BaseCor):
         :return: 返回到识别的文字, 如果没有返回空字符串
         """
         if self.roi:
-            result = self.ocr_single_line(image)
-            if result != "":
+            result, score = self.model.ocr_single_line(image)
+            if result != "" and score > 0.8:
                 return result
+            else:
+                # 如果没有识别到，这个时候考虑到可能是竖方向的文本, 使用detect_and_ocr来进行识别
+                logger.info(f"[{self.name}] Try to detect vertically")
+                result = self.detect_and_ocr(image)
 
-            # 如果没有识别到，这个时候考虑到可能是竖方向的文本, 使用detect_and_ocr来进行识别
-            logger.info(f"[{self.name}] Try to detect vertically")
-            result = self.detect_and_ocr(image)
-
-            if not result:
-                logger.info(f"[{self.name}]: No text detected in ROI")
-                return ""
-            if result[0].ocr_text != "" and result[0].score > self.score:
-                return result[0].ocr_text
+                if not result:
+                    logger.info(f"[{self.name}]: No text detected in ROI")
+                    return ""
+                if result[0].ocr_text != "" and result[0].score > self.score:
+                    return result[0].ocr_text
 
             # 如果还是没有识别到。那可能就是真的没有识别到了
             return ""
