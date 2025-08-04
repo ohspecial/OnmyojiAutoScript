@@ -147,7 +147,6 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
         自动寻找挑战的层数并且选定 , 找不到会向下划一点
         :return: 如果找得到返回层数，找不到返回None
         """
-
         def set_layer_roi(ocr_target: RuleOcr, roi: tuple):
             ocr_target.roi[0] = int(roi[0]) - 225
             ocr_target.roi[1] = int(roi[1]) - 40
@@ -180,11 +179,14 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
             :param roi:
             :return:
             """
-            ocr_target.roi[0] = int(roi[0]) - 118
+            # 调整识别范围
+            ocr_target.roi[0] = int(roi[0]) - 116
             ocr_target.roi[1] = int(roi[1]) + 37
+            x, y, w, h = ocr_target.roi
+            roi_image = self.device.image[y:y+h, x:x+w]
             # print(f'检测到的未通过ROI: {roi}')
             # print(f'检测到的勾玉数量ROI: {ocr_target.roi}')
-            jade_num = ocr_target.ocr(self.device.image)
+            jade_num = ocr_target.ocr(roi_image)
             if isinstance(jade_num, str):
                 logger.warning(f'OCR failed, try again {jade_num}')
                 return None
@@ -297,10 +299,11 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('zhu')
+    c = Config('xiaohao')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()
 
-    t.run()
-    # t.find_battle(False)
+    # t.run()
+    t.find_battle(False)
+

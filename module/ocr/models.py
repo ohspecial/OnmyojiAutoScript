@@ -26,14 +26,14 @@ if __name__ == "__main__":
     import cv2
     import time
     from memory_profiler import profile
-    image = cv2.imread(r"d:\2025-07-17_12-52-22-184354.png")
+    image = cv2.imread(r"F:\OnmyojiAutoScript-easy-install\O_SE_JADE.png")
 
     # 引入ocr 会导致非常巨大的内存开销
-    @profile
+    # @profile
     def test_memory():
         for i in range(2):
             start_time = time.time()
-            result = model.ocr(image)
+            result = model.ocr_single_line(image)
             print(result)
             end_time = time.time()
             print(f'耗时：{end_time-start_time}')
