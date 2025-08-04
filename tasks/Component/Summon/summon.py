@@ -41,11 +41,10 @@ class Summon(BaseTask, SummonAssets):
         self.wait_until_appear(self.I_BLUE_TICKET)
         while True:
             ticket_info = self.O_ONE_TICKET.ocr(self.device.image)
+            logger.info(f'One ticket info: {ticket_info}')
             # 处理 None 和空字符串
             if ticket_info is None or ticket_info == '':
                 ticket_info = 0
-            elif isinstance(ticket_info, list):
-                ticket_info = ticket_info[1]
             else:
                 # 使用正则表达式提取字符串中的数字   ['免费', '21/20']   
                 match = re.search(r'\d+', ticket_info)

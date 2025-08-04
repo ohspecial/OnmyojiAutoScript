@@ -81,15 +81,16 @@ class Single(BaseCor):
                 # 如果没有识别到，这个时候考虑到可能是竖方向的文本, 使用detect_and_ocr来进行识别
                 logger.info(f"[{self.name}] Try to detect vertically")
                 result = self.detect_and_ocr(image)
-
                 if not result:
                     logger.info(f"[{self.name}]: No text detected in ROI")
                     return ""
-                if result[0].ocr_text != "" and result[0].score > self.score:
-                    return result[0].ocr_text
-
+                # 当识别结果有多个时，进行拼接返回
+                res = ""
+                for i in range(len(result)):
+                    if result[i].ocr_text != "" and result[i].score > self.score:
+                        res =  res.join(result[i].ocr_text)
             # 如果还是没有识别到。那可能就是真的没有识别到了
-            return ""
+            return res
         else:
             raise ScriptError("Roi is empty")
 
