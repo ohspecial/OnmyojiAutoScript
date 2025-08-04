@@ -88,7 +88,7 @@ class Single(BaseCor):
                 res = ""
                 for i in range(len(result)):
                     if result[i].ocr_text != "" and result[i].score > self.score:
-                        res =  res.join(result[i].ocr_text)
+                        res =  res.join(str(result[i].ocr_text))
             # 如果还是没有识别到。那可能就是真的没有识别到了
             return res
         else:
