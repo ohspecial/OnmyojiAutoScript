@@ -132,7 +132,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('zhu')
+    c = Config('xiaohao')
     d = Device(c)
     t = Guild(c, d)
 

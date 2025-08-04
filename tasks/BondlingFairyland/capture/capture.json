@@ -2,8 +2,8 @@
   {
     "itemName": "tomb_guard",
     "imageName": "capture_tomb_guard.png",
-    "roiFront": "847,518,30,31",
-    "roiBack": "832,501,64,60",
+    "roiFront": "292,278,29,97",
+    "roiBack": "292,278,29,97",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "镇墓兽"

@@ -29,8 +29,8 @@
   {
     "itemName": "guild_blue",
     "imageName": "guild_guild_blue.png",
-    "roiFront": "794,186,74,73",
-    "roiBack": "262,128,702,460",
+    "roiFront": "344,184,74,73",
+    "roiBack": "262,128,712,467",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "蓝票"
@@ -38,8 +38,8 @@
   {
     "itemName": "guild_scrap",
     "imageName": "guild_guild_scrap.png",
-    "roiFront": "570,439,71,68",
-    "roiBack": "331,160,559,372",
+    "roiFront": "795,230,71,68",
+    "roiBack": "331,160,589,407",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "黑蛋碎片"
@@ -47,8 +47,8 @@
   {
     "itemName": "guild_skin",
     "imageName": "guild_guild_skin.png",
-    "roiFront": "795,438,71,72",
-    "roiBack": "282,129,677,468",
+    "roiFront": "609,447,71,72",
+    "roiBack": "265,126,681,477",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "皮肤券"
@@ -56,8 +56,8 @@
   {
     "itemName": "guild_skin_check",
     "imageName": "guild_guild_skin_check.png",
-    "roiFront": "795,438,71,72",
-    "roiBack": "272,123,661,467",
+    "roiFront": "343,436,74,75",
+    "roiBack": "343,436,74,75",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "皮肤券判断是否到末端"
@@ -65,8 +65,8 @@
   {
     "itemName": "guild_check_scrap",
     "imageName": "guild_guild_check_scrap.png",
-    "roiFront": "536,431,90,88",
-    "roiBack": "257,126,698,469",
+    "roiFront": "594,248,87,84",
+    "roiBack": "594,248,87,84",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "购买检查"

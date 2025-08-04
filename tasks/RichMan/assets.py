@@ -18,15 +18,15 @@ class RichManAssets:
 	# description 
 	I_GUILD_CLOSE_RED = RuleImage(roi_front=(1029,120,53,57), roi_back=(1029,120,53,57), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_close_red.png")
 	# 蓝票 
-	I_GUILD_BLUE = RuleImage(roi_front=(794,186,74,73), roi_back=(262,128,702,460), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_blue.png")
+	I_GUILD_BLUE = RuleImage(roi_front=(344,184,74,73), roi_back=(262,128,712,467), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_blue.png")
 	# 黑蛋碎片 
-	I_GUILD_SCRAP = RuleImage(roi_front=(570,439,71,68), roi_back=(331,160,559,372), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_scrap.png")
+	I_GUILD_SCRAP = RuleImage(roi_front=(795,230,71,68), roi_back=(331,160,589,407), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_scrap.png")
 	# 皮肤券 
-	I_GUILD_SKIN = RuleImage(roi_front=(795,438,71,72), roi_back=(282,129,677,468), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin.png")
+	I_GUILD_SKIN = RuleImage(roi_front=(609,447,71,72), roi_back=(265,126,681,477), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin.png")
 	# 皮肤券判断是否到末端 
-	I_GUILD_SKIN_CHECK = RuleImage(roi_front=(795,438,71,72), roi_back=(272,123,661,467), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin_check.png")
+	I_GUILD_SKIN_CHECK = RuleImage(roi_front=(343,436,74,75), roi_back=(343,436,74,75), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin_check.png")
 	# 购买检查 
-	I_GUILD_CHECK_SCRAP = RuleImage(roi_front=(536,431,90,88), roi_back=(257,126,698,469), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_check_scrap.png")
+	I_GUILD_CHECK_SCRAP = RuleImage(roi_front=(594,248,87,84), roi_back=(594,248,87,84), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_check_scrap.png")
 
 
 	# Ocr Rule Assets
