@@ -64,11 +64,11 @@ class GeneralBattleAssets:
 	C_GREEN_MARK_AREA = RuleClick(roi_front=(0,0,1280,720), roi_back=(0,0,1280,720), name="green_mark_area")
 	# 战斗的时候有一定的概率随机点击 
 	C_RANDOM_CLICK = RuleClick(roi_front=(104,79,1050,507), roi_back=(255,65,100,100), name="random_click")
+	# 红标BOSS 
+	C_RED_BOSS = RuleClick(roi_front=(382,14,48,40), roi_back=(382,14,48,40), name="red_boss")
 
 
 	# Image Rule Assets
-	# 御魂溢出 
-	I_OVER_GHOST = RuleImage(roi_front=(609,410,65,28), roi_back=(609,410,65,28), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_over_ghost.png")
 	# 奖励，就是那个魂 
 	I_REWARD = RuleImage(roi_front=(547,518,172,96), roi_back=(547,518,172,96), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_reward.png")
 	# 预设的小图标 
@@ -135,6 +135,8 @@ class GeneralBattleAssets:
 	I_GREEN_MARKER_BOTTOM = RuleImage(roi_front=(0,0,1280,720), roi_back=(0,0,1280,720), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_green_marker_bottom.png")
 	# 新版本的预设图案带数字 
 	I_PRESET_WIT_NUMBER = RuleImage(roi_front=(40,655,37,37), roi_back=(9,636,100,74), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_preset_wit_number.png")
+	# 御魂溢出 
+	I_OVER_GHOST = RuleImage(roi_front=(609,410,65,28), roi_back=(609,410,65,28), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_over_ghost.png")
 
 
 	# Image Rule Assets

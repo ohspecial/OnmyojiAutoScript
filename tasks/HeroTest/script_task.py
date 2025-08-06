@@ -15,7 +15,7 @@ from module.logger import logger
 from module.exception import TaskEnd
 
 
-class ScriptTask(GameUi, BaseActivity, HeroTestAssets,SwitchSoul):
+class ScriptTask(GameUi, BaseActivity, HeroTestAssets, SwitchSoul):
 
     is_update = False
     is_skill = False
@@ -337,7 +337,7 @@ if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config("oas1")
+    c = Config("xiaohao")
     d = Device(c)
     t = ScriptTask(c, d)
 

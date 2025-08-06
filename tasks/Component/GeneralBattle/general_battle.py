@@ -7,6 +7,7 @@ from time import sleep
 
 import cv2
 
+from module.base.timer import Timer
 from module.base.utils import get_color, color_similar
 from tasks.base_task import BaseTask
 from tasks.Component.GeneralBattle.config_general_battle import GreenMarkType, GeneralBattleConfig
@@ -64,8 +65,13 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
 
         # 绿标
         self.wait_until_disappear(self.I_BUFF)
+        
         if self.is_in_battle(False):
             self.green_mark(config.green_enable, config.green_mark)
+        # 红标 无反馈，待测试优化
+        if config.red_mark:
+            self.wait_until_stable(self.I_FRIENDS,timeout=Timer(5, count=3))
+            self.click(self.C_RED_BOSS)
 
         win = self.battle_wait(config.random_click_swipt_enable)
         if win:
@@ -422,14 +428,17 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         判断是否在战斗中
         :return:
         """
+        # 等待出现战斗开始
         if is_screenshot:
             self.screenshot()
         if self.appear(self.I_FRIENDS) or \
                 self.appear(self.I_WIN) or \
                 self.appear(self.I_FALSE) or \
                 self.appear(self.I_REWARD):
+            logger.info("is in battle")
             return True
         else:
+            logger.info("is not in battle")
             return False
 
     def is_in_prepare(self, is_screenshot: bool = True) -> bool:
