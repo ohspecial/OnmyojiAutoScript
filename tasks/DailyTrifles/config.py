@@ -27,7 +27,7 @@ class DailyTriflesConfig(BaseModel):
     # 每天购买体力数量
     buy_sushi_count: int = Field(title='Buy Sushi Count', default=-1)
 
-    hide_fields = dynamic_hide('draw_mystery_pattern')
+    # hide_fields = dynamic_hide('draw_mystery_pattern')
 
 
 class DailyTrifles(ConfigBase):
