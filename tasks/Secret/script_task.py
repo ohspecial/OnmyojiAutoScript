@@ -179,11 +179,13 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
             :param roi:
             :return:
             """
+            # import cv2
             # 调整识别范围
-            ocr_target.roi[0] = int(roi[0]) - 116
+            ocr_target.roi[0] = int(roi[0]) - 115
             ocr_target.roi[1] = int(roi[1]) + 37
             x, y, w, h = ocr_target.roi
             roi_image = self.device.image[y:y+h, x:x+w]
+            # cv2.imwrite('layer.png', roi_image)
             # print(f'检测到的未通过ROI: {roi}')
             # print(f'检测到的勾玉数量ROI: {ocr_target.roi}')
             jade_num = ocr_target.ocr(roi_image)
@@ -222,8 +224,10 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
             if layer:
                 self.C_SE_CLICK_LAYER.roi_front = text_pos
                 self.click(self.C_SE_CLICK_LAYER, interval=1)
+                print(f'确认层数: {layer}')
                 return layer
             else:
+                print(f'确认层数: {layer}')
                 return None
 
         else:
@@ -299,7 +303,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('xiaohao')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()
