@@ -27,6 +27,10 @@ class RichManAssets:
 	I_GUILD_SKIN_CHECK = RuleImage(roi_front=(343,436,74,75), roi_back=(343,436,74,75), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin_check.png")
 	# 购买检查 
 	I_GUILD_CHECK_SCRAP = RuleImage(roi_front=(594,248,87,84), roi_back=(594,248,87,84), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_check_scrap.png")
+	# 六星御魂 
+	I_GUILD_SOUL = RuleImage(roi_front=(343,186,71,69), roi_back=(243,133,719,489), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_soul.png")
+	# 六星御魂检测 
+	I_GUILD_CHECK_SOUL = RuleImage(roi_front=(593,217,89,88), roi_back=(593,217,89,88), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_check_soul.png")
 
 
 	# Ocr Rule Assets

@@ -46,6 +46,9 @@ class Guild(Buy, GameUi, RichManAssets):
         if con.mystery_amulet:
             # 蓝票
             self._guild_mystery_amulet()
+        if con.soul:
+            # 六星御魂
+            self._gulid_soul()
         if con.black_daruma_scrap:
             # 黑碎
             self._guild_black_daruma_scrap()
@@ -74,6 +77,20 @@ class Guild(Buy, GameUi, RichManAssets):
             logger.warning('No mystery amulet can buy')
             return False
         self.buy_more(self.I_GUILD_BLUE, number)
+        time.sleep(0.5)
+        return True
+
+    def _gulid_soul(self):
+        # 六星御魂
+        logger.hr('Guild soul', 2)
+        self.screenshot()
+        if not self.buy_check_money(self.O_GUILD_TOTAL, 400):
+            return False
+        number = self.check_remain(self.I_GUILD_SOUL)
+        if number == 0:
+            logger.warning('No soul can buy')
+            return False
+        self.buy_more(self.I_GUILD_SOUL, number)
         time.sleep(0.5)
         return True
 

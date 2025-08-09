@@ -89,6 +89,7 @@ class GuildStore(BaseModel):
     # 寮商店
     enable: bool = Field(title='Enable', default=False)
     mystery_amulet: bool = Field(title='Mystery Amulet', default=False)
+    soul: bool = Field(title='Soul', default=False)
     black_daruma_scrap: bool = Field(title='Black Daruma Scrap', default=False)
     skin_ticket: int = Field(title='Skin Ticket', default=0, description='skin_ticket_help')
 
