@@ -48,7 +48,7 @@ class Guild(Buy, GameUi, RichManAssets):
             self._guild_mystery_amulet()
         if con.soul:
             # 六星御魂
-            self._gulid_soul()
+            self._gulid_soul(con.skin_ticket)
         if con.black_daruma_scrap:
             # 黑碎
             self._guild_black_daruma_scrap()
@@ -72,6 +72,10 @@ class Guild(Buy, GameUi, RichManAssets):
         self.screenshot()
         if not self.buy_check_money(self.O_GUILD_TOTAL, 240):
             return False
+        result = self.I_GUILD_BLUE.match(self.device.image)
+        if not result:
+            logger.warning('No blue ticket')
+            return False
         number = self.check_remain(self.I_GUILD_BLUE)
         if number == 0:
             logger.warning('No mystery amulet can buy')
@@ -80,16 +84,25 @@ class Guild(Buy, GameUi, RichManAssets):
         time.sleep(0.5)
         return True
 
-    def _gulid_soul(self):
+    def _gulid_soul(self, num: int = 0):
         # 六星御魂
         logger.hr('Guild soul', 2)
         self.screenshot()
-        if not self.buy_check_money(self.O_GUILD_TOTAL, 400):
+        if num == 0:
+            logger.warning('No buy soul')
             return False
+        result = self.I_GUILD_SOUL.match(self.device.image)
+        if not result:
+            logger.warning('No soul')
+            return False
+        if not self.buy_check_money(self.O_GUILD_TOTAL, 200):
+            return False
+        # 检查功勋商店皮肤券 本周剩余数量
         number = self.check_remain(self.I_GUILD_SOUL)
         if number == 0:
             logger.warning('No soul can buy')
             return False
+        # 购买功勋商店皮肤券
         self.buy_more(self.I_GUILD_SOUL, number)
         time.sleep(0.5)
         return True
@@ -99,6 +112,10 @@ class Guild(Buy, GameUi, RichManAssets):
         logger.hr('Guild black daruma scrap', 2)
         self.screenshot()
         if not self.buy_check_money(self.O_GUILD_TOTAL, 200):
+            return False
+        result = self.I_GUILD_SCRAP.match(self.device.image)
+        if not result:
+            logger.warning('No black daruma scrap')
             return False
         number = self.check_remain(self.I_GUILD_SCRAP)
         if number == 0:
@@ -118,6 +135,10 @@ class Guild(Buy, GameUi, RichManAssets):
         if not self.buy_check_money(self.O_GUILD_TOTAL, 50):
             return False
         # 检查功勋商店皮肤券 本周剩余数量
+        result = self.I_GUILD_SKIN.match(self.device.image)
+        if not result:
+            logger.warning('No skin ticket')
+            return False
         number = self.check_remain(self.I_GUILD_SKIN)
         if number == 0:
             logger.warning('No skin ticket can buy')
