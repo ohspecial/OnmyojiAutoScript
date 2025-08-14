@@ -84,7 +84,6 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
         # 记得退回去到町中
         self.ui_click(self.I_UI_BACK_YELLOW, self.I_CHECK_TOWN)
         # 调起花合战
-        self.set_next_run(task='TalismanPass', target=datetime.now())
         self.set_next_run(task='Duel', success=True, finish=True)
         raise TaskEnd('Duel')
 
@@ -278,8 +277,11 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
                 logger.info('Duel battle win')
                 self.ui_click_until_disappear(self.I_D_VICTORY)
                 return True
-        # 绿标
-        self.green_mark(enable, mark_mode)
+        # 绿标  先模板匹配找绿标名字，找不到则点击位置
+        if enable:
+            # 点击绿标，现在能标上绿标，但是不一定能识别到，所以不点击位置了，会导致报错重启
+            self.duel_green_mark_by_template(mark_mode)
+            
         # 等待结果
         logger.info('Duel wait result')
         self.device.stuck_record_add('BATTLE_STATUS_S')
@@ -330,7 +332,110 @@ class ScriptTask(GameUi, GeneralBattle, DuelAssets):
                 self.device.stuck_record_add('BATTLE_STATUS_S')
         return battle_win
 
+    def duel_green_mark_by_template(self, mark_mode: GreenMarkType = GreenMarkType.GREEN_MAIN) -> bool:
+        match mark_mode:
+            case GreenMarkType.GREEN_LEFT1:
+                target = self.I_GREEN_MARK_IMG1
+                logger.info("Green left 1")
+            case GreenMarkType.GREEN_LEFT2:
+                target = self.I_GREEN_MARK_IMG2
+                logger.info("Green left 2")
+            case GreenMarkType.GREEN_LEFT3:
+                target = self.I_GREEN_MARK_IMG3
+                logger.info("Green left 3")
+            case GreenMarkType.GREEN_LEFT4:
+                target = self.I_GREEN_MARK_IMG4
+                logger.info("Green left 4")
+            case GreenMarkType.GREEN_LEFT5:
+                target = self.I_GREEN_MARK_IMG5
+                logger.info("Green left 5")
+            case GreenMarkType.GREEN_MAIN:
+                return
 
+        logger.info('------进行图片匹配识别绿标位置------')
+        # 点击绿标
+        mark_timer = Timer(5)
+        mark_timer.start()
+        while 1:
+            if mark_timer.reached():
+                logger.info('Duel green mark timeout, dont appear I_GREEN_MARK_IMG')
+                return False
+            self.screenshot()
+            if self.appear(target, interval=0.5):
+                new_roi_front = (target.roi_front[0],
+                                 target.roi_front[1] + 60,
+                                 10,
+                                 100)
+                self.C_DUEL_GREEN_LEFT_FULL.roi_front = new_roi_front
+                logger.info(f'old Image roi {target.roi_front}')
+                logger.info(f'new Image roi {self.C_DUEL_GREEN_LEFT_FULL.roi_front}')
+                break
+        # 点击绿标
+        mark_timer = Timer(5)
+        mark_timer.start()
+        while 1:
+            if mark_timer.reached():
+                logger.info('Duel green mark timeout')
+                return False
+            self.screenshot()
+            if self.I_GREEN_MARK.match(self.device.image):
+                logger.info("识别到绿标,返回")
+                return True
+            
+            self.click(self.C_DUEL_GREEN_LEFT_FULL, interval=4)
+
+    def duel_green_mark_by_region(self, mark_mode: GreenMarkType = GreenMarkType.GREEN_MAIN):
+        """
+        绿标， 如果不使能就直接返回
+        :param enable:
+        :param mark_mode:
+        :return:
+        """
+        logger.info('------进行区域点击识别绿标位置------')
+        if self.wait_until_appear(self.I_GREEN_MARK, wait_time=1):
+            # logger.info("识别到绿标，返回")
+            return
+        # logger.info("Green is enable")
+        x, y = None, None
+        match mark_mode:
+            case GreenMarkType.GREEN_LEFT1:
+                x, y = self.C_DUEL_GREEN_LEFT_1.coord()
+                logger.info("Green left 1")
+            case GreenMarkType.GREEN_LEFT2:
+                x, y = self.C_GREEN_LEFT_2.coord()
+                logger.info("Green left 2")
+            case GreenMarkType.GREEN_LEFT3:
+                x, y = self.C_GREEN_LEFT_3.coord()
+                logger.info("Green left 3")
+            case GreenMarkType.GREEN_LEFT4:
+                x, y = self.C_GREEN_LEFT_4.coord()
+                logger.info("Green left 4")
+            case GreenMarkType.GREEN_LEFT5:
+                x, y = self.C_DUEL_GREEN_LEFT_5.coord()
+                logger.info("Green left 5")
+            case GreenMarkType.GREEN_MAIN:
+                x, y = self.C_GREEN_MAIN.coord()
+                logger.info("Green main")
+
+        # 等待那个准备的消失
+        while 1:
+            self.screenshot()
+            if not self.appear(self.I_PREPARE_HIGHLIGHT):
+                break
+
+        # 点击绿标 ，增加斗技点击次数
+        mark_timer = Timer(5)
+        mark_timer.start()
+        while 1:
+            self.screenshot()
+            if self.I_GREEN_MARK.match(self.device.image):
+                logger.info("匹配识别到绿标,返回")
+                break
+            if mark_timer.reached():
+                # logger.warning("识别绿标超时,返回")
+                break
+            # 点击绿标
+            self.device.click(x, y)
 
 
 if __name__ == '__main__':
