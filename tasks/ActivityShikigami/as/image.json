@@ -2,7 +2,7 @@
   {
     "itemName": "shi",
     "imageName": "as_shi.png",
-    "roiFront": "1183,241,47,38",
+    "roiFront": "1188,172,39,30",
     "roiBack": "1164,134,83,318",
     "method": "Template matching",
     "threshold": 0.7,
@@ -47,8 +47,8 @@
   {
     "itemName": "lock",
     "imageName": "as_lock.png",
-    "roiFront": "877,647,25,26",
-    "roiBack": "761,613,255,76",
+    "roiFront": "907,658,25,26",
+    "roiBack": "761,613,266,93",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "上锁图标"
@@ -56,8 +56,8 @@
   {
     "itemName": "unlock",
     "imageName": "as_unlock.png",
-    "roiFront": "875,647,28,25",
-    "roiBack": "758,607,242,85",
+    "roiFront": "908,659,28,25",
+    "roiBack": "758,607,257,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "还未上锁图片"
