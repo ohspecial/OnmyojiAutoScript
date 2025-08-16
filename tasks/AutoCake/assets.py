@@ -24,5 +24,9 @@ class AutoCakeAssets:
 	I_IS_OVER = RuleImage(roi_front=(706,254,69,64), roi_back=(706,254,69,64), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_is_over.png")
 	# 已关闭樱饼 
 	I_IS_CLOSE = RuleImage(roi_front=(970,663,22,21), roi_back=(970,663,22,21), threshold=0.6, method="Template matching", file="./tasks/AutoCake/res/res_is_close.png")
+	# 上锁 
+	I_LOCK = RuleImage(roi_front=(912,657,21,25), roi_back=(658,588,437,127), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_lock.png")
+	# 未上锁 
+	I_UNLOCK = RuleImage(roi_front=(909,661,22,21), roi_back=(774,619,330,100), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_unlock.png")
 
 

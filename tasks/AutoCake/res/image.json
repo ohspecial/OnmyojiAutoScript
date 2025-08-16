@@ -34,5 +34,23 @@
     "method": "Template matching",
     "threshold": 0.6,
     "description": "已关闭樱饼"
+  },
+  {
+    "itemName": "lock",
+    "imageName": "res_lock.png",
+    "roiFront": "912,657,21,25",
+    "roiBack": "658,588,437,127",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "上锁"
+  },
+  {
+    "itemName": "unlock",
+    "imageName": "res_unlock.png",
+    "roiFront": "909,661,22,21",
+    "roiBack": "774,619,330,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "未上锁"
   }
 ]

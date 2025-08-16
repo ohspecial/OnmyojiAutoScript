@@ -25,7 +25,7 @@ import time
 """ 活动通用 """
 
 
-class ScriptTask(GameUi, SwitchSoul, GeneralBattle , ActivityShikigamiAssets ,AutoCakeAssets):
+class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShikigamiAssets):
     def run(self) -> None:
         self.start_time = datetime.now()
         config = self.config.auto_cake
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('zhu')
+    c = Config('xiaohao')
     d = Device(c)
     t = ScriptTask(c, d)
 
