@@ -118,6 +118,8 @@ class Digit(Single):
         :return:
         """
         result = self.ocr_single(image)
+        # 去除非数字
+        result = re.sub(r'[^\d.]', '', result)
 
         if result == "":
             return 0
