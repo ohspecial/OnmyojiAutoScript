@@ -72,7 +72,8 @@ class Guild(Buy, GameUi, RichManAssets):
         self.screenshot()
         if not self.buy_check_money(self.O_GUILD_TOTAL, 240):
             return False
-        result = self.I_GUILD_BLUE.match(self.device.image)
+        # 判断不出来蓝票的位置, 降低阈值
+        result = self.I_GUILD_BLUE.match(self.device.image, threshold=0.6)
         if not result:
             logger.warning('No blue ticket')
             return False
@@ -170,7 +171,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('xiaohao')
+    c = Config('zhu')
     d = Device(c)
     t = Guild(c, d)
 
