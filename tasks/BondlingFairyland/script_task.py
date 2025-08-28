@@ -37,24 +37,24 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
     current_ball_index = 5
     def run(self):
 
-        logger.hr('第一步, 检查契忆数量', 2)
-        self.ui_get_current_page()
-        self.ui_goto(page_mall, confirm_wait=2.5)
-        self.ui_click(self.I_MALL_SCCALES, self.I_MALL_SCCALES_CHECK)
-        self.ui_click(self.I_MALL_BONDLINGS_SURE, self.I_MALL_BONDLINGS_ON)
+        # logger.hr('第一步, 检查契忆数量', 2)
+        # self.ui_get_current_page()
+        # self.ui_goto(page_mall, confirm_wait=2.5)
+        # self.ui_click(self.I_MALL_SCCALES, self.I_MALL_SCCALES_CHECK)
+        # self.ui_click(self.I_MALL_BONDLINGS_SURE, self.I_MALL_BONDLINGS_ON)
 
-        MAX_COUNT = 2000
-        cu, re, total = self.O_BL_CHECK_MONEY.ocr(self.device.image)
+        # MAX_COUNT = 2000
+        # cu, re, total = self.O_BL_CHECK_MONEY.ocr(self.device.image)
 
-        if cu >= MAX_COUNT:
-            message = f'契忆数量: {cu} 大于 {MAX_COUNT}'
-            self.ui_get_current_page()
-            self.ui_goto(page_main)
-            logger.warning(message)
-            self.set_next_run(target='BondlingFairyland', finish=True, success=True)
-            raise TaskEnd
+        # if cu >= MAX_COUNT:
+        #     message = f'契忆数量: {cu} 大于 {MAX_COUNT}'
+        #     self.ui_get_current_page()
+        #     self.ui_goto(page_main)
+        #     logger.warning(message)
+        #     self.set_next_run(target='BondlingFairyland', finish=True, success=True)
+        #     raise TaskEnd
 
-        message = f'契忆数量: {cu} 小于 {MAX_COUNT}, 继续任务'
+        # message = f'契忆数量: {cu} 小于 {MAX_COUNT}, 继续任务'
         logger.hr('第二步, 切换御魂', 2)
         # 引用配置
         cong = self.config.bondling_fairyland
@@ -855,7 +855,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    config = Config('zhu')
+    config = Config('xiaohao')
     device = Device(config)
     task = ScriptTask(config, device)
     # image = task.screenshot()
