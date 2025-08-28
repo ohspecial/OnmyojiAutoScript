@@ -115,5 +115,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "ui_buy_success",
+    "imageName": "ui_ui_buy_success.png",
+    "roiFront": "509,60,258,58",
+    "roiBack": "509,60,258,58",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "购买成功"
   }
 ]

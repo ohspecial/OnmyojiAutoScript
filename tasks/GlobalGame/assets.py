@@ -31,6 +31,8 @@ class GlobalGameAssets:
 	I_CLIENT_CLEAR = RuleImage(roi_front=(578,369,151,72), roi_back=(578,369,151,72), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_client_clear.png")
 	# description 
 	I_CHAT_CLOSE_BUTTON = RuleImage(roi_front=(632,343,49,103), roi_back=(632,343,49,103), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_chat_close_button.png")
+	# description 
+	I_AVTIVITY_FRAGMENT = RuleImage(roi_front=(604,332,69,40), roi_back=(604,332,69,40), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/gg/gg_avtivity_fragment.png")
 
 
 	# Click Rule Assets
@@ -65,5 +67,7 @@ class GlobalGameAssets:
 	I_UI_EXIT_ENSURE = RuleImage(roi_front=(691,378,167,52), roi_back=(627,339,357,180), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_exit_ensure.png")
 	# description 
 	I_UI_EXIT_BONDLING_ENSURE = RuleImage(roi_front=(670,399,177,66), roi_back=(628,366,294,164), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_exit_bondling_ensure.png")
+	# 购买成功 
+	I_UI_BUY_SUCCESS = RuleImage(roi_front=(509,60,258,58), roi_back=(509,60,258,58), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_buy_success.png")
 
 

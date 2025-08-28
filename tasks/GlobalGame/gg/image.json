@@ -88,5 +88,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "avtivity_fragment",
+    "imageName": "gg_avtivity_fragment.png",
+    "roiFront": "604,332,69,40",
+    "roiBack": "604,332,69,40",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
   }
 ]

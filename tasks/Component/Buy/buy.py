@@ -61,6 +61,10 @@ class Buy(BaseTask, BuyAssets):
                     if not self.appear(self.I_UI_REWARD, threshold=0.6):
                         logger.info('Get reward success')
                         break
+                    # 适配购买御魂
+                    if not self.appear(self.I_UI_BUY_SUCCESS, threshold=0.6):
+                        logger.info('Buy success')
+                        break
                     # 一直点击
                     if self.ui_reward_appear_click():
                         continue

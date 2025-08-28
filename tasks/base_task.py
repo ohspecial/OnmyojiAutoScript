@@ -139,7 +139,9 @@ class BaseTask(GlobalGameAssets, CostumeBase,GeneralBattleAssets):
         
         # 判断勾协
         self._burst()
-
+        # 活动碎片检测
+        self._avtivity_fragment()
+        
         # # 判断网络异常
         # if self.appear(self.I_NETWORK_ABNORMAL):
         #     logger.warning(f"Network abnormal")
@@ -151,7 +153,17 @@ class BaseTask(GlobalGameAssets, CostumeBase,GeneralBattleAssets):
         #     raise GameStuckError
 
         return self.device.image
-
+    
+    def _avtivity_fragment(self):
+        """
+        活动碎片检测
+        :return:
+        """
+        
+        if self.appear(self.I_AVTIVITY_FRAGMENT):
+            logger.warning(f"Activity fragment detected")
+            self.click(self.C_RANDOM_CLICK)
+    
     def appear(self,
                target: RuleImage | RuleGif,
                interval: float = None,
@@ -540,16 +552,16 @@ class BaseTask(GlobalGameAssets, CostumeBase,GeneralBattleAssets):
     #  ---------------------------------------------------------------------------------------------------------------
     def ui_reward_appear_click(self, screenshot=False) -> bool:
         """
-        如果出现 ‘获得奖励’ 就点击
+        如果出现 ‘获得奖励’ 就点击,或者“购买成功”
         :return:
         """
         if screenshot:
             self.screenshot()
-        return self.appear_then_click(self.I_UI_REWARD, action=self.C_UI_REWARD, interval=0.4, threshold=0.6)
+        return self.appear_then_click(self.I_UI_REWARD, action=self.C_UI_REWARD, interval=0.4, threshold=0.6) or self.appear_then_click(self.I_UI_BUY_SUCCESS, action=self.C_UI_REWARD, interval=0.4, threshold=0.6)
 
     def ui_get_reward(self, click_image: RuleImage or RuleOcr or RuleClick, click_interval: float = 1):
         """
-        传进来一个点击图片 或是 一个ocr， 会点击这个图片，然后等待‘获得奖励’，
+        传进来一个点击图片 或是 一个ocr， 会点击这个图片，然后等待‘获得奖励’，或者买御魂的“购买成功”出现
         最后当获得奖励消失后 退出
         :param click_interval:
         :param click_image:
@@ -568,7 +580,9 @@ class BaseTask(GlobalGameAssets, CostumeBase,GeneralBattleAssets):
                     if not self.appear(self.I_UI_REWARD, threshold=0.6):
                         logger.info('Get reward success')
                         break
-
+                    if not self.appear(self.I_UI_BUY_SUCCESS, threshold=0.6):
+                        logger.info('Buy success')
+                        break
                     # 一直点击
                     if self.ui_reward_appear_click():
                         continue
