@@ -130,6 +130,7 @@ class ScriptTask(GameUi, BaseActivity, HeroTestAssets, SwitchSoul):
 
             # 如果是兵藏秘境 看看是否有兵道帖
             if is_skill:
+                self.screenshot()
                 if not self.check_art_war_card():
                     logger.info("Art war card is not enough")
                     break
@@ -263,7 +264,6 @@ class ScriptTask(GameUi, BaseActivity, HeroTestAssets, SwitchSoul):
         return win
 
     def check_art_war_card(self):
-        self.screenshot()
         cu = self.O_ART_WAR_CARD.ocr(image=self.device.image)
         if cu[0] >= 1:
             logger.info("Art war card is enough")
