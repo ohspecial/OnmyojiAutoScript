@@ -304,5 +304,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "御魂溢出"
+  },
+  {
+    "itemName": "soul_buff_close",
+    "imageName": "gb_soul_buff_close.png",
+    "roiFront": "1050,128,29,30",
+    "roiBack": "1050,128,29,30",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "时运加成关闭按钮"
   }
 ]

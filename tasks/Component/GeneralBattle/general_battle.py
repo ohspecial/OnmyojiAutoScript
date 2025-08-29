@@ -202,6 +202,11 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             if self.appear(self.I_REWARD_GOLD, threshold=0.8):
                 win = True
                 break
+            
+            # 如果出现时运加成buff
+            if self.appear_then_click(self.I_SOUL_BUFF_CLOSE, interval=1):
+                continue
+            
             # 如果开启战斗过程随机滑动
             if random_click_swipt_enable:
                 self.random_click_swipt()

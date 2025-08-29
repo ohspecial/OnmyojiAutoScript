@@ -137,6 +137,8 @@ class GeneralBattleAssets:
 	I_PRESET_WIT_NUMBER = RuleImage(roi_front=(40,655,37,37), roi_back=(9,636,100,74), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_preset_wit_number.png")
 	# 御魂溢出 
 	I_OVER_GHOST = RuleImage(roi_front=(609,410,65,28), roi_back=(609,410,65,28), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_over_ghost.png")
+	# 时运加成关闭按钮 
+	I_SOUL_BUFF_CLOSE = RuleImage(roi_front=(1050,128,29,30), roi_back=(1050,128,29,30), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_soul_buff_close.png")
 
 
 	# Image Rule Assets
