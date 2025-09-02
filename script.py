@@ -320,7 +320,6 @@ class Script:
 
             if task.next_run > datetime.now():
                 logger.info(f'Wait until {task.next_run} for task `{task.command}`')
-                # self.is_first_task = False
                 method = self.config.script.optimization.when_task_queue_empty
                 close_game_limit_time = self.config.script.optimization.close_game_limit_time
                 close_emulator_limit_time = self.config.script.optimization.close_emulator_limit_time
@@ -407,6 +406,8 @@ class Script:
             logger.critical('Game page unknown')
             self.save_error_log()
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> GamePageUnknownError")
+            self.config.task_call('Restart')
+            self.device.sleep(10)
             return False
         except ScriptError as e:
             logger.critical(e)
@@ -482,6 +483,8 @@ class Script:
             self.device = Device(self.config)
 
             # Run
+            if self.state_queue:
+                self.state_queue.put({"schedule": self.config.get_schedule_data()})
             logger.info(f'Scheduler: Start task `{task}`')
             self.device.stuck_record_clear()
             self.device.click_record_clear()
@@ -503,6 +506,13 @@ class Script:
                 logger.critical("Possible reason #2: There is a problem with this task. "
                                 "Please contact developers or try to fix it yourself.")
                 logger.critical('Request human takeover')
+                # 添加失败三次的推送通知
+                self.config.notifier.push(
+                    title=f'{I18n.trans_zh_cn(task)}{task}',
+                    content=f"<{self.config_name}> 任务连续失败三次，请上线查看"
+                )
+                # 关闭模拟器
+                self.device.emulator_stop()
                 exit(1)
 
             if success:
