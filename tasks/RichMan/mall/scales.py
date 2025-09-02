@@ -97,6 +97,7 @@ class Scales(Buy, MallNavbar):
         # 选择魂
         while 1:
             self.screenshot()
+            self.device.save_screenshot()
             if self.appear(self.I_SCA_SIX_STAR):
                 logger.info('Scales buy success')
                 time.sleep(1.8)
