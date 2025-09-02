@@ -62,7 +62,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
 
             # 照顾一下某些模拟器慢的
             time.sleep(0.1)
-
+        
         # 绿标
         self.wait_until_disappear(self.I_BUFF)
         
@@ -175,9 +175,6 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         win: bool = False
         while 1:
             self.screenshot()
-            # 检查御魂溢出
-            if self.appear_then_click(self.I_OVER_GHOST, interval=1):
-                continue
 
             # 如果出现赢 就点击, 第二个是针对封魔的图片
             if self.appear(self.I_WIN, threshold=0.8) or self.appear(self.I_DE_WIN):
@@ -191,8 +188,8 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             if self.appear(self.I_FALSE, threshold=0.8):
                 logger.info("Battle result is false")
                 win = False
-                break
-
+                break            
+            
             # 如果领奖励
             if self.appear(self.I_REWARD, threshold=0.6):
                 win = True
@@ -203,10 +200,6 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
                 win = True
                 break
             
-            # 如果出现时运加成buff
-            if self.appear_then_click(self.I_SOUL_BUFF_CLOSE, interval=1):
-                continue
-            
             # 如果开启战斗过程随机滑动
             if random_click_swipt_enable:
                 self.random_click_swipt()
@@ -216,10 +209,6 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         while 1:
             self.screenshot()
             if win:
-                # 检查御魂溢出
-                if self.appear_then_click(self.I_OVER_GHOST, interval=1):
-                    continue
-                    
                 # 点击赢了        
                 action_click = random.choice([self.C_WIN_1, self.C_WIN_2, self.C_WIN_3])
                 if self.appear_then_click(self.I_WIN, action=action_click, interval=0.5):
@@ -240,9 +229,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         logger.info("Get reward")
         while 1:
             self.screenshot()
-            # 检查御魂溢出
-            if self.appear_then_click(self.I_OVER_GHOST, interval=1):
-                continue
+
             # 如果出现领奖励
             action_click = random.choice([self.C_REWARD_1, self.C_REWARD_2, self.C_REWARD_3])
             if (self.appear_then_click(self.I_REWARD, action=action_click, interval=1.5) or

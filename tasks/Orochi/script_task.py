@@ -448,6 +448,9 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                 logger.info('Win battle')
                 self.wait_until_appear(self.I_REWARD, wait_time=1.5)
                 self.screenshot()
+                # 如果出现时运加成buff
+                if self.appear_then_click(self.I_SOUL_BUFF_CLOSE, interval=1):
+                    continue
                 if not self.appear(self.I_GREED_GHOST):
                     logger.warning('Greedy ghost disappear. Maybe it is a false battle')
                     continue
@@ -456,6 +459,9 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                     action_click = random.choice([self.C_REWARD_1, self.C_REWARD_2, self.C_REWARD_3])
                     if not self.appear(self.I_GREED_GHOST):
                         break
+                    # 如果出现时运加成buff
+                    if self.appear_then_click(self.I_SOUL_BUFF_CLOSE, interval=1):
+                        continue
                     if self.click(action_click, interval=1.5):
                         continue
                 return True
@@ -465,6 +471,9 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                 appear_greed_ghost = self.appear(self.I_GREED_GHOST)
                 while 1:
                     self.screenshot()
+                    # 如果出现时运加成buff
+                    if self.appear_then_click(self.I_SOUL_BUFF_CLOSE, interval=1):
+                        continue
                     action_click = random.choice([self.C_REWARD_1, self.C_REWARD_2, self.C_REWARD_3])
                     if self.appear_then_click(self.I_REWARD, action=action_click, interval=1.5):
                         continue
@@ -506,7 +515,7 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
-    c = Config('oas1')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
 
