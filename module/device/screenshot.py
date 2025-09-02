@@ -141,7 +141,6 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
             self._last_save_time[genre] = now
             return True
         else:
-            self._last_save_time[genre] = now
             return False
 
     def screenshot_last_save_time_reset(self, genre):
