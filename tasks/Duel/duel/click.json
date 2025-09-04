@@ -6,6 +6,12 @@
     "description": "战斗数据"
   },
   {
+    "itemName": "duel_click_5",
+    "roiFront": "105,23,52,47",
+    "roiBack": "105,23,52,47",
+    "description": "点击第五手上式神位置，获得式神名称"
+  },
+  {
     "itemName": "duel_green_left_1",
     "roiFront": "301,375,67,104",
     "roiBack": "301,375,67,104",
