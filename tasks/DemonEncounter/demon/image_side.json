@@ -72,6 +72,15 @@
     "description": "信"
   },
   {
+    "itemName": "mall",
+    "imageName": "demon_mall.png",
+    "roiFront": "510,70,95,48",
+    "roiBack": "510,70,95,48",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "封魔密信"
+  },
+  {
     "itemName": "letter_close",
     "imageName": "demon_letter_close.png",
     "roiFront": "851,43,45,45",

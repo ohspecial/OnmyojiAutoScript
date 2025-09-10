@@ -10,11 +10,6 @@ from tasks.Component.config_base import ConfigBase, TimeDelta
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Utils.config_enum import ShikigamiClass
 
-# 宝箱购买项目
-class BoxBuyConfig(BaseModel):
-    # 默认购买蓝票，未添加选项，没人会不买吧！
-    box_buy_sushi: bool = Field(default=False, description='逢魔宝箱是否购买体力')
-
 class BestDemonBossSelect(BaseModel):
     enable: bool = Field(
         default=False,
@@ -73,19 +68,12 @@ class BestDemonConfig(BaseModel):
 class UtilizeScheduler(Scheduler):
     priority: int = Field(default=2, description='priority_help')
 
-class GeneralDemonConfig(BaseModel):
-    # 是否切换阵容
-    switch_preset_enable: bool = Field(default=False, description='按照御魂配置更换阵容，周一无效')
-    # 按式神名字绿标
-    green_enable: bool = Field(default=False, description='是否开启绿标,若开启则需在下面输入绿标名称')
-    green_mark_shikigami_name: str = Field(default="", description='green_mark_shikigami_name_help')
+class SwitchSoulConfig(BaseModel):
+    switch_group_team: str = Field(default='-1,-1', description='switch_group_team_help')
 
-    
 class DemonEncounter(ConfigBase):
     scheduler: UtilizeScheduler = Field(default_factory=UtilizeScheduler)
-    general_demon_config: GeneralDemonConfig = Field(default_factory=GeneralDemonConfig)
-    box_buy_config: BoxBuyConfig = Field(default_factory=BoxBuyConfig)
+    switch_soul: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
     best_demon_boss_config: BestDemonBossSelect = Field(default_factory=BestDemonBossSelect)
     demon_soul_config: DemonConfig = Field(default_factory=DemonConfig)
     best_demon_soul_config: BestDemonConfig = Field(default_factory=BestDemonConfig)
-    

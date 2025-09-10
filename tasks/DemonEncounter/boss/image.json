@@ -133,14 +133,5 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "极逢魔集结挑战"
-  },
-  {
-    "itemName": "boss_preset",
-    "imageName": "boss_boss_preset.png",
-    "roiFront": "26,634,39,50",
-    "roiBack": "26,634,39,50",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
   }
 ]

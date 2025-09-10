@@ -46,8 +46,6 @@ class DemonEncounterAssets:
 	I_BOSS_KILLED = RuleImage(roi_front=(654,596,35,68), roi_back=(614,537,123,176), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_killed.png")
 	# 极逢魔集结挑战 
 	I_BEST_BOSS_FIRE = RuleImage(roi_front=(1087,562,100,36), roi_back=(1087,562,100,36), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_best_boss_fire.png")
-	# description 
-	I_BOSS_PRESET = RuleImage(roi_front=(26,634,39,50), roi_back=(26,634,39,50), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_preset.png")
 
 
 	# Ocr Rule Assets
@@ -80,11 +78,9 @@ class DemonEncounterAssets:
 	# 左下角小指针 
 	I_DE_LOCATION = RuleImage(roi_front=(26,653,44,47), roi_back=(26,653,44,47), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_de_location.png")
 	# 逢魔蓝票 
-	I_MYSTERY_AMULET = RuleImage(roi_front=(596,314,84,82), roi_back=(581,294,115,116), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_mystery_amulet.png")
-	# 逢魔体力 
-	I_SUSHI = RuleImage(roi_front=(602,318,72,54), roi_back=(581,294,115,116), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_sushi.png")
+	I_BLUE_PIAO = RuleImage(roi_front=(420,226,444,262), roi_back=(420,226,444,262), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/blue_piao.png")
 	# 50勾玉购买 
-	I_JADE_50 = RuleImage(roi_front=(593,425,84,46), roi_back=(548,405,182,83), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_jade_50.png")
+	I_JADE_50 = RuleImage(roi_front=(420,226,444,262), roi_back=(420,226,444,262), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/jade_50.png")
 
 
 	# Image Rule Assets
@@ -104,6 +100,8 @@ class DemonEncounterAssets:
 	I_DE_AWARD = RuleImage(roi_front=(1216,214,42,36), roi_back=(1195,198,74,67), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_de_award.png")
 	# 信 
 	I_DE_LETTER = RuleImage(roi_front=(1236,358,33,35), roi_back=(1177,261,100,294), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_de_letter.png")
+	# 封魔密信 
+	I_MALL = RuleImage(roi_front=(510,70,95,48), roi_back=(510,70,95,48), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_mall.png")
 	# 关闭封魔密信 
 	I_LETTER_CLOSE = RuleImage(roi_front=(851,43,45,45), roi_back=(851,43,45,45), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/demon/demon_letter_close.png")
 	# 小鬼王的挑战 
@@ -120,7 +118,7 @@ class DemonEncounterAssets:
 
 	# Ocr Rule Assets
 	# 计数已经开启多少的 
-	O_DE_COUNTER = RuleOcr(roi=(1207,685,45,34), area=(1207,685,45,34), mode="DigitCounter", method="Default", keyword="", name="de_counter")
+	O_DE_COUNTER = RuleOcr(roi=(1204,685,48,34), area=(1204,685,48,34), mode="DigitCounter", method="Default", keyword="", name="de_counter")
 
 
 	# Click Rule Assets
