@@ -44,7 +44,9 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
             self.kirin()
         else:
             self.netherworld()
-        sleep(1)
+
+        self.ui_get_current_page()
+        self.ui_goto(page_main)
 
         self.plan_tomorrow_hunt()
         raise TaskEnd('Hunt')
@@ -105,21 +107,19 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
         logger.hr('kirin', 2)
         while 1:
             self.screenshot()
-            if self.appear(self.I_FIRE):
-                self.click_fire()
-                break
-            if self.appear_then_click(self.I_UI_CONFIRM, interval=0.9):
-                continue
-            if self.appear_then_click(self.I_KIRIN_CHALLAGE, interval=1.5):
-                continue
-            if self.appear(self.I_KIRIN_END):
-                # 今日已挑战
-                logger.warning('Today have already challenged the Kirin')
-                self.ui_click_until_disappear(self.I_UI_BACK_YELLOW)
-                return
-        logger.info('Start battle')
-        self.run_general_battle()        
 
+            self.check_and_invite()
+
+            if self.appear(self.I_KIRIN_END):
+                # 你的阴阳寮已经打过的麒麟了
+                logger.warning('Your guild have already challenged the Kirin')
+                return
+            if self.appear_then_click(self.I_KIRIN_CHALLAGE, interval=1):
+                continue
+            if self.appear(self.I_PREPARE_HIGHLIGHT):
+                break
+        logger.info('Arrive the Kirin')
+        self.run_general_battle()
 
     def netherworld(self):
         logger.hr('netherworld', 2)
@@ -192,7 +192,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
-    c = Config('oas1')
+    c = Config('mi')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()
