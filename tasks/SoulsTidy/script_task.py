@@ -40,7 +40,7 @@ class ScriptTask(GameUi, SoulsTidyAssets):
 
             if self.appear_then_click(self.I_ST_REPLACE, interval=1):
                 continue
-            if self.appear_then_click(self.I_ST_SOULS, interval=1):
+            if self.appear_then_click(self.I_ST_SOULS, threshold=0.6, interval=1):
                 continue
             if self.click(self.C_ST_DETAIL, interval=1.5):
                 continue
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
 
