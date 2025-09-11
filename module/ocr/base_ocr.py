@@ -95,6 +95,8 @@ class BaseCor:
         :param image:
         :return:
         """
+        # 增强对比度
+        image = cv2.convertScaleAbs(image, alpha=1.5, beta=0)
         return image
 
     def after_process(self, result):
@@ -144,19 +146,26 @@ class BaseCor:
         :return:
         """
         # pre process
-        start_time = time.time()
         image = self.crop(image, self.roi)
-        image = self.pre_process(image)
+
         # ocr
         result, score = self.model.ocr_single_line(image)
+        logger.info(f"ocr result is {result} , score is {score}")
+        start_time = time.time()
+        # 如果分数低于目标分数，则进行预处理后重新识别
+        if score < self.score:
+            image = self.pre_process(image)
+            result, score = self.model.ocr_single_line(image)
+            logger.info(f"ocr result after pre process is {result} , score is {score}")
+        
         if score < self.score:
             result = ""
-        # after proces
+        # after process
         result = self.after_process(result)
-        # logger.info("ocr result score: %s" % score)
         logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
                     text=f'[{result}]')
         return result
+
 
     def detect_and_ocr(self, image, drop_score = None) -> list[BoxedResult]:
         """
