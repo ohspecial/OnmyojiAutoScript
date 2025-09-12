@@ -90,10 +90,19 @@
     "description": "description"
   },
   {
-    "itemName": "check_hunt",
-    "imageName": "page_check_hunt.png",
+    "itemName": "check_netherworld",
+    "imageName": "page_check_netherworld.png",
     "roiFront": "575,30,46,25",
     "roiBack": "553,1,81,68",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "description"
+  },
+  {
+    "itemName": "check_kirin",
+    "imageName": "page_check_kirin.png",
+    "roiFront": "91,20,96,36",
+    "roiBack": "42,8,248,72",
     "method": "Template matching",
     "threshold": 0.7,
     "description": "description"

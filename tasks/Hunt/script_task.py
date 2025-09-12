@@ -10,7 +10,7 @@ from module.logger import logger
 from module.base.timer import Timer
 
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_hunt, page_shikigami_records
+from tasks.GameUi.page import page_main, page_kirin, page_netherworld, page_shikigami_records
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralInvite.general_invite import GeneralInvite
@@ -37,8 +37,6 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
             else:
                 if con.netherworld_group_team != '-1,-1':
                     self.run_switch_soul(con.netherworld_group_team)
-        self.ui_get_current_page()
-        self.ui_goto(page_hunt)
 
         if self.kirin_day:
             self.kirin()
@@ -104,7 +102,9 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
             self.custom_next_run(task='Hunt', custom_time=self.con_time.netherworld_time, time_delta=1)
 
     def kirin(self):
-        logger.hr('kirin', 2)
+        logger.hr('麒麟', 2)
+        self.ui_get_current_page()
+        self.ui_goto(page_kirin)
         while 1:
             self.screenshot()
 
@@ -122,7 +122,9 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
         self.run_general_battle()
 
     def netherworld(self):
-        logger.hr('netherworld', 2)
+        logger.hr('阴界之门', 2)
+        self.ui_get_current_page()
+        self.ui_goto(page_netherworld)
         while 1:
             self.screenshot()
             if self.is_in_room(False):
