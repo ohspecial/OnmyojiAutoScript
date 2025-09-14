@@ -328,8 +328,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             """
             layer_limit = {
                 # 低层不限制
-                # "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", 
-                "玖", "拾", "番外"
+                # "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", 
+                "拾", "番外"
             }
             # ,荒川之怒·壹，4，前往按钮，function
             result = [-1, '', -1, GOTO_BUTTON[index], self.challenge, '']

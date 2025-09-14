@@ -190,8 +190,7 @@ class BaseCor:
         for result in boxed_results:
             result.ocr_text = self.after_process(result.ocr_text)
             results.append(result)
-            if logDisplay:
-                logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
+            logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
                             text=str([result.ocr_text for result in results]))
         return results
 
