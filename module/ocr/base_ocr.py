@@ -47,6 +47,7 @@ class BaseCor:
 
     lang: str = "ch"
     score: float = 0.6  # 阈值默认为0.5
+    min_score: float = 0.3  # 宽松阈值，用于挽救数字等结果
 
     name: str = "ocr"
     mode: OcrMode = OcrMode.FULL
@@ -189,9 +190,9 @@ class BaseCor:
         for result in boxed_results:
             result.ocr_text = self.after_process(result.ocr_text)
             results.append(result)
-
-        logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
-                    text=str([result.ocr_text for result in results]))
+            if logDisplay:
+                logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
+                            text=str([result.ocr_text for result in results]))
         return results
 
     def match(self, result: str, included: bool=False) -> bool:
