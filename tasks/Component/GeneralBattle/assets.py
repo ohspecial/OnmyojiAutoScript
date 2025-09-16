@@ -153,6 +153,8 @@ class GeneralBattleAssets:
 	O_PRESET = RuleOcr(roi=(20,620,60,80), area=(20,620,60,80), mode="Single", method="Default", keyword="预", name="preset")
 	# 初始化区域 
 	O_GREEN_MARK_AREA = RuleOcr(roi=(1,345,1277,284), area=(1,345,1277,284), mode="Full", method="Default", keyword="", name="green_mark_area")
+    # 预设
+	O_PRESET_FULL = RuleOcr(roi=(20,620,60,80), area=(20,620,60,80), mode="Single", method="Default", keyword="预设", name="preset")
 
 
 	# Swipe Rule Assets

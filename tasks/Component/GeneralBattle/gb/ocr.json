@@ -25,5 +25,14 @@
     "method": "Default",
     "keyword": "",
     "description": "初始化区域"
+  },
+  {
+    "itemName": "preset_full",
+    "roiFront": "20,620,60,80",
+    "roiBack":  "20,620,60,80",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "预设",
+    "description": "预设"
   }
 ]
