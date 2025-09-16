@@ -144,7 +144,6 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AreaBossAssets):
         return result
 
     def start_fight(self) -> bool:
-        self.save_image()
         while 1:
             self.screenshot()
             if self.appear_then_click(self.I_FIRE, interval=1):
