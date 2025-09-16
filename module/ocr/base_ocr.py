@@ -167,7 +167,6 @@ class BaseCor:
                     text=f'[{result}]')
         return result
 
-
     def detect_and_ocr(self, image, drop_score = None) -> list[BoxedResult]:
         """
         注意：这里使用了预处理和后处理

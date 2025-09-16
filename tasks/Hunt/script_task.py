@@ -10,7 +10,7 @@ from module.logger import logger
 from module.base.timer import Timer
 
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_hunt, page_shikigami_records
+from tasks.GameUi.page import page_main, page_kirin, page_netherworld, page_shikigami_records
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralInvite.general_invite import GeneralInvite
@@ -37,14 +37,14 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
             else:
                 if con.netherworld_group_team != '-1,-1':
                     self.run_switch_soul(con.netherworld_group_team)
-        self.ui_get_current_page()
-        self.ui_goto(page_hunt)
 
         if self.kirin_day:
             self.kirin()
         else:
             self.netherworld()
-        sleep(1)
+
+        self.ui_get_current_page()
+        self.ui_goto(page_main)
 
         self.plan_tomorrow_hunt()
         raise TaskEnd('Hunt')
@@ -102,27 +102,29 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
             self.custom_next_run(task='Hunt', custom_time=self.con_time.netherworld_time, time_delta=1)
 
     def kirin(self):
-        logger.hr('kirin', 2)
+        logger.hr('麒麟', 2)
+        self.ui_get_current_page()
+        self.ui_goto(page_kirin)
         while 1:
             self.screenshot()
-            if self.appear(self.I_FIRE):
-                self.click_fire()
-                break
-            if self.appear_then_click(self.I_UI_CONFIRM, interval=0.9):
-                continue
-            if self.appear_then_click(self.I_KIRIN_CHALLAGE, interval=1.5):
-                continue
-            if self.appear(self.I_KIRIN_END):
-                # 今日已挑战
-                logger.warning('Today have already challenged the Kirin')
-                self.ui_click_until_disappear(self.I_UI_BACK_YELLOW)
-                return
-        logger.info('Start battle')
-        self.run_general_battle()        
 
+            self.check_and_invite()
+
+            if self.appear(self.I_KIRIN_END):
+                # 你的阴阳寮已经打过的麒麟了
+                logger.warning('Your guild have already challenged the Kirin')
+                return
+            if self.appear_then_click(self.I_KIRIN_CHALLAGE, interval=1):
+                continue
+            if self.appear(self.I_PREPARE_HIGHLIGHT):
+                break
+        logger.info('Arrive the Kirin')
+        self.run_general_battle()
 
     def netherworld(self):
-        logger.hr('netherworld', 2)
+        logger.hr('阴界之门', 2)
+        self.ui_get_current_page()
+        self.ui_goto(page_netherworld)
         while 1:
             self.screenshot()
             if self.is_in_room(False):
@@ -192,7 +194,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
-    c = Config('oas1')
+    c = Config('mi')
     d = Device(c)
     t = ScriptTask(c, d)
     t.screenshot()
