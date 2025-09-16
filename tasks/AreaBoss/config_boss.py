@@ -24,4 +24,4 @@ class Boss(BaseModel):
     use_collect: bool = Field(default=False, description='use_collect_help')
 
     # 没有开启极是否拉到60级进行攻打
-    Attack_60: bool = Field(default=False, description='没有开启极是否拉到60级进行攻打')
+    Attack_60: bool = Field(default=True, description='没有开启极是否拉到60级进行攻打')
