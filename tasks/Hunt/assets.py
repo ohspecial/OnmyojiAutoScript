@@ -27,7 +27,7 @@ class HuntAssets:
 	I_KIRIN_CHALLAGE = RuleImage(roi_front=(1143,602,72,38), roi_back=(1143,602,72,38), threshold=0.8, method="Template matching", file="./tasks/Hunt/kirin/kirin_kirin_challage.png")
 	# 集合 
 	I_KIRIN_GATHER = RuleImage(roi_front=(28,480,75,64), roi_back=(28,480,75,64), threshold=0.8, method="Template matching", file="./tasks/Hunt/kirin/kirin_kirin_gather.png")
-	# 已结束 
+	# 麒麟已挑战 
 	I_KIRIN_END = RuleImage(roi_front=(1143,602,72,38), roi_back=(1143,602,72,38), threshold=0.8, method="Template matching", file="./tasks/Hunt/kirin/kirin_kirin_end.png")
 
 
