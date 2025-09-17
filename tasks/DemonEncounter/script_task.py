@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from module.logger import logger
 from module.exception import TaskEnd
 from module.base.timer import Timer
-from module.server.i18n import I18n
 
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
@@ -387,9 +386,6 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
             self.screenshot()
             if self.appear(self.I_LETTER_CLOSE):
                 break
-            if self.appear(self.I_BOSS_FIRE) or self.appear(self.I_BEST_BOSS_FIRE):
-                self.appear_then_click(self.I_UI_BACK_RED)
-                continue
             if self.click(target_click, interval=1):
                 continue
         logger.info('Question answering Start')
@@ -413,20 +409,15 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                             continue
                     break
                 # 如果没有出现红色关闭按钮，说明答题结束
-                if not self.appear(self.I_LETTER_CLOSE) and not self.appear(self.I_MALL) and not self.appear(self.I_DE_LETTER):
-                    time.sleep(1)
+                if not self.appear(self.I_LETTER_CLOSE):
+                    time.sleep(1.8)
                     self.screenshot()
-                    if self.appear(self.I_LETTER_CLOSE) or self.appear(self.I_MALL) or self.appear(self.I_DE_LETTER):
-                        continue
-                    else:
-                        # self.save_image()
+                    if not self.appear(self.I_LETTER_CLOSE):
                         logger.warning('Answer finish')
                         return
 
                 # 一直点击
-                self.click(answer_click, interval=1)
-                time.sleep(0.5)
-                self.appear_then_click(self.I_DE_FIND, interval=1)
+                self.click(answer_click, interval=1.5)
             time.sleep(0.5)
 
     def _battle(self, target_click):
@@ -516,13 +507,12 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         # 本人选择的策略是只要进来了就算一次，不管是不是打完了
         logger.hr("General battle start", 2)
         self.current_count += 1
-        logger.info(f'Current tasks: {I18n.trans_zh_cn(self.config.task.command)}')
-        logger.info(f'Current count: {self.current_count} / {self.limit_count}')
+        logger.info(f'Current count: {self.current_count}')
 
         task_run_time = datetime.now() - self.start_time
         # 格式化时间，只保留整数部分的秒
         task_run_time_seconds = timedelta(seconds=int(task_run_time.total_seconds()))
-        logger.info(f'Current times: {task_run_time_seconds} / {self.limit_time}')
+        logger.info(f'Current times: {task_run_time_seconds}')
 
         if config is None:
             config = GeneralBattleConfig()
@@ -578,7 +568,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('xiaohao')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
 
