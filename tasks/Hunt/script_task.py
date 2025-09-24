@@ -10,7 +10,7 @@ from module.logger import logger
 from module.base.timer import Timer
 
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_kirin, page_netherworld, page_shikigami_records
+from tasks.GameUi.page import page_main, page_hunt, page_hunt_kirin, page_shikigami_records
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralInvite.general_invite import GeneralInvite
@@ -37,10 +37,12 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
             else:
                 if con.netherworld_group_team != '-1,-1':
                     self.run_switch_soul(con.netherworld_group_team)
-
+        self.ui_get_current_page()
         if self.kirin_day:
+            self.ui_goto(page_hunt_kirin)
             self.kirin()
         else:
+            self.ui_goto(page_hunt)
             self.netherworld()
 
         self.ui_get_current_page()
@@ -107,9 +109,12 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
         self.ui_goto(page_kirin)
         while 1:
             self.screenshot()
-
-            self.check_and_invite()
-
+            if self.appear(self.I_PREPARE_HIGHLIGHT):
+                break
+            if self.appear_then_click(self.I_UI_CONFIRM, interval=0.9):
+                continue
+            if self.appear_then_click(self.I_KIRIN_CHALLAGE, interval=1.5):
+                continue
             if self.appear(self.I_KIRIN_END):
                 # 你的阴阳寮已经打过的麒麟了
                 logger.warning('Your guild have already challenged the Kirin')

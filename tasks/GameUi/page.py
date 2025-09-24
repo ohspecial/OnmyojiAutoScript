@@ -108,14 +108,14 @@ page_town.link(button=G.I_TOWN_GOTO_DUEL, destination=page_duel)
 page_demon_encounter = Page(G.I_CHECK_DEMON_ENCOUNTER)
 page_demon_encounter.link(button=G.I_DEMON_ENCOUNTER_GOTO_TOWN, destination=page_town)
 page_town.link(button=G.I_TOWN_GOTO_DEMON_ENCOUNTER, destination=page_demon_encounter)
-# 麒麟 kirin
-page_kirin = Page(G.I_CHECK_KIRIN)
-page_kirin.link(button=G.I_BACK_YOLLOW, destination=page_town)
-page_town.link(button=G.I_TOWN_GOTO_HUNT, destination=page_kirin)
-# 阴界之门 netherworld
-page_netherworld = Page(G.I_CHECK_NETHERWORLD)
-page_netherworld.link(button=G.I_BACK_BLUE, destination=page_town)
-page_town.link(button=G.I_TOWN_GOTO_HUNT, destination=page_netherworld)
+# 狩猎战 hunt
+page_hunt = Page(G.I_CHECK_HUNT)
+page_hunt.link(button=G.I_BACK_BL, destination=page_town)
+page_town.link(button=G.I_TOWN_GOTO_HUNT, destination=page_hunt)
+# 狩猎战麒麟 hunt_kirin
+page_hunt_kirin = Page(G.I_CHECK_HUNT_KIRIN)
+page_hunt_kirin.link(button=G.I_BACK_YOLLOW, destination=page_town)
+page_town.link(button=G.I_TOWN_GOTO_HUNT, destination=page_hunt_kirin)
 # 协同斗技 draft_duel
 page_draft_duel = Page(G.I_CHECK_DRAFT_DUEL)
 page_draft_duel.link(button=G.I_BACK_YOLLOW, destination=page_town)
@@ -212,10 +212,11 @@ page_climb_act_ap.link(button=asa.I_SWITCH, destination=page_climb_act_pass)
 page_climb_act_pass.link(button=asa.I_SWITCH, destination=page_climb_act_ap)
 # 爬塔活动boss战界面
 page_climb_act_boss = Page(asa.I_CHECK_BOSS)
-page_climb_act_boss.additional = [BT.I_UI_BACK_RED]
+page_climb_act_boss.additional = [BT.I_UI_BACK_RED, asa.I_SKIP_BUTTON]
 page_climb_act_boss.link(button=G.I_BACK_Y, destination=page_climb_act)
 page_climb_act.link(button=asa.I_BOSS, destination=page_climb_act_boss)
 # 爬塔活动加成界面
 page_climb_act_buff = Page(asa.I_CHECK_BUFF)
+page_climb_act_buff.additional = [BT.I_UI_BACK_RED, asa.I_SKIP_BUTTON]
 page_climb_act_buff.link(button=G.I_BACK_Y, destination=page_climb_act)
 page_climb_act.link(button=asa.I_BUFF_CHANGE_BUTTON, destination=page_climb_act_buff)

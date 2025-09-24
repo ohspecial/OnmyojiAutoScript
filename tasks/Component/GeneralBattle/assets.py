@@ -139,6 +139,8 @@ class GeneralBattleAssets:
 	I_OVER_GHOST = RuleImage(roi_front=(609,410,65,28), roi_back=(609,410,65,28), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_over_ghost.png")
 	# 时运加成关闭按钮 
 	I_SOUL_BUFF_CLOSE = RuleImage(roi_front=(1050,128,29,30), roi_back=(1050,128,29,30), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_soul_buff_close.png")
+	# 战斗信息标识 
+	I_BATTLE_INFO = RuleImage(roi_front=(230,12,37,39), roi_back=(210,1,147,72), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_battle_info.png")
 
 
 	# Image Rule Assets

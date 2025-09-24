@@ -9,6 +9,7 @@ from module.logger import logger
 
 from tasks.Component.config_base import ConfigBase, TimeDelta, Time
 
+
 class ApMode(str, Enum):
     AP_ACTIVITY = 'ap_activity'
     AP_GAME = 'ap_game'

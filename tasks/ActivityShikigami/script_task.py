@@ -5,6 +5,10 @@ from time import sleep
 
 import cv2
 import numpy as np
+from time import sleep
+
+import cv2
+import numpy as np
 import random
 import tasks.Component.GeneralBattle.config_general_battle
 from datetime import datetime, timedelta, time
@@ -348,8 +352,14 @@ class ScriptTask(GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets):
     def battle_wait(self, random_click_swipt_enable: bool) -> bool:
         # 通用战斗结束判断
         self.device.stuck_record_add("BATTLE_STATUS_S")
+        # 通用战斗结束判断
+        self.device.stuck_record_add("BATTLE_STATUS_S")
         self.device.click_record_clear()
         logger.info("Start battle process")
+
+        for btn in (self.C_RANDOM_LEFT, self.C_RANDOM_RIGHT, self.C_RANDOM_TOP, self.C_RANDOM_BOTTOM):
+            btn.name = "BATTLE_RANDOM"
+        ok_cnt, max_retry = 0, 5
 
         for btn in (self.C_RANDOM_LEFT, self.C_RANDOM_RIGHT, self.C_RANDOM_TOP, self.C_RANDOM_BOTTOM):
             btn.name = "BATTLE_RANDOM"
@@ -409,4 +419,4 @@ if __name__ == '__main__':
     d = Device(c)
     t = ScriptTask(c, d)
 
-    t.run()
+    t.switch_buff(c.activity_shikigami.general_climb)
