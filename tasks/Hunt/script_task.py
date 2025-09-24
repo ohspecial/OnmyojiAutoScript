@@ -106,7 +106,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
     def kirin(self):
         logger.hr('麒麟', 2)
         self.ui_get_current_page()
-        self.ui_goto(page_kirin)
+        self.ui_goto(page_hunt_kirin)
         while 1:
             self.screenshot()
             if self.appear(self.I_PREPARE_HIGHLIGHT):
@@ -129,7 +129,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
     def netherworld(self):
         logger.hr('阴界之门', 2)
         self.ui_get_current_page()
-        self.ui_goto(page_netherworld)
+        self.ui_goto(page_hunt)
         while 1:
             self.screenshot()
             if self.is_in_room(False):
