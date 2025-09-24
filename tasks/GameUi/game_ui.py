@@ -17,7 +17,7 @@ from tasks.Restart.assets import RestartAssets
 from tasks.SixRealms.assets import SixRealmsAssets
 from tasks.base_task import BaseTask
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
-
+from tasks.Component.GeneralInvite.assets import GeneralInviteAssets as GIA
 
 class GameUi(BaseTask, GameUiAssets):
     ui_current: Page = None
