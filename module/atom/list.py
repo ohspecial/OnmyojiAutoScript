@@ -8,10 +8,11 @@ import numpy as np
 
 from random import randint
 
-from ppocronnx.predict_system import BoxedResult
+
 from module.atom.ocr import RuleOcr
 from module.atom.image import RuleImage
 from module.logger import logger
+from module.ocr.onnx_paddle_ocr import BoxedResult
 
 
 class RuleList:

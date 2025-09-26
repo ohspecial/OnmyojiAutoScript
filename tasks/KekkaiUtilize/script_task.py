@@ -9,7 +9,9 @@ from datetime import timedelta, datetime
 from module.base.timer import Timer
 from module.atom.image_grid import ImageGrid
 from module.logger import logger
-from module.exception import TaskEnd
+
+from module.exception import TaskEnd, GameStuckError
+from module.ocr.onnx_paddle_ocr import BoxedResult
 
 from tasks.GameUi.game_ui import GameUi
 from tasks.Utils.config_enum import ShikigamiClass

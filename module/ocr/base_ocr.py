@@ -5,7 +5,6 @@ import time
 import cv2
 import numpy as np
 
-from ppocronnx.predict_system import BoxedResult
 from enum import Enum
 
 
@@ -14,7 +13,7 @@ from module.base.utils import area_pad, crop, float2str
 
 from module.exception import ScriptError
 from module.logger import logger
-from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr
+from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr, BoxedResult
 from module.server.setting import State
 
 if State.deploy_config.UseOcrServer:
