@@ -78,17 +78,17 @@ def fun(ev: threading.Event):
     logger.attr("Host", host)
     logger.attr("Port", port)
     logger.attr("Reload", ev is not None)
-    # ocrServer
-    if State.deploy_config.UseOcrServer:
-        port = args.port or State.deploy_config.OcrServerPort
-        start_ocr_server(port=port)
+
 
 
     uvicorn.run("module.server.app:fastapi_app",
                 host=host,
                 port=port,
                 factory=True)
-
+    # ocrServer
+    if State.deploy_config.UseOcrServer:
+        port = args.port or State.deploy_config.OcrServerPort
+        start_ocr_server(port=port)
 
 
 if __name__ == "__main__":
