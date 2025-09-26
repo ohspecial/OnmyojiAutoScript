@@ -14,7 +14,7 @@ class OcrModel:
             logger.info(f"[UseGpu] {use_gpu}")
         return ONNXPaddleOcr(use_angle_cls=True,use_gpu=use_gpu)
 
-
+OCR_MODEL = OcrModel()
 
 
 
