@@ -6,9 +6,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from module.logger import logger
+from module.ocr.rpc import stop_ocr_server_process, start_ocr_server_process
 
 from module.server.home_router import home_app
 from module.server.script_router import script_app
+from module.server.setting import State
+
+
+def cleanup_and_exit():
+    """清理资源并退出"""
+    logger.info("正在停止OCR server...")
+    stop_ocr_server_process()
+    logger.info("OCR server已停止")
 
 app = FastAPI(
     title='OAS',
@@ -30,12 +39,16 @@ app.include_router(script_app)
 @app.on_event("startup")
 async def startup_event():
     logger.info('OAS web service startup done')
+    # ocrServer
+    if State.deploy_config.UseOcrServer:
+        port = State.deploy_config.OcrServerPort
+        start_ocr_server_process(port=port)
     pass
 
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info('OAS web service shutdown done')
-
+    cleanup_and_exit()
 
 
 

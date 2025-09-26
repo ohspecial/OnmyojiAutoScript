@@ -142,6 +142,22 @@ def start_ocr_server_process(port=22268):
         process = multiprocessing.Process(target=start_ocr_server, args=(port,))
         process.start()
 
+def stop_ocr_server_process():
+    """停止OCR server进程"""
+    global process
+    if process is not None and process.is_alive():
+        logger.info("[OcrServer] Stopping OCR server process...")
+        process.terminate()
+        process.join(timeout=5)  # 等待最多5秒
+        if process.is_alive():
+            logger.warning("[OcrServer] OCR server process didn't terminate gracefully, forcing kill")
+            process.kill()
+            process.join()
+        logger.info("[OcrServer] OCR server process stopped")
+        process = None
+    else:
+        logger.info("[OcrServer] OCR server process is not running")
+
 if __name__ == "__main__":
     # Run server
     parser = argparse.ArgumentParser(description="OAS OCR service")

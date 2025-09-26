@@ -92,4 +92,3 @@ def fun(ev: threading.Event):
 
 if __name__ == "__main__":
     fun(None)
-
