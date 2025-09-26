@@ -80,6 +80,11 @@ Deploy:
     # Address of ocr server for alas instance to connect
     # [Default] 127.0.0.1:22268
     OcrClientAddress: 127.0.0.1:22268
+    # Whether to use gpu for ocr
+    # [In most cases] false
+    # [In few cases] true, if you have a nvidia gpu and installed cuda
+    UseGpu: false
+
 
   Update:
     # Use auto update and builtin updater feature

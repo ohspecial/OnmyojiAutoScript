@@ -26,6 +26,7 @@ class ConfigModel:
     PypiMirror: Optional[str] = None
     InstallDependencies: bool = True
     RequirementsFile: str = "requirements.txt"
+    UseGpu: bool = False  # Enable GPU acceleration for PyTorch and ONNX
 
     # Adb
     AdbExecutable: str = "./toolkit/Lib/site-packages/adbutils/binaries/adb.exe"
@@ -166,3 +167,7 @@ class DeployConfig(ConfigModel):
         )
         logger.info("Take the screenshot of entire window if you need help")
 
+
+if __name__ == "__main__":
+    config = DeployConfig()
+    config.write()

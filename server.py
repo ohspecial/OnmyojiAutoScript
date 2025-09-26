@@ -8,6 +8,7 @@
 • Win-Py ≤ 3.10            → TZ='CST-8'       + _tzset()（POSIX 语法）
 """
 import os, sys, time
+from module.ocr.rpc import start_ocr_server
 
 if hasattr(time, "tzset"):
     # Unix 全系  /  Windows 3.11+ 走这条
@@ -77,6 +78,10 @@ def fun(ev: threading.Event):
     logger.attr("Host", host)
     logger.attr("Port", port)
     logger.attr("Reload", ev is not None)
+    # ocrServer
+    if State.deploy_config.UseOcrServer:
+        port = args.port or State.deploy_config.OcrServerPort
+        start_ocr_server(port=port)
 
     uvicorn.run("module.server.app:fastapi_app",
                 host=host,
