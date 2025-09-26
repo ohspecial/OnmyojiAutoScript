@@ -21,8 +21,8 @@ if State.deploy_config.UseOcrServer:
     from module.ocr.rpc import ModelProxyFactory
     OCR_MODEL = ModelProxyFactory()
 else:
-    from module.ocr.models import OCR_MODEL
-    OCR_MODEL = OCR_MODEL
+    from module.ocr.models import OcrModel
+    OCR_MODEL = OcrModel()
 
 def enlarge_canvas(image):
     """

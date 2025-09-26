@@ -6,7 +6,7 @@ from module.logger import logger
 from module.server.setting import State
 
 process: multiprocessing.Process = None
-from module.ocr.models import OcrModel
+
 
 class ModelProxy:
     client = None
@@ -54,7 +54,8 @@ class ModelProxy:
                 logger.warning(f"Ocr server disconnected: {e}")
 
                 self.online = False
-        from module.ocr.models import OCR_MODEL
+        from module.ocr.models import OcrModel
+        OCR_MODEL = OcrModel()
         return OCR_MODEL.__getattribute__(self.lang).ocr(img_fp)
     def detect_and_ocr(self, img_fp, drop_score=None):
         if self.online:
@@ -64,7 +65,8 @@ class ModelProxy:
             except Exception as e:
                 logger.warning(f"Ocr server disconnected: {e}")
                 self.online = False
-        from module.ocr.models import OCR_MODEL
+        from module.ocr.models import OcrModel
+        OCR_MODEL = OcrModel()
         return OCR_MODEL.__getattribute__(self.lang).detect_and_ocr(img_fp, drop_score)
     def ocr_lines(self, img_fp):
         if self.online:
@@ -73,7 +75,8 @@ class ModelProxy:
                 return self.client("ocr_lines", img_str)
             except:
                 self.online = False
-        from module.ocr.models import OCR_MODEL
+        from module.ocr.models import OcrModel
+        OCR_MODEL = OcrModel()
         return OCR_MODEL.__getattribute__(self.lang).ocr_lines(img_fp)
     def ocr_single_line(self, img_fp):
         if self.online:
@@ -83,7 +86,8 @@ class ModelProxy:
             except Exception as e:
                 logger.warning(f"Ocr server disconnected: {e}")
                 self.online = False
-        from module.ocr.models import OCR_MODEL
+        from module.ocr.models import OcrModel
+        OCR_MODEL = OcrModel()
         return OCR_MODEL.__getattribute__(self.lang).ocr_single_line(img_fp)
 
 class ModelProxyFactory:
@@ -98,6 +102,7 @@ class ModelProxyFactory:
 def start_ocr_server(port=22268):
     import zerorpc
     import zmq
+    from module.ocr.models import OcrModel
 
     class OCRServer(OcrModel):
         def hello(self):
