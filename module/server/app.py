@@ -37,11 +37,6 @@ app.include_router(home_app)
 app.include_router(script_app)
 
 
-# ocrServer
-if State.deploy_config.UseOcrServer:
-    port = State.deploy_config.OcrServerPort
-    start_ocr_server_process(port=port)
-
 @app.on_event("startup")
 async def startup_event():
     logger.info('OAS web service startup done')
