@@ -14,7 +14,9 @@ from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr
 class OcrModel:
     @cached_property
     def ch(self):
-        return ONNXPaddleOcr(use_angle_cls=True,use_gpu=False)
+        use_gpu = torch.cuda.is_available()
+        logger.info("ocr use gpu: %s" % use_gpu)
+        return ONNXPaddleOcr(use_angle_cls=True,use_gpu=use_gpu,use_onnx=True)
 
 
 OCR_MODEL = OcrModel()
