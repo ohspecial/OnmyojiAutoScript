@@ -97,7 +97,7 @@ class GPUDependencyManager:
             logger.info('PyTorch CPU installation completed')
 
             # Install onnxruntime CPU version (指定版本以确保兼容性)
-            onnx_cmd = f'{self.pip_cmd} install "onnxruntime>=1.16.0,<1.24.0"{self.arg_str}'
+            onnx_cmd = f'{self.pip_cmd} install "onnxruntime>=1.16.0,<1.23.0"{self.arg_str}'
             logger.info('Installing onnxruntime CPU version...')
             result = subprocess.run(onnx_cmd, shell=True, check=True, capture_output=True, text=True)
             logger.info('onnxruntime CPU installation completed')

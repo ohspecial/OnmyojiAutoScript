@@ -158,6 +158,9 @@ def stop_ocr_server_process():
     else:
         logger.info("[OcrServer] OCR server process is not running")
 
+
+
+
 if __name__ == "__main__":
     # Run server
     parser = argparse.ArgumentParser(description="OAS OCR service")

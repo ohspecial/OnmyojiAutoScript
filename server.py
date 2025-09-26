@@ -83,6 +83,7 @@ def fun(ev: threading.Event):
         port = args.port or State.deploy_config.OcrServerPort
         start_ocr_server(port=port)
 
+
     uvicorn.run("module.server.app:fastapi_app",
                 host=host,
                 port=port,
