@@ -136,11 +136,15 @@ def alive() -> bool:
     else:
         return False
 
+# 脱离主进程运行
 def start_ocr_server_process(port=22268):
     global process
-    if not alive():
-        process = multiprocessing.Process(target=start_ocr_server, args=(port,))
-        process.start()
+    if alive():
+        logger.warning("Ocr server process already running")
+        return
+    process = multiprocessing.Process(target=start_ocr_server, args=(port,))
+    process.start()
+    logger.info(f"Ocr server process started on port {port}")
 
 def stop_ocr_server_process():
     """停止OCR server进程"""

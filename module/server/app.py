@@ -6,11 +6,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from module.logger import logger
+from module.ocr.rpc import start_ocr_server_process
 
 from module.server.home_router import home_app
 from module.server.script_router import script_app
-
-
+from module.server.setting import State
 
 app = FastAPI(
     title='OAS',
@@ -29,6 +29,10 @@ app.add_middleware(
 app.include_router(home_app)
 app.include_router(script_app)
 
+# ocrServer
+if State.deploy_config.UseOcrServer:
+    port = State.deploy_config.OcrServerPort
+    start_ocr_server_process(port=port)
 
 @app.on_event("startup")
 async def startup_event():
