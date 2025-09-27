@@ -17,7 +17,7 @@ class ModelProxy:
         import zerorpc
 
         logger.info(f"Connecting to OCR server {address}")
-        cls.client = zerorpc.Client(timeout=10)
+        cls.client = zerorpc.Client(timeout=30)
         cls.client.connect(f"tcp://{address}")
         try:
             cls.client.hello()
@@ -185,4 +185,4 @@ if __name__ == "__main__":
     )
     args, _ = parser.parse_known_args()
     port = args.port or State.deploy_config.OcrServerPort
-    start_ocr_server(port=22273)
+    start_ocr_server(port=22268)

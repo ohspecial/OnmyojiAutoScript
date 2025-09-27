@@ -19,10 +19,18 @@ class GPUDependencyManager:
     def check_cuda_available(self):
         """Check if CUDA is available on the system"""
         try:
+            # 首先尝试通过onnxruntime检查CUDA
+            import onnxruntime
+            providers = onnxruntime.get_available_providers()
+            return 'CUDAExecutionProvider' in providers
+        except ImportError:
+            pass
+
+        try:
             import torch
             return torch.cuda.is_available()
         except ImportError:
-            # If torch is not installed, we can't check CUDA availability
+            # If neither onnxruntime nor torch is installed, we can't check CUDA availability
             return False
 
     def uninstall_conflicting_packages(self):
@@ -42,42 +50,78 @@ class GPUDependencyManager:
             except Exception as e:
                 logger.debug(f'Failed to uninstall {package}: {e}')
 
-    def install_gpu_dependencies(self):
-        """Install GPU-specific dependencies"""
-        logger.hr('Installing GPU Dependencies', 1)
+    def install_onnxruntime_gpu(self):
+        """Install only onnxruntime-gpu without PyTorch for CUDA 12.4"""
+        logger.hr('Installing ONNX Runtime GPU Only', 1)
 
-        # First uninstall any existing conflicting packages
-        self.uninstall_conflicting_packages()
+        # 卸载冲突的onnxruntime包
+        packages_to_uninstall = ['onnxruntime', 'onnxruntime-gpu']
+        for package in packages_to_uninstall:
+            try:
+                logger.info(f'Uninstalling {package} if present...')
+                subprocess.run(
+                    f'{self.pip_cmd} uninstall {package} -y{self.arg_str}',
+                    shell=True, check=False, capture_output=True
+                )
+            except Exception as e:
+                logger.debug(f'Failed to uninstall {package}: {e}')
 
         try:
-            # Install PyTorch with CUDA support (CUDA 12.4)
-            torch_cmd = (
-                f'{self.pip_cmd} install torch torchvision torchaudio '
-                f'--index-url https://download.pytorch.org/whl/cu124{self.arg_str}'
-            )
-            logger.info('Installing PyTorch with CUDA 12.4 support...')
-            result = subprocess.run(torch_cmd, shell=True, check=True, capture_output=True, text=True)
-            logger.info('PyTorch CUDA installation completed')
-
-            # Install onnxruntime-gpu
-            onnx_cmd = f'{self.pip_cmd} install onnxruntime-gpu==1.22.0{self.arg_str}'
-            logger.info('Installing onnxruntime-gpu 1.22.0...')
+            # 为CUDA 12.4安装兼容的onnxruntime-gpu版本
+            # onnxruntime-gpu 1.19.0+ 支持CUDA 12.x
+            onnx_cmd = f'{self.pip_cmd} install onnxruntime-gpu==1.19.2{self.arg_str}'
+            logger.info('Installing onnxruntime-gpu 1.19.2 (compatible with CUDA 12.4)...')
             result = subprocess.run(onnx_cmd, shell=True, check=True, capture_output=True, text=True)
             logger.info('onnxruntime-gpu installation completed')
 
-            # Verify CUDA installation
-            if self.verify_cuda_installation():
-                logger.info('✓ GPU dependencies installed successfully and CUDA is available')
+            # 验证安装
+            if self.verify_onnx_gpu_installation():
+                logger.info('✓ ONNX Runtime GPU installed successfully and CUDA is available')
             else:
-                logger.warning('⚠ GPU dependencies installed but CUDA may not be available')
+                logger.warning('⚠ ONNX Runtime GPU installed but CUDA may not be available')
 
         except subprocess.CalledProcessError as e:
-            logger.error(f'Failed to install GPU dependencies: {e}')
+            logger.error(f'Failed to install onnxruntime-gpu: {e}')
             logger.error(f'Command output: {e.stdout if hasattr(e, "stdout") else ""}')
             logger.error(f'Command error: {e.stderr if hasattr(e, "stderr") else ""}')
             # Fallback to CPU installation
-            logger.info('Falling back to CPU dependencies...')
-            self.install_cpu_dependencies()
+            logger.info('Falling back to CPU onnxruntime...')
+            self.install_onnxruntime_cpu()
+
+    def install_onnxruntime_cpu(self):
+        """Install only onnxruntime CPU version"""
+        logger.hr('Installing ONNX Runtime CPU Only', 1)
+
+        # 卸载冲突的onnxruntime包
+        packages_to_uninstall = ['onnxruntime', 'onnxruntime-gpu']
+        for package in packages_to_uninstall:
+            try:
+                logger.info(f'Uninstalling {package} if present...')
+                subprocess.run(
+                    f'{self.pip_cmd} uninstall {package} -y{self.arg_str}',
+                    shell=True, check=False, capture_output=True
+                )
+            except Exception as e:
+                logger.debug(f'Failed to uninstall {package}: {e}')
+
+        try:
+            # 安装onnxruntime CPU版本
+            onnx_cmd = f'{self.pip_cmd} install onnxruntime==1.19.2{self.arg_str}'
+            logger.info('Installing onnxruntime CPU version 1.19.2...')
+            result = subprocess.run(onnx_cmd, shell=True, check=True, capture_output=True, text=True)
+            logger.info('onnxruntime CPU installation completed')
+
+            # 验证安装
+            if self.verify_onnx_installation():
+                logger.info('✓ ONNX Runtime CPU installed successfully')
+            else:
+                logger.warning('⚠ ONNX Runtime CPU installed but verification failed')
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f'Failed to install onnxruntime CPU: {e}')
+            logger.error(f'Command output: {e.stdout if hasattr(e, "stdout") else ""}')
+            logger.error(f'Command error: {e.stderr if hasattr(e, "stderr") else ""}')
+            raise
 
     def install_cpu_dependencies(self):
         """Install CPU-only dependencies"""
@@ -156,14 +200,41 @@ class GPUDependencyManager:
             logger.warning(f'CUDA verification failed: {e}')
             return False
 
+    def verify_onnx_gpu_installation(self):
+        """Verify that ONNX Runtime GPU installation is working"""
+        try:
+            # 清除已导入的模块以获取最新安装
+            modules_to_clear = ['onnxruntime', 'onnxruntime.capi._pybind_state']
+            for module in modules_to_clear:
+                if module in sys.modules:
+                    del sys.modules[module]
+
+            import onnxruntime
+            logger.info(f'ONNX Runtime verification: version {onnxruntime.__version__}')
+
+            # 检查可用的执行提供者
+            providers = onnxruntime.get_available_providers()
+            logger.info(f'Available providers: {providers}')
+
+            # 检查是否有CUDA支持
+            has_cuda = 'CUDAExecutionProvider' in providers
+            if has_cuda:
+                logger.info('✓ CUDA Execution Provider is available')
+            else:
+                logger.warning('⚠ CUDA Execution Provider not found')
+
+            return has_cuda
+
+        except Exception as e:
+            logger.warning(f'ONNX Runtime GPU verification failed: {e}')
+            return False
+
     def install_dependencies(self, use_gpu=True):
-        """Main method to install dependencies based on GPU configuration"""
+        """Main method to install dependencies based on configuration"""
         if use_gpu:
-            logger.info('UseGpu is enabled, installing CUDA dependencies...')
-            self.install_gpu_dependencies()
+            self.install_onnxruntime_gpu()
         else:
-            logger.info('UseGpu is disabled, installing CPU dependencies...')
-            self.install_cpu_dependencies()
+            self.install_onnxruntime_cpu()
 
 if __name__ == "__main__":
     # Example usage
@@ -171,4 +242,4 @@ if __name__ == "__main__":
     arg_string = " --trusted-host pypi.org --trusted-host files.pythonhosted.org"
 
     manager = GPUDependencyManager(pip_command, arg_string)
-    manager.install_dependencies(use_gpu=True)  # Change to False to install CPU dependencies
+    manager.install_dependencies(use_gpu=True)
