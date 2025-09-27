@@ -50,11 +50,44 @@ class GPUDependencyManager:
             except Exception as e:
                 logger.debug(f'Failed to uninstall {package}: {e}')
 
+    def check_package_version(self, package_name, target_version):
+        """Check if a package is installed with the target version"""
+        try:
+            result = subprocess.run(
+                f'{self.pip_cmd} show {package_name}',
+                shell=True, check=False, capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                # Parse the output to get version
+                for line in result.stdout.split('\n'):
+                    if line.startswith('Version:'):
+                        current_version = line.split(':')[1].strip()
+                        logger.info(f'{package_name} current version: {current_version}')
+                        return current_version == target_version
+            return False
+        except Exception as e:
+            logger.debug(f'Failed to check {package_name} version: {e}')
+            return False
+
     def install_onnxruntime_gpu(self):
         """Install only onnxruntime-gpu without PyTorch for CUDA 12.4"""
         logger.hr('Installing ONNX Runtime GPU Only', 1)
 
-        # 卸载冲突的onnxruntime包
+        target_version = "1.19.2"
+
+        # 检查当前是否已安装目标版本
+        if self.check_package_version('onnxruntime-gpu', target_version):
+            logger.info(f'✓ onnxruntime-gpu {target_version} already installed, skipping installation')
+            # 仍然进行验证
+            if self.verify_onnx_gpu_installation():
+                logger.info('✓ ONNX Runtime GPU verification successful')
+                return
+            else:
+                logger.warning('⚠ Existing installation verification failed, reinstalling...')
+        else:
+            logger.info(f'onnxruntime-gpu {target_version} not found, proceeding with installation')
+
+        # 如果没有目标版本或验证失败，则卸载并重新安装
         packages_to_uninstall = ['onnxruntime', 'onnxruntime-gpu']
         for package in packages_to_uninstall:
             try:
@@ -69,8 +102,8 @@ class GPUDependencyManager:
         try:
             # 为CUDA 12.4安装兼容的onnxruntime-gpu版本
             # onnxruntime-gpu 1.19.0+ 支持CUDA 12.x
-            onnx_cmd = f'{self.pip_cmd} install onnxruntime-gpu==1.19.2{self.arg_str}'
-            logger.info('Installing onnxruntime-gpu 1.19.2 (compatible with CUDA 12.4)...')
+            onnx_cmd = f'{self.pip_cmd} install onnxruntime-gpu=={target_version}{self.arg_str}'
+            logger.info(f'Installing onnxruntime-gpu {target_version} (compatible with CUDA 12.4)...')
             result = subprocess.run(onnx_cmd, shell=True, check=True, capture_output=True, text=True)
             logger.info('onnxruntime-gpu installation completed')
 
@@ -92,7 +125,21 @@ class GPUDependencyManager:
         """Install only onnxruntime CPU version"""
         logger.hr('Installing ONNX Runtime CPU Only', 1)
 
-        # 卸载冲突的onnxruntime包
+        target_version = "1.19.2"
+
+        # 检查当前是否已安装目标版本
+        if self.check_package_version('onnxruntime', target_version):
+            logger.info(f'✓ onnxruntime {target_version} already installed, skipping installation')
+            # 仍然进行验证
+            if self.verify_onnx_installation():
+                logger.info('✓ ONNX Runtime CPU verification successful')
+                return
+            else:
+                logger.warning('⚠ Existing installation verification failed, reinstalling...')
+        else:
+            logger.info(f'onnxruntime {target_version} not found, proceeding with installation')
+
+        # 如果没有目标版本或验证失败，则卸载并重新安装
         packages_to_uninstall = ['onnxruntime', 'onnxruntime-gpu']
         for package in packages_to_uninstall:
             try:
@@ -106,8 +153,8 @@ class GPUDependencyManager:
 
         try:
             # 安装onnxruntime CPU版本
-            onnx_cmd = f'{self.pip_cmd} install onnxruntime==1.19.2{self.arg_str}'
-            logger.info('Installing onnxruntime CPU version 1.19.2...')
+            onnx_cmd = f'{self.pip_cmd} install onnxruntime=={target_version}{self.arg_str}'
+            logger.info(f'Installing onnxruntime CPU version {target_version}...')
             result = subprocess.run(onnx_cmd, shell=True, check=True, capture_output=True, text=True)
             logger.info('onnxruntime CPU installation completed')
 
