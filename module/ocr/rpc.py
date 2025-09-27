@@ -60,7 +60,12 @@ class ModelProxy:
         if self.online:
             img_str = img_fp.dumps()
             try:
-                return self.client("detect_and_ocr", img_str, drop_score)
+                result_dicts = self.client("detect_and_ocr", img_str, drop_score)
+                # Convert dictionaries back to BoxedResult objects
+                if result_dicts:
+                    from module.ocr.onnx_paddle_ocr import BoxedResult
+                    return [BoxedResult.from_dict(result_dict) for result_dict in result_dicts]
+                return []
             except Exception as e:
                 logger.warning(f"Ocr server disconnected: {e}")
                 self.online = False
@@ -110,7 +115,11 @@ def start_ocr_server(port=22268):
         def detect_and_ocr(self, img_fp, drop_score=None):
             img_fp = pickle.loads(img_fp)
             cnocr = self.__getattribute__('ch')
-            return cnocr.detect_and_ocr(img_fp, drop_score)
+            results = cnocr.detect_and_ocr(img_fp, drop_score)
+            # Convert BoxedResult objects to serializable dictionaries
+            if results:
+                return [result.to_dict() for result in results]
+            return []
         def ocr_lines(self, img_fp):
             img_fp = pickle.loads(img_fp)
             cnocr = self.__getattribute__('ch')
@@ -176,4 +185,4 @@ if __name__ == "__main__":
     )
     args, _ = parser.parse_known_args()
     port = args.port or State.deploy_config.OcrServerPort
-    start_ocr_server(port=port)
+    start_ocr_server(port=22273)

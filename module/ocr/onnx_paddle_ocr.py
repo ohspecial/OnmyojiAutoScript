@@ -1,4 +1,6 @@
 from typing import List
+import pickle
+import base64
 
 import cv2
 import numpy as np
@@ -23,7 +25,30 @@ class BoxedResult(object):
     def __repr__(self):
         return self.__str__()
 
-class ONNXPaddleOcr(onnxocr.ONNXPaddleOcr):
+    def to_dict(self):
+        """Convert BoxedResult to a serializable dictionary"""
+        return {
+            'box': self.box,
+            'text_img': base64.b64encode(pickle.dumps(self.text_img)).decode('utf-8') if self.text_img is not None else None,
+            'ocr_text': self.ocr_text,
+            'score': self.score
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        """Create BoxedResult from a dictionary"""
+        text_img = None
+        if data['text_img'] is not None:
+            text_img = pickle.loads(base64.b64decode(data['text_img'].encode('utf-8')))
+
+        return cls(
+            box=data['box'],
+            text_img=text_img,
+            ocr_text=data['ocr_text'],
+            score=data['score']
+        )
+
+class ONNXPaddleOcr(onnx_paddleocr.ONNXPaddleOcr):
     def __init__(self,
                  use_gpu=True,
                  gpu_mem=500,

@@ -14,26 +14,27 @@ class OcrModel:
             logger.info(f"[UseGpu] {use_gpu}")
         return ONNXPaddleOcr(use_angle_cls=True,use_gpu=use_gpu)
 
-OCR_MODEL = OcrModel()
+# OCR_MODEL = OcrModel()
+
+from module.ocr.rpc import ModelProxyFactory
+OCR_MODEL = ModelProxyFactory()
 
 
+if __name__ == "__main__":
+    model = OCR_MODEL.__getattribute__('ch')
+    import cv2
+    import time
+    from memory_profiler import profile
+    image = cv2.imread(r"E:\img_tmp\2025-07-22_21-41-44-818362.png")
 
+    # 引入ocr 会导致非常巨大的内存开销
+    @profile
+    def test_memory():
+        for i in range(29999):
+            start_time = time.time()
+            result = model.detect_and_ocr(image)
+            print(result)
+            end_time = time.time()
+            print(f'耗时：{end_time-start_time}')
 
-# if __name__ == "__main__":
-#     model = OCR_MODEL.ch
-#     import cv2
-#     import time
-#     from memory_profiler import profile
-#     image = cv2.imread(r"d:\2025-07-17_12-52-22-184354.png")
-#
-#     # 引入ocr 会导致非常巨大的内存开销
-#     @profile
-#     def test_memory():
-#         for i in range(2):
-#             start_time = time.time()
-#             result = model.ocr(image)
-#             print(result)
-#             end_time = time.time()
-#             print(f'耗时：{end_time-start_time}')
-#
-#     test_memory()
+    test_memory()
