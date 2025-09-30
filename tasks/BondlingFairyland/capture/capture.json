@@ -2,8 +2,8 @@
   {
     "itemName": "tomb_guard",
     "imageName": "capture_tomb_guard.png",
-    "roiFront": "292,278,29,97",
-    "roiBack": "292,278,29,97",
+    "roiFront": "847,518,30,31",
+    "roiBack": "832,501,64,60",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "镇墓兽"
@@ -61,6 +61,15 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "battle_fail_abandon",
+    "imageName": "battle_fail_abandon.png",
+    "roiFront": "436,606,115,36",
+    "roiBack": "436,606,115,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "放弃结契"
   },
   {
     "itemName": "battle_success",

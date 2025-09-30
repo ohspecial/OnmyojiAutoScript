@@ -29,17 +29,17 @@ class BondlingFairylandAssets:
 	# Ocr-description 
 	O_B_BONDLING_CLASS = RuleOcr(roi=(266,271,79,112), area=(287,271,36,112), mode="Single", method="Default", keyword="", name="b_bondling_class")
 	# 小盘子 
-	O_B_LOW_NUMBER = RuleOcr(roi=(490,24,98,36), area=(490,24,98,36), mode="DigitCounter", method="Default", keyword="", name="b_low_number")
+	O_B_LOW_NUMBER = RuleOcr(roi=(543,14,96,33), area=(543,14,96,33), mode="DigitCounter", method="Default", keyword="", name="b_low_number")
 	# 中盘子 
-	O_B_MEDIUM_NUMBER = RuleOcr(roi=(687,21,101,36), area=(687,21,101,36), mode="DigitCounter", method="Default", keyword="", name="b_medium_number")
+	O_B_MEDIUM_NUMBER = RuleOcr(roi=(734,19,99,25), area=(734,19,99,25), mode="DigitCounter", method="Default", keyword="", name="b_medium_number")
 	# 大盘子 
-	O_B_HIGH_NUMBER = RuleOcr(roi=(883,23,100,32), area=(883,23,100,32), mode="DigitCounter", method="Default", keyword="", name="b_high_number")
+	O_B_HIGH_NUMBER = RuleOcr(roi=(928,17,94,30), area=(928,17,94,30), mode="DigitCounter", method="Default", keyword="", name="b_high_number")
 	# 鸣契石 
-	O_B_STONE_NUMBER = RuleOcr(roi=(858,22,82,40), area=(858,22,82,40), mode="DigitCounter", method="Default", keyword="", name="b_stone_number")
+	O_B_STONE_NUMBER = RuleOcr(roi=(1135,16,78,32), area=(1135,16,78,32), mode="DigitCounter", method="Default", keyword="", name="b_stone_number")
 	# 召唤契灵数量 
 	O_B_SUMMON_BALL_NUMBER = RuleOcr(roi=(546,540,100,45), area=(546,540,100,45), mode="Single", method="Default", keyword="", name="b_summon_ball_number")
 	# 抓捕契灵剩余数量 
-	O_B_BALL_NUMBER = RuleOcr(roi=(1190,532,70,30), area=(1190,532,70,30), mode="DigitCounter", method="Default", keyword="", name="b_ball_number")
+	O_B_BALL_NUMBER = RuleOcr(roi=(1186,666,65,26), area=(1186,666,65,26), mode="DigitCounter", method="Default", keyword="", name="b_ball_number")
 	# 好友邀请 
 	O_FRIEND = RuleOcr(roi=(357,89,100,54), area=(357,89,100,54), mode="Single", method="Default", keyword="", name="friend")
 	# 跨区邀请 
@@ -86,7 +86,7 @@ class BondlingFairylandAssets:
 
 	# Image Rule Assets
 	# 镇墓兽 
-	I_TOMB_GUARD = RuleImage(roi_front=(292,278,29,97), roi_back=(292,278,29,97), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_tomb_guard.png")
+	I_TOMB_GUARD = RuleImage(roi_front=(847,518,30,31), roi_back=(832,501,64,60), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_tomb_guard.png")
 	# 茨球 
 	I_SNOWBALL = RuleImage(roi_front=(532,375,44,48), roi_back=(512,353,94,93), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_snowball.png")
 	# 小黑 
@@ -99,6 +99,8 @@ class BondlingFairylandAssets:
 	I_CAP_FAILURE = RuleImage(roi_front=(1192,608,30,39), roi_back=(1192,608,30,39), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/capture_cap_failure.png")
 	# description 
 	I_BATTLE_FAIL = RuleImage(roi_front=(740,267,79,84), roi_back=(740,267,79,84), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/battle_fail.png")
+	# 放弃结契 
+	I_BATTLE_FAIL_ABANDON = RuleImage(roi_front=(436,606,115,36), roi_back=(436,606,115,36), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/battle_fail_abandon.png")
 	# description 
 	I_BATTLE_SUCCESS = RuleImage(roi_front=(651,203,70,81), roi_back=(651,203,70,81), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/capture/battle_success.png")
 

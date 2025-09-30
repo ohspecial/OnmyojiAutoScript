@@ -76,9 +76,11 @@ class BondlingBattle(GeneralBattle, BondlingFairylandAssets):
                 break
             if self.appear_then_click(self.I_WIN, threshold=0.6):
                 continue
-            if self.appear_then_click(self.I_BATTLE_SUCCESS, threshold=0.6):
+            if self.appear_then_click(self.I_BATTLE_SUCCESS, threshold=0.6, interval=1):
                 continue
-            if self.appear_then_click(self.I_BATTLE_FAIL, threshold=0.6):
+            if self.appear_then_click(self.I_BATTLE_FAIL_ABANDON, interval=1):
+                continue
+            if self.appear_then_click(self.I_BATTLE_FAIL, threshold=0.6, interval=1):
                 continue
             # 如果开启战斗过程随机滑动
             if random_click_swipt_enable:
@@ -97,9 +99,11 @@ class BondlingBattle(GeneralBattle, BondlingFairylandAssets):
                 continue
             if self.appear_then_click(self.I_WIN, threshold=0.6):
                 continue
-            if self.appear_then_click(self.I_BATTLE_SUCCESS, threshold=0.6):
+            if self.appear_then_click(self.I_BATTLE_SUCCESS, threshold=0.6, interval=1):
                 continue
-            if self.appear_then_click(self.I_BATTLE_FAIL, threshold=0.6):
+            if self.appear_then_click(self.I_BATTLE_FAIL_ABANDON, interval=1):
+                continue
+            if self.appear_then_click(self.I_BATTLE_FAIL, threshold=0.6, interval=1):
                 continue
             if not self.appear(self.I_REWARD):
                 break
