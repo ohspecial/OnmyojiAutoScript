@@ -12,6 +12,8 @@ from tasks.Utils.config_enum import ShikigamiClass
 class SelectFriendList(str, Enum):
     SAME_SERVER = 'same_server'
     DIFFERENT_SERVER = 'different_server'
+    BOTH = 'both'
+
 
 class UtilizeRule(str, Enum):
     DEFAULT = 'default'  # 默认就好
@@ -28,7 +30,7 @@ class UtilizeScheduler(Scheduler):
 
 class UtilizeConfig(BaseModel):
     utilize_rule: UtilizeRule = Field(default=UtilizeRule.DEFAULT, description='utilize_rule_help')
-    select_friend_list: SelectFriendList = Field(default=SelectFriendList.SAME_SERVER, description='select_friend_list_help')
+    select_friend_list: SelectFriendList = Field(default=SelectFriendList.BOTH, description='select_friend_list_help')
     shikigami_class: ShikigamiClass = Field(default=ShikigamiClass.N, description='shikigami_class_help')
     shikigami_order: int = Field(default=4, description='shikigami_order_help')
     utilize_enable: bool = Field(default=True, description='是否蹭卡，小号可以选择不蹭卡')

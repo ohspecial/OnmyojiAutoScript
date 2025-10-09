@@ -420,33 +420,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             raise ValueError('Unknown utilize rule')
         return result
 
-    def run_utilize(self, friend: SelectFriendList = SelectFriendList.SAME_SERVER,
-                    shikigami_class: ShikigamiClass = ShikigamiClass.N,
-                    shikigami_order: int = 7):
-        """
-        执行寄养
-        :param shikigami_class:
-        :param friend:
-        :param rule:
-        :return:
-        """
-        logger.hr('Start utilize')
-        if self.first_utilize:
-            self.swipe(self.S_U_END, interval=3)
-            self.first_utilize = False
-            if friend == SelectFriendList.SAME_SERVER:
-                self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-                self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            else:
-                self.switch_friend_list(SelectFriendList.SAME_SERVER)
-                self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-        else:
-            self.switch_friend_list(friend)
-
-        # --------------- 结界卡选择 ---------------
-        if not self._select_optimal_resource_card():
-            return False
-
+    def _utilize_proceed_to_enter(self, shikigami_class: ShikigamiClass, shikigami_order: int) -> bool:
         # 找到卡,重置次数
         self.utilize_add_count = 0
         logger.info('开始执行进入结界蹭卡流程')
@@ -456,7 +430,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             logger.warning('Cannot find enter realm button')
             # 可能是滑动的时候出错
             logger.warning('The best reason is that the swipe is wrong')
-            return
+            return False
         wait_timer = Timer(20)
         wait_timer.start()
         while 1:
@@ -475,7 +449,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             if wait_timer.reached():
                 self.save_image(wait_time=0, push_flag=False, content='进入好友结界超时', image_type='png')
                 logger.warning('Appear friend realm timeout')
-                return
+                return False
             if self.appear_then_click(self.I_CHECK_FRIEND_REALM_2, interval=1.5):
                 logger.info('Click too fast to enter the friend\'s realm pool')
                 continue
@@ -503,6 +477,115 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         # 上式神
         self.set_shikigami(shikigami_order, stop_image)
         return True
+
+    def _utilize_find_and_select_best(self, shikigami_class: ShikigamiClass, shikigami_order: int):
+        logger.info("开启智能选择模式，将从所有好友列表中寻找最佳结界卡")
+
+        RESOURCE_PRESETS = {
+            '斗鱼': [151, 143, 134, 126, 101, 84],
+            '太鼓': [76, 76, 67, 67, 59, 50]
+        }
+        MAX_INDEX = 99
+
+        def get_resource_index(resource_name, current_value, preset_values):
+            for idx, val in enumerate(preset_values):
+                if current_value >= val:
+                    return idx
+            return MAX_INDEX
+
+        def get_best_card_from_pair(ap, jade):
+            ap_idx = get_resource_index('斗鱼', ap, RESOURCE_PRESETS['斗鱼'])
+            jade_idx = get_resource_index('太鼓', jade, RESOURCE_PRESETS['太鼓'])
+            if ap == 0 and jade == 0:
+                return None, 0, MAX_INDEX
+            if ap_idx <= jade_idx:
+                return '斗鱼', ap, ap_idx
+            else:
+                return '太鼓', jade, jade_idx
+
+        
+
+        best_overall = {'ap': 0, 'jade': 0, 'friend_list': None}
+        friend_lists_to_scan = [SelectFriendList.SAME_SERVER, SelectFriendList.DIFFERENT_SERVER]
+
+        for friend_list in friend_lists_to_scan:
+            self.switch_friend_list(friend_list)
+            self.ap_max_num = 0
+            self.jade_max_num = 0
+
+            logger.info(f"正在扫描 {friend_list.value} 列表...")
+            if self._current_select_best(selected_card=False):
+                logger.info(f"在 {friend_list.value} 列表中发现完美结界卡，直接选择。")
+                return self._utilize_proceed_to_enter(shikigami_class, shikigami_order)
+
+            logger.info(f"扫描完成 {friend_list.value}: 最佳斗鱼={self.ap_max_num}, 最佳太鼓={self.jade_max_num}")
+
+            current_best_type, current_best_val, current_best_idx = get_best_card_from_pair(self.ap_max_num,
+                                                                                             self.jade_max_num)
+            overall_best_type, overall_best_val, overall_best_idx = get_best_card_from_pair(best_overall['ap'],
+                                                                                            best_overall['jade'])
+
+            if current_best_type:
+                if not overall_best_type or current_best_idx < overall_best_idx or \
+                        (current_best_idx == overall_best_idx and current_best_val > overall_best_val):
+                    logger.info(f"发现新的最优选择在 {friend_list.value}: {current_best_type} ({current_best_val})")
+                    best_overall['ap'] = self.ap_max_num
+                    best_overall['jade'] = self.jade_max_num
+                    best_overall['friend_list'] = friend_list
+
+        if not best_overall['friend_list']:
+            logger.warning("在所有好友列表中均未找到合适的结界卡。")
+            return False
+
+        logger.info(
+            f"全列表扫描完成. 最佳结界卡位于 {best_overall['friend_list'].value} (斗鱼: {best_overall['ap']}, 太鼓: {best_overall['jade']})")
+
+        self.switch_friend_list(best_overall['friend_list'])
+
+        res_type, target, _ = get_best_card_from_pair(best_overall['ap'], best_overall['jade'])
+
+        logger.info(f"返回列表 {best_overall['friend_list'].value} 尝试选择 {res_type} (>= {target}).")
+
+        if self._current_select_best(res_type, target, selected_card=True):
+            logger.info("成功重新定位并选择最佳结界卡。")
+            return self._utilize_proceed_to_enter(shikigami_class, shikigami_order)
+        else:
+            logger.warning("无法重新定位最佳结界卡，可能已被占用。重置记录以备下次运行。")
+            self.ap_max_num, self.jade_max_num = 0, 0
+            return False
+
+    def run_utilize(self, friend: SelectFriendList = SelectFriendList.SAME_SERVER,
+                    shikigami_class: ShikigamiClass = ShikigamiClass.N,
+                    shikigami_order: int = 7):
+        """
+        执行寄养
+        :param shikigami_class:
+        :param friend:
+        :param rule:
+        :return:
+        """
+        logger.hr('Start utilize')
+
+        if friend == SelectFriendList.BOTH:
+            return self._utilize_find_and_select_best(shikigami_class, shikigami_order)
+
+        if self.first_utilize:
+            self.swipe(self.S_U_END, interval=3)
+            self.first_utilize = False
+            if friend == SelectFriendList.SAME_SERVER:
+                self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+                self.switch_friend_list(SelectFriendList.SAME_SERVER)
+            else:
+                self.switch_friend_list(SelectFriendList.SAME_SERVER)
+                self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+        else:
+            self.switch_friend_list(friend)
+
+        # --------------- 结界卡选择 ---------------
+        if not self._select_optimal_resource_card():
+            return False
+
+        return self._utilize_proceed_to_enter(shikigami_class, shikigami_order)
 
     def _select_optimal_resource_card(self):
         """整合后的智能选卡主逻辑（无嵌套函数版）"""
@@ -746,12 +829,13 @@ if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('xiaohao')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
-    for i in range(10):
-        t.perform_swipe_action()
-    t.recive_guild_ap_or_assets()
+    t.run()
+    # for i in range(10):
+    #     t.perform_swipe_action()
+    # t.recive_guild_ap_or_assets()
     # t.check_utilize_add()
     # t.check_card_num('勾玉', 67)
     # t.screenshot()
