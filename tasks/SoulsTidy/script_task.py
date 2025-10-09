@@ -99,11 +99,15 @@ class ScriptTask(GameUi, SoulsTidyAssets):
             if self.appear_then_click(self.I_ST_BONGNA, interval=1, threshold=0.6):
                 continue
         if self.config.souls_tidy.simple_tidy.enable_maneki:
+            """
+            """
             logger.hr('Enter bongna')
-            # 进入已弃置界面
-            """
-            现在默认进入就是已弃置界面,所以不需要点击
-            """
+            # 确保已弃置界面
+            while 1:
+                self.screenshot()
+                if self.appear(self.I_ST_ABANDONED_SELECTED):
+                    break
+                self.click(self.I_ST_ABANDONED_SELECTED, interval=1.5)
             # 确保是按照等级来排序的
             while 1:
                 self.screenshot()
@@ -183,3 +187,4 @@ if __name__ == '__main__':
 
     #t.greed_maneki()
     t.run()
+

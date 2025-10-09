@@ -12,13 +12,13 @@ class BondlingFairylandAssets:
 
 	# Click Rule Assets
 	# description 
-	C_STONE_1 = RuleClick(roi_front=(239,536,26,24), roi_back=(0,0,100,100), name="stone_1")
+	C_STONE_1 = RuleClick(roi_front=(230,533,23,20), roi_back=(0,0,100,100), name="stone_1")
 	# description 
-	C_STONE_2 = RuleClick(roi_front=(417,490,26,23), roi_back=(0,0,100,100), name="stone_2")
+	C_STONE_2 = RuleClick(roi_front=(441,569,23,20), roi_back=(0,0,100,100), name="stone_2")
 	# description 
-	C_STONE_3 = RuleClick(roi_front=(705,511,28,26), roi_back=(0,0,100,100), name="stone_3")
+	C_STONE_3 = RuleClick(roi_front=(692,537,23,20), roi_back=(0,0,100,100), name="stone_3")
 	# description 
-	C_STONE_4 = RuleClick(roi_front=(911,487,27,24), roi_back=(0,0,100,100), name="stone_4")
+	C_STONE_4 = RuleClick(roi_front=(944,529,23,20), roi_back=(0,0,100,100), name="stone_4")
 	# description 
 	C_STONE_5 = RuleClick(roi_front=(1041,494,25,25), roi_back=(0,0,100,100), name="stone_5")
 	# description 

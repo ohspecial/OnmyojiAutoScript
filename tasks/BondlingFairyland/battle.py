@@ -5,6 +5,7 @@ from datetime import timedelta, datetime
 
 import random
 
+from module.server.i18n import I18n
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.BondlingFairyland.assets import BondlingFairylandAssets
 from tasks.BondlingFairyland.config_battle import BattleConfig
@@ -22,12 +23,7 @@ class BondlingBattle(GeneralBattle, BondlingFairylandAssets):
         """
         logger.hr("General battle start", 2)
         self.current_count += 1
-        logger.info(f'Current count: {self.current_count} / {limit_count}')
-
-        task_run_time = datetime.now() - self.start_time
-        # 格式化时间，只保留整数部分的秒
-        task_run_time_seconds = timedelta(seconds=int(task_run_time.total_seconds()))
-        logger.info(f'Current times: {task_run_time_seconds} / {self.limit_time}')
+        logger.info(f"Current count: {self.current_count} / " + str(limit_count))
 
         if self.check_load():
             # 首先要判断进入战斗的界面

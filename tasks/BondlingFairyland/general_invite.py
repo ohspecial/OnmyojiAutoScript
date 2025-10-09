@@ -68,7 +68,7 @@ class GeneralInvite(BaseTask, BondlingFairylandAssets, GeneralInviteAssets):
         while 1:
             self.screenshot()
             if self.timer_wait.reached():
-                logger.warning('Wait timeout')
+                logger.warning('队长等待超时...')
                 return False
             if self.appear(self.I_MATCHING):
                 logger.warning('Timeout, now is no room')
@@ -465,7 +465,7 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    c = Config('oas1')
+    c = Config('du')
     d = Device(c)
     t = GeneralInvite(c, d)
 
