@@ -542,6 +542,12 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
         self.switch_friend_list(best_overall['friend_list'])
 
+        # 强制刷新列表，确保从顶部开始搜索
+        logger.info("重置列表位置...")
+        other_list = SelectFriendList.SAME_SERVER if best_overall['friend_list'] == SelectFriendList.DIFFERENT_SERVER else SelectFriendList.DIFFERENT_SERVER
+        self.switch_friend_list(other_list)
+        self.switch_friend_list(best_overall['friend_list'])
+
         res_type, target, _ = get_best_card_from_pair(best_overall['ap'], best_overall['jade'])
 
         logger.info(f"返回列表 {best_overall['friend_list'].value} 尝试选择 {res_type} (>= {target}).")
