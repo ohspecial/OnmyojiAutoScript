@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from tasks.Component.GeneralBattle.config_general_battle import GreenMarkType
 
 class BattleConfig(BaseModel):
+    lock_team_enable: bool = Field(default=False, description='lock_team_enable_help')
     # 是否开启绿标
     green_enable: bool = Field(default=False, description='green_enable_help')
     # 选哪一个绿标
