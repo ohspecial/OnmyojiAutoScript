@@ -79,21 +79,18 @@ class Single(BaseCor):
             result = self.ocr_single_line(image)
             if result != "":
                 return result
-            else:
-                # 如果没有识别到，这个时候考虑到可能是竖方向的文本, 使用detect_and_ocr来进行识别
-                logger.info(f"[{self.name}] Try to detect vertically")
-                result = self.detect_and_ocr(image)
-                logger.info(f"[{self.name}] result: {result}")
-                if not result:
-                    logger.info(f"[{self.name}]: No text detected in ROI")
-                    return ""
-                # 当识别结果有多个时，进行拼接返回
-                res = ""
-                for i in range(len(result)):
-                    if result[i].ocr_text != "" and result[i].score > self.score:
-                        res =  res.join(str(result[i].ocr_text))
+
+            # 如果没有识别到，这个时候考虑到可能是竖方向的文本, 使用detect_and_ocr来进行识别
+            logger.info(f"[{self.name}] Try to detect vertically")
+            result = self.detect_and_ocr(image)
+            if not result:
+                logger.info(f"[{self.name}]: No text detected in ROI")
+                return ""
+            if result[0].ocr_text != "" and result[0].score > self.score:
+                return result[0].ocr_text
+
             # 如果还是没有识别到。那可能就是真的没有识别到了
-            return res
+            return ""
         else:
             raise ScriptError("Roi is empty")
 
@@ -259,7 +256,7 @@ class Quantity(BaseCor):
             return 0
 
         box = boxed_results[0].box
-        self.area = box[0][0] + self.roi[0], box[0][1] + self.roi[1], box[1][0] - box[0][0], box[2][1] - box[0][1]
+        self.area = box[0, 0] + self.roi[0], box[0, 1] + self.roi[1], box[1, 0] - box[0, 0], box[2, 1] - box[0, 1]
         return boxed_results[0].ocr_text
 
 

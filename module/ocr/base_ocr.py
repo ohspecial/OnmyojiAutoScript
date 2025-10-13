@@ -156,14 +156,16 @@ class BaseCor:
         :return:
         """
         # pre process
+        start_time = time.time()
         image = self.crop(image, self.roi)
-
+        image = self.pre_process(image)
         # ocr
         result, score = self.model.ocr_single_line(image)
         if score < self.score:
             result = ""
-        # after process
+        # after proces
         result = self.after_process(result)
+        # logger.info("ocr result score: %s" % score)
         logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
                     text=f'[{result}]')
         return result
@@ -189,12 +191,6 @@ class BaseCor:
         # after proces
         for result in boxed_results:
             result.ocr_text = self.after_process(result.ocr_text)
-            box = result.box  # 获取边界框坐标
-            x_min = self.roi[0] + box[0][0]
-            y_min = self.roi[1] + box[0][1]
-            width = box[1][0] - box[0][0]
-            height = box[2][1] - box[1][1]
-            result.after_box = [int(x_min), int(y_min), int(width), int(height)]
             results.append(result)
 
         logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),

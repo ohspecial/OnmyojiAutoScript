@@ -4,14 +4,16 @@ import base64
 
 import cv2
 import numpy as np
-import onnxocr.onnx_paddleocr as onnxocr
+
+
+from module.ocr.onnxocr import onnx_paddleocr
+
 
 class BoxedResult(object):
     box: List[int]
     text_img: np.ndarray
     ocr_text: str
     score: float
-    after_box: List[int]
 
     def __init__(self, box, text_img, ocr_text, score):
         self.box = box
