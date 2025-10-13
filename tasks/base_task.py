@@ -157,7 +157,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             self.click(self.C_RANDOM_CLICK)
     
     def appear(self,
-               target: RuleImage | RuleGif,
+               target: RuleImage | RuleGif | RuleOcr,
                interval: float = None,
                threshold: float = None):
         """
@@ -167,9 +167,6 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
         :param threshold:
         :return:
         """
-        if not isinstance(target, RuleImage) and not isinstance(target, RuleGif):
-            return False
-
         if interval:
             if target.name in self.interval_timer:
                 if self.interval_timer[target.name].limit != interval:
@@ -178,8 +175,10 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
                 self.interval_timer[target.name] = Timer(interval)
             if not self.interval_timer[target.name].reached():
                 return False
-
-        appear = target.match(self.device.image, threshold=threshold)
+        if isinstance(target, RuleOcr):
+            appear = self.ocr_appear(target, interval)
+        else:
+            appear = target.match(self.device.image, threshold=threshold)
 
         if appear and interval:
             self.interval_timer[target.name].reset()
