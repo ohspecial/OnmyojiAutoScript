@@ -15,12 +15,14 @@ class OcrModel:
         return ONNXPaddleOcr(use_angle_cls=True,use_gpu=use_gpu)
 
 # OCR_MODEL = OcrModel()
-
 from module.ocr.rpc import ModelProxyFactory
+
 OCR_MODEL = ModelProxyFactory()
 
 
+
 if __name__ == "__main__":
+
     model = OCR_MODEL.__getattribute__('ch')
     import cv2
     import time
