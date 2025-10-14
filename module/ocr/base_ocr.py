@@ -86,6 +86,12 @@ class BaseCor:
         self.area: list = list(area)
         self.keyword = keyword
 
+    def __str__(self):
+        return f"{self.name}"
+
+    def __repr__(self):
+        return f"{self.name}"
+
     @cached_property
     def model(self) -> ONNXPaddleOcr:  #因为目前只有一个语言，所以直接返回对应的模型
         return OCR_MODEL.__getattribute__(self.lang)
