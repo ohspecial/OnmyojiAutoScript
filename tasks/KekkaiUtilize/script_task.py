@@ -2,6 +2,7 @@
 # @author runhey
 # github https://github.com/runhey
 import re
+import re
 import time
 from cached_property import cached_property
 from datetime import timedelta, datetime
@@ -9,6 +10,7 @@ from datetime import timedelta, datetime
 from module.base.timer import Timer
 from module.atom.image_grid import ImageGrid
 from module.logger import logger
+from module.exception import TaskEnd
 from module.exception import TaskEnd
 
 from tasks.GameUi.game_ui import GameUi
@@ -22,9 +24,18 @@ from module.base.utils import point2str
 import random
 
 """ 结界蹭卡 """
+from module.base.utils import point2str
+import random
+
+""" 结界蹭卡 """
 
 
 class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
+    last_best_index = 99
+    utilize_add_count = 0
+    ap_max_num = 0
+    jade_max_num = 0
+    first_utilize = True
     last_best_index = 99
     utilize_add_count = 0
     ap_max_num = 0
@@ -35,6 +46,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         con = self.config.kekkai_utilize.utilize_config
         self.ui_get_current_page()
         self.ui_goto(page_guild)
+
 
         # 进入寮结界
         self.goto_realm()
@@ -47,8 +59,86 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         # 检查蹭卡收获
         self.check_utilize_harvest()
         # 收体力盒子或者是经验盒子
+        # 育成界面去蹭卡
+        if con.utilize_enable:
+            self.check_utilize_add()
+
+        # 查看育成满级
+        self.check_max_lv(con.shikigami_class)
+        # 检查蹭卡收获
+        self.check_utilize_harvest()
+        # 收体力盒子或者是经验盒子
         self.check_box_ap_or_exp(con.box_ap_enable, con.box_exp_enable, con.box_exp_waste)
 
+        # 收取寮资金和体力
+        self.recive_guild_ap_or_assets()
+        if not con.utilize_enable:
+            self.set_next_run(task='KekkaiUtilize', finish=True, success=True)
+        raise TaskEnd
+
+    def recive_guild_ap_or_assets(self):
+        for i in range(1, 5):
+            self.ui_get_current_page()
+            self.ui_goto(page_guild)
+            # 在寮的主界面 检查是否有收取体力或者是收取寮资金
+            if self.check_guild_ap_or_assets():
+                logger.warning(f'第[{i}]次检查寮收获,成功')
+                self.ui_goto(page_main)
+                break
+            else:
+                logger.warning(f'第[{i}]次检查寮收获寮收获,失败')
+            self.ui_goto(page_main)
+
+    def check_utilize_add(self):
+        con = self.config.kekkai_utilize.utilize_config
+        while 1:
+            self.utilize_add_count += 1
+            if self.utilize_add_count >= 5:
+                logger.warning('没有合适可以蹭的卡, 5分钟后再次执行蹭卡')
+                self.push_notify(content=f"没有合适可以蹭的卡, 5分钟后再次执行蹭卡")
+                self.set_next_run(task='KekkaiUtilize', target=datetime.now() + timedelta(minutes=5))
+                return
+
+            # 无论收不收到菜，都会进入看看至少看一眼时间还剩多少
+            time.sleep(0.5)
+            # 进入育成界面
+            self.realm_goto_grown()
+            self.screenshot()
+
+            if not self.appear(self.I_UTILIZE_ADD):
+                remaining_time = self.O_UTILIZE_RES_TIME.ocr(self.device.image)
+                if not isinstance(remaining_time, timedelta):
+                    logger.warning('Ocr remaining time error')
+                logger.info(f'Utilize remaining time: {remaining_time}')
+                # 已经蹭上卡了，设置下次蹭卡时间  # 减少30秒
+                # remaining_time = remaining_time - timedelta(seconds=30)
+                next_time = datetime.now() + remaining_time
+                self.set_next_run(task='KekkaiUtilize', target=next_time)
+                return
+            if not self.grown_goto_utilize():
+                logger.info('Utilize failed, exit')
+            # 开始执行寄养
+            if self.run_utilize(con.select_friend_list, con.shikigami_class, con.shikigami_order):
+                # 退出寮结界
+                self.back_guild()
+                # 进入寮结界
+                self.goto_realm()
+            else:
+                self.back_realm()
+
+    def check_max_lv(self, shikigami_class: ShikigamiClass = ShikigamiClass.N):
+        """
+        在结界界面，进入式神育成，检查是否有满级的，如果有就换下一个
+        退出的时候还是结界界面
+        :return:
+        """
+        self.realm_goto_grown()
+        if self.appear(self.I_RS_LEVEL_MAX):
+            # 存在满级的式神
+            logger.info('Exist max level shikigami and replace it')
+            self.unset_shikigami_max_lv()
+            self.switch_shikigami_class(shikigami_class)
+            self.set_shikigami(shikigami_order=7, stop_image=self.I_RS_NO_ADD)
         # 收取寮资金和体力
         self.recive_guild_ap_or_assets()
         if not con.utilize_enable:
@@ -136,6 +226,23 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 break
             if self.appear_then_click(self.I_UI_BACK_BLUE, interval=2.5):
                 continue
+            logger.info('No max level shikigami')
+        if self.detect_no_shikigami():
+            logger.warning('There are no any shikigami grow room')
+            self.switch_shikigami_class(shikigami_class)
+            self.set_shikigami(shikigami_order=7, stop_image=self.I_RS_NO_ADD)
+
+        # 回到结界界面
+        while 1:
+            self.screenshot()
+
+            if self.appear(self.I_REALM_SHIN) and self.appear(self.I_SHI_GROWN):
+                self.screenshot()
+                if not self.appear(self.I_REALM_SHIN):
+                    continue
+                break
+            if self.appear_then_click(self.I_UI_BACK_BLUE, interval=2.5):
+                continue
 
     def check_guild_ap_or_assets(self, ap_enable: bool = True, assets_enable: bool = True) -> bool:
         """
@@ -145,6 +252,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         """
         timer_check = Timer(2)
         timer_check.start()
+        click_ap = False
         click_ap = False
         while 1:
             self.screenshot()
@@ -159,7 +267,16 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
             if click_ap and not self.appear(self.I_GUILD_AP) and not self.appear(self.I_UI_REWARD):
                 return True
+                continue
 
+            if timer_check.reached():
+                return False
+
+            if click_ap and not self.appear(self.I_GUILD_AP) and not self.appear(self.I_UI_REWARD):
+                return True
+
+            # 关闭展开的寮活动横幅
+            if self.appear_then_click(self.I_GUILD_EXPAND):
             # 关闭展开的寮活动横幅
             if self.appear_then_click(self.I_GUILD_EXPAND):
                 timer_check.reset()
@@ -168,14 +285,28 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             # 资金收取确认
             if self.appear_then_click(self.I_GUILD_ASSETS_RECEIVE, interval=1):
                 time.sleep(1)
+            # 资金收取确认
+            if self.appear_then_click(self.I_GUILD_ASSETS_RECEIVE, interval=1):
+                time.sleep(1)
                 timer_check.reset()
                 continue
+
 
             # 收资金
             if self.appear_then_click(self.I_GUILD_ASSETS, interval=1.5, threshold=0.6):
                 timer_check.reset()
                 continue
 
+            # 收体力
+            if self.appear_then_click(self.I_GUILD_AP, interval=1):
+                # 等待1秒，看到获得奖励
+                time.sleep(1)
+                logger.info('appear_click guild_ap success')
+                if self.ui_reward_appear_click(True):
+                    logger.info('appear_click reward success')
+                    click_ap = True
+                    timer_check.reset()
+                continue
             # 收体力
             if self.appear_then_click(self.I_GUILD_AP, interval=1):
                 # 等待1秒，看到获得奖励
@@ -289,6 +420,9 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                     if cur == res == totol == 0:
                         continue
                     if cur == totol and cur + res == totol:
+                    if cur == res == totol == 0:
+                        continue
+                    if cur == totol and cur + res == totol:
                         logger.info('Exp box reach max do not collect')
                         break
                 if self.appear_then_click(self.I_BOX_EXP, threshold=0.6, interval=1):
@@ -392,9 +526,12 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         rule = self.config.kekkai_utilize.utilize_config.utilize_rule
         if rule == UtilizeRule.DEFAULT:
             return ImageGrid([self.I_U_FISH_6, self.I_U_TAIKO_6, self.I_U_FISH_5, self.I_U_TAIKO_5])
+            return ImageGrid([self.I_U_FISH_6, self.I_U_TAIKO_6, self.I_U_FISH_5, self.I_U_TAIKO_5])
         elif rule == UtilizeRule.FISH:
             return ImageGrid([self.I_U_FISH_6, self.I_U_FISH_5])
+            return ImageGrid([self.I_U_FISH_6, self.I_U_FISH_5])
         elif rule == UtilizeRule.TAIKO:
+            return ImageGrid([self.I_U_TAIKO_6, self.I_U_TAIKO_5])
             return ImageGrid([self.I_U_TAIKO_6, self.I_U_TAIKO_5])
         else:
             logger.error('Unknown utilize rule')
@@ -406,12 +543,19 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         result = []
         if rule == UtilizeRule.DEFAULT:
             result = [CardClass.FISH6, CardClass.TAIKO6, CardClass.FISH5, CardClass.TAIKO5,
+            result = [CardClass.FISH6, CardClass.TAIKO6, CardClass.FISH5, CardClass.TAIKO5,
                       CardClass.TAIKO4, CardClass.FISH4, CardClass.TAIKO3, CardClass.FISH3]
         elif rule == UtilizeRule.FISH:
             result = [CardClass.FISH6, CardClass.FISH5,
                       CardClass.TAIKO6, CardClass.TAIKO5, CardClass.FISH4, CardClass.TAIKO4, CardClass.FISH3,
                       CardClass.TAIKO3]
+            result = [CardClass.FISH6, CardClass.FISH5,
+                      CardClass.TAIKO6, CardClass.TAIKO5, CardClass.FISH4, CardClass.TAIKO4, CardClass.FISH3,
+                      CardClass.TAIKO3]
         elif rule == UtilizeRule.TAIKO:
+            result = [CardClass.TAIKO6, CardClass.TAIKO5,
+                      CardClass.FISH6, CardClass.FISH5, CardClass.TAIKO4, CardClass.FISH4, CardClass.TAIKO3,
+                      CardClass.FISH3]
             result = [CardClass.TAIKO6, CardClass.TAIKO5,
                       CardClass.FISH6, CardClass.FISH5, CardClass.TAIKO4, CardClass.FISH4, CardClass.TAIKO3,
                       CardClass.FISH3]
@@ -435,6 +579,9 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         wait_timer.start()
         while 1:
             self.screenshot()
+            if self.appear(self.I_U_ADD_1) or self.appear(self.I_U_ADD_2):
+                logger.info('Appear enter friend realm button')
+                break
             if self.appear(self.I_U_ADD_1) or self.appear(self.I_U_ADD_2):
                 logger.info('Appear enter friend realm button')
                 break
@@ -463,12 +610,20 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         self.screenshot()
         if self.appear(self.I_U_ADD_1):  # 右侧第一个有（无论左侧有没有）
             logger.info('Right side has one')
+            logger.info('Right side has one')
             stop_image = self.I_U_ADD_1
         elif self.appear(self.I_U_ADD_2) and not self.appear(self.I_U_ADD_1):  # 右侧第二个有 但是最左边的没有，这表示只留有一个坑位
+            logger.info('Right side has two')
             logger.info('Right side has two')
             stop_image = self.I_U_ADD_2
         if not stop_image:
             # 没有坑位可能是其他人的手速太快了抢占了
+            self.save_image(content='没有坑位了', wait_time=0, push_flag=False, image_type='png')
+            logger.warning('没有坑位可能是其他人的手速太快了抢占了')
+            return True
+        # 切换式神的类型
+        self.switch_shikigami_class(shikigami_class)
+        # 上式神
             self.save_image(content='没有坑位了', wait_time=0, push_flag=False, image_type='png')
             logger.warning('没有坑位可能是其他人的手速太快了抢占了')
             return True
@@ -717,7 +872,101 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 # 跳过无效结界卡（类型未知或数值异常）
                 if card_type == 'unknown' or card_value <= 0 or card_type not in RESOURCE_CONFIG:
                     logger.info(f'⏭️ 跳过无效卡: {card_type}@{card_value}')
+            # ------ 步骤1: 截图识别结界卡 ------#
+            self.screenshot()
+            cards = self.order_targets.find_everyone(self.device.image)
+
+            # 处理无卡情况
+            if not cards:
+                miss_count += 1
+                logger.info(f'第{swipe_count}次滑动 | 未检测到结界卡' if swipe_count > 0 else '初始界面 | 未检测到结界卡')
+                # 连续无卡超过阈值则终止
+                if miss_count > CONSEC_MISS:
+                    logger.warning(f'⚠️ 连续{miss_count}次 | 未检测到结界卡, 终止流程')
+                    return None
+                # 执行滑动操作
+                self.perform_swipe_action()
+                continue
+
+            miss_count = 0  # 重置无卡计数器
+
+            # ------ 步骤2: 处理识别到的结界卡 ------
+            cards_list = [target for target, _, _ in cards]
+            logger.info((f'第{swipe_count}次滑动' if swipe_count > 0 else '初始界面') + f' | 检测到结界卡：{cards_list}')
+
+            # 遍历所有结界卡（已按位置排序）
+            for _, _, area in cards:
+                # 设置点击区域并获取结界卡详情
+                self.C_SELECT_CARD.roi_front = area
+                self.click(self.C_SELECT_CARD)
+                time.sleep(2)  # 等待结界卡详情加载
+
+                # 解析结界卡类型和数值
+                card_type, card_value = self.check_card_num()
+
+                # 跳过无效结界卡（类型未知或数值异常）
+                if card_type == 'unknown' or card_value <= 0 or card_type not in RESOURCE_CONFIG:
+                    logger.info(f'⏭️ 跳过无效卡: {card_type}@{card_value}')
                     continue
+
+                # ====== 模式分支处理 ======#
+                current_max = RESOURCE_CONFIG[card_type]['max']
+                record_attr = RESOURCE_CONFIG[card_type]['record_attr']
+                current_record = getattr(self, record_attr, 0)
+                logger.info(f'🔍 识别卡片: {card_type} | 当前值: {card_value}, 最优值: {current_record}')
+
+                # 更新最佳记录
+                if card_value > current_record:
+                    logger.info(f'📈 更新记录: {card_type} | {current_record} → {card_value}')
+                    setattr(self, record_attr, card_value)
+
+                if selected_card:  # 确认选择模式
+                    # 检查是否符合选择条件
+                    if (card_type == best_card_type) and (card_value >= best_card_num):
+                        logger.info(f'🎉 确认蹭卡: {card_type} | 当前值: {card_value} ≥ 目标值: {best_card_num}')
+                        self.save_image(push_flag=False, wait_time=0, content=f'🎉 确认蹭卡（{card_type}: {card_value}）')
+                        return True
+                else:  # 探索记录模式
+                    # 发现完美卡直接返回
+                    if card_value >= current_max:
+                        message = f'🎉 完美蹭卡 | {card_type}: {card_value}'
+                        logger.info(message)
+                        self.save_image(push_flag=False, wait_time=0, content=message)
+                        return True
+
+            # ------ 步骤3: 滑动到下一屏 ------#
+            self.perform_swipe_action()
+
+        # ============== 终止处理 ==============#
+        logger.warning(f'⚠️ 已达到最大滑动次数{MAX_SWIPES}, 终止流程')
+        return None
+
+    def perform_swipe_action(self):
+        """统一滑动操作"""
+        duration = 2
+        safe_pos_x = random.randint(340, 600)
+        safe_pos_y = random.randint(500, 565)
+        p1 = (safe_pos_x, safe_pos_y)
+        p2 = (safe_pos_x, safe_pos_y - 416)
+        logger.info('Swipe %s -> %s, %sS ' % (point2str(*p1), point2str(*p2), duration))
+        self.device.swipe_adb(p1, p2, duration=duration)
+
+        # self.swipe(self.S_U_UP, duration=1, wait_up_time=1)
+        self.device.click_record_clear()
+        time.sleep(2)
+
+    def check_card_num(self) -> tuple[str, int]:
+        """优化版数值提取方法，返回结界卡类型及对应数值"""
+        self.screenshot()
+        # OCR识别
+        raw_text = self.O_CARD_NUM.ocr(self.device.image)
+        # logger.info(f'OCR原始结果: {raw_text}')
+
+        # 判断结界卡类型
+        if any(c in raw_text for c in ['体', 'カ', '力']):
+            card_type = '斗鱼'
+        elif any(c in raw_text for c in ['勾', '玉']):
+            card_type = '太鼓'
 
                 # ====== 模式分支处理 ======#
                 current_max = RESOURCE_CONFIG[card_type]['max']
@@ -798,6 +1047,26 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
         # logger.info(f'识别成功: 卡类型: {card_type}, 数值: {value}')
         return card_type, value
+            logger.warning(f'结界卡类型识别失败，原始内容: {raw_text}')
+            # self.push_notify(content=f'结界卡类型识别失败: {raw_text}')
+            return 'unknown', 0  # 未知类型返回0
+
+        # 提取纯数字部分（兼容带+号的情况，如+100）
+        cleaned = re.sub(r'[^\d+]', '', raw_text)  # 保留数字和加号
+        match = re.search(r'\d+', cleaned)  # 匹配连续数字
+
+        try:
+            value = int(match.group()) if match else 0
+        except ValueError:
+            logger.warning(f'数值转换异常，清理后文本: {cleaned}')
+            value = 0
+
+        if value <= 0:
+            self.push_notify(content=f'数值异常: {raw_text} -> 解析值: {value}')
+            return card_type, 0
+
+        # logger.info(f'识别成功: 卡类型: {card_type}, 数值: {value}')
+        return card_type, value
 
     def back_guild(self):
         """
@@ -812,6 +1081,19 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             if self.appear(self.I_GUILD_REALM):
                 break
 
+            if self.appear_then_click(self.I_UI_BACK_RED, interval=1):
+                continue
+            if self.appear_then_click(self.I_UI_BACK_BLUE, interval=1):
+                continue
+
+    def back_realm(self):
+        # 回到寮结界
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_REALM_SHIN):
+                break
+            if self.appear(self.I_SHI_DEFENSE):
+                break
             if self.appear_then_click(self.I_UI_BACK_RED, interval=1):
                 continue
             if self.appear_then_click(self.I_UI_BACK_BLUE, interval=1):
