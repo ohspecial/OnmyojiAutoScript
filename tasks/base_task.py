@@ -130,8 +130,6 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             self.device.screenshot()
         # 判断勾协
         self._burst()
-        # 活动碎片检测
-        self._avtivity_fragment()
         
         # # 判断网络异常
         # if self.appear(self.I_NETWORK_ABNORMAL):
