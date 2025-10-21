@@ -19,10 +19,11 @@ class Full(BaseCor):
     """
     这个类适用于大ROI范围的文本识别。可以支持多条文本识别， 默认不支持竖方向的文本识别
     """
+
     def after_process(self, result):
         return result
 
-    def ocr_full(self, image, keyword: str=None) -> tuple:
+    def ocr_full(self, image, keyword: str = None) -> tuple:
         """
         检测整个图片的文本,并对结果进行过滤。返回的是匹配到的keyword的左边。如果没有匹配到返回(0, 0, 0, 0)
         :param image:
@@ -45,25 +46,26 @@ class Full(BaseCor):
         # 如果匹配到了多个,则合并所有的坐标，返回合并后的坐标
         if len(index_list) > 1:
             area_list = [(
-                boxed_results[index].box[0][0],  # x
-                boxed_results[index].box[0][1],  # y
-                boxed_results[index].box[1][0] - boxed_results[index].box[0][0],     # width
-                boxed_results[index].box[2][1] - boxed_results[index].box[0][1],     # height
+                boxed_results[index].box[0, 0],  # x
+                boxed_results[index].box[0, 1],  # y
+                boxed_results[index].box[1, 0] - boxed_results[index].box[0, 0],  # width
+                boxed_results[index].box[2, 1] - boxed_results[index].box[0, 1],  # height
             ) for index in index_list]
             area = merge_area(area_list)
-            print(area)
-            self.area = area[0]+self.roi[0], area[1]+self.roi[1], area[2], area[3]
+            self.area = area[0] + self.roi[0], area[1] + self.roi[1], area[2], area[3]
         else:
             box = boxed_results[index_list[0]].box
-            self.area = box[0][0]+self.roi[0], box[0][1]+self.roi[1], box[1][0] - box[0][0], box[2][1] - box[0][1]
+            self.area = box[0, 0] + self.roi[0], box[0, 1] + self.roi[1], box[1, 0] - box[0, 0], box[2, 1] - box[0, 1]
 
         logger.info(f"OCR [{self.name}] detected in {self.area}")
         return self.area
+
 
 class Single(BaseCor):
     """
     这个类使用于单行文本识别（所识别的ROI不会动）
     """
+
     def after_process(self, result):
         return result
 
@@ -94,6 +96,7 @@ class Single(BaseCor):
             return res
         else:
             raise ScriptError("Roi is empty")
+
 
 class Digit(Single):
 
@@ -132,6 +135,7 @@ class Digit(Single):
         else:
             return int(result)
 
+
 class DigitCounter(Single):
     def after_process(self, result):
         result = super().after_process(result)
@@ -164,7 +168,6 @@ class DigitCounter(Single):
             logger.warning(f'Unexpected ocr result: {result}')
             return 0, 0, 0
 
-
     def ocr_digit_counter(self, image) -> tuple[int, int, int]:
         """
         获取计数的结果
@@ -175,6 +178,7 @@ class DigitCounter(Single):
         if result == "":
             return 0, 0, 0
         return self.ocr_str_digit_counter(result)
+
 
 class Duration(Single):
     def after_process(self, result):
@@ -214,12 +218,14 @@ class Duration(Single):
 
         return self.parse_time(result)
 
+
 class Quantity(BaseCor):
     """
     专门用于识别超级多的数量，不支持多个区域的识别
     可支持负数
     比如：”6.33亿“ ”1.2万“ “53万/100” -> 530,000
     """
+
     def after_process(self, result):
         result = super().after_process(result)
         result = result.replace('I', '1').replace('D', '0').replace('S', '5')
@@ -257,8 +263,7 @@ class Quantity(BaseCor):
         return boxed_results[0].ocr_text
 
 
-
 if __name__ == '__main__':
     import cv2
-    image = cv2.imread(r'd:\MuMu12-20250704-215030.png')
 
+    image = cv2.imread(r'E:\Project\OnmyojiAutoScript-assets\jade.png')
