@@ -52,23 +52,21 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         self.check_box_ap_or_exp(con.box_ap_enable, con.box_exp_enable, con.box_exp_waste)
 
         # 收取寮资金和体力
-        self.recive_guild_ap_or_assets()
+        self.receive_guild_ap_or_assets()
         if not con.utilize_enable:
             self.set_next_run(task='KekkaiUtilize', finish=True, success=True)
         raise TaskEnd
 
-    def recive_guild_ap_or_assets(self):
-        for i in range(1, 5):
-            self.ui_get_current_page()
-            self.ui_goto(page_guild)
-            # 在寮的主界面 检查是否有收取体力或者是收取寮资金
-            if self.check_guild_ap_or_assets():
-                logger.warning(f'第[{i}]次检查寮收获,成功')
-                self.ui_goto(page_main)
-                break
-            else:
-                logger.warning(f'第[{i}]次检查寮收获寮收获,失败')
+    def receive_guild_ap_or_assets(self):
+        self.ui_get_current_page()
+        self.ui_goto(page_guild)
+        # 在寮的主界面 检查是否有收取体力或者是收取寮资金
+        if self.check_guild_ap_or_assets():
+            logger.warning('Harvest guild reward success')
             self.ui_goto(page_main)
+        else:
+            logger.warning('Not found guild reward, exit')
+        self.ui_goto(page_main)
 
     def check_utilize_add(self):
         con = self.config.kekkai_utilize.utilize_config
