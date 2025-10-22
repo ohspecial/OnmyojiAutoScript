@@ -45,7 +45,7 @@ from module.device.platform2.platform_windows import minimize_by_name,show_windo
 
 class Script:
     def __init__(self, config_name: str ='oas') -> None:
-        self.device = Device(config=Config(config_name=config_name))
+        self._emulator_down = False
         logger.hr('Start', level=0)
         self.server = None
         self.state_queue: Queue = None
@@ -376,9 +376,38 @@ class Script:
         else:
             self._handle_close_game(task, close_game_limit_time)
 
+    def exception_handler(self, e: Exception, command: str) -> None:
+        # 处理御魂溢出
+        from tasks.Utils.post_diagnotor import PostDiagnotor, AnalyzeType
+        image = getattr(self.device, 'image', None)
+        analyse_type = PostDiagnotor().handle(e=e, command=command, image=image)
+        if analyse_type == AnalyzeType.SoulOverflow:
+            self.config.task_call('SoulsTidy')
+            time.sleep(1)
+
+    def _handle_goto_main(self):
+        logger.info('Goto main page during wait')
+        self.run('GotoMain')
+
+    def _handle_close_game(self, task, close_game_limit_time):
+        if task.next_run > datetime.now() + timedelta(hours=close_game_limit_time.hour, minutes=close_game_limit_time.minute, seconds=close_game_limit_time.second):
+            logger.info('Close game during wait')
+            self.device.app_stop()
+        else:
+            self._handle_goto_main()
+
+    def _handle_close_emulator_or(self, task, close_game_limit_time, close_emulator_limit_time, method):
+        if task.next_run > datetime.now() + timedelta(hours=close_emulator_limit_time.hour, minutes=close_emulator_limit_time.minute, seconds=close_emulator_limit_time.second):
+            logger.info('Close emulator during wait')
+            self.device.emulator_stop()
+            self._emulator_down = True # 标记
+        elif method == 'close_emulator_or_goto_main':
+            self._handle_goto_main()
+        else:
+            self._handle_close_game(task, close_game_limit_time)
+
     def run(self, command: str) -> bool:
         """
-
         :param command:  大写驼峰命名的任务名字
         :return:
         """
@@ -396,11 +425,13 @@ class Script:
             return True
         except GameNotRunningError as e:
             logger.warning(e)
+            self.exception_handler(e=e, command=command)
             self.config.task_call('Restart')
             return True
         except (GameStuckError, GameTooManyClickError) as e:
             logger.error(e)
             self.save_error_log()
+            self.exception_handler(e=e, command=command)
             logger.warning(f'Game stuck, {self.device.package} will be restarted in 10 seconds')
             logger.warning('If you are playing by hand, please stop Alas')
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> GameStuckError or GameTooManyClickError")
@@ -410,32 +441,37 @@ class Script:
         except GameBugError as e:
             logger.warning(e)
             self.save_error_log()
+            self.exception_handler(e=e, command=command)
             logger.warning('An error has occurred in Azur Lane game client, Alas is unable to handle')
             logger.warning(f'Restarting {self.device.package} to fix it')
             self.config.task_call('Restart')
             self.device.sleep(10)
             return False
-        except GamePageUnknownError:
+        except GamePageUnknownError as e:
             logger.info('Game server may be under maintenance or network may be broken, check server status now')
             # 这个还不重要 留着坑填
             logger.critical('Game page unknown')
             self.save_error_log()
+            self.exception_handler(e=e, command=command)
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> GamePageUnknownError")
             self.config.task_call('Restart')
             self.device.sleep(10)
             return False
         except ScriptError as e:
             logger.critical(e)
+            self.exception_handler(e=e, command=command)
             logger.critical('This is likely to be a mistake of developers, but sometimes just random issues')
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> ScriptError")
             exit(1)
         except RequestHumanTakeover as e:
             logger.critical(e)
+            self.exception_handler(e=e, command=command)
             logger.critical('Request human takeover')
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> RequestHumanTakeover")
             exit(1)
         except Exception as e:
             logger.exception(e)
+            self.exception_handler(e=e, command=command)
             self.save_error_log()
             self.config.notifier.push(title=f'{I18n.trans_zh_cn(command)}{command}', content=f"<{self.config_name}> Exception occured")
             exit(1)
@@ -496,7 +532,11 @@ class Script:
                 self.config.task_delay(task='Restart', success=True, server=True)
                 del_cached_property(self, 'config')
                 continue
-            self.device = Device(self.config)
+            if self._emulator_down:
+                self.device = Device(self.config)
+                self._emulator_down = False
+            else:                
+                _ = self.device # 使用缓存
 
             # Run
             logger.info(f'Scheduler: Start task `{task}`')
@@ -554,8 +594,5 @@ class Script:
 
 
 if __name__ == "__main__":
-    script = Script("zhu")
-    # print(script.gui_task_list())
-    # print(script.config.gui_menu)
-    print(script.device)
-    print(script.device.screenshot())
+    script = Script("oas2")
+    script.loop()

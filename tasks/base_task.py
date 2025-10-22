@@ -4,6 +4,7 @@
 
 from time import sleep
 
+import random
 from datetime import datetime, timedelta
 from module.atom.animate import RuleAnimate
 from module.atom.click import RuleClick
@@ -119,20 +120,16 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             self.set_next_run(task='WantedQuests', target=datetime.now().replace(microsecond=0))
         return True
 
-    def screenshot(self):
+    def screenshot(self, soft_skip: bool = False):
         """
         截图 引入中间函数的目的是 为了解决如协作的这类突发的事件
+        :param soft_skip: True跳过截图(但保证设备一定有图才跳过,否则依然截图)
         :return:
         """
-        self.device.screenshot()
-        # 御魂溢出
-        if self.appear_then_click(self.I_OVER_GHOST):
-            pass
-        
+        if not soft_skip or not self.exist_image():
+            self.device.screenshot()
         # 判断勾协
         self._burst()
-        # 活动碎片检测
-        self._avtivity_fragment()
         
         # # 判断网络异常
         # if self.appear(self.I_NETWORK_ABNORMAL):
@@ -145,19 +142,16 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
         #     raise GameStuckError
 
         return self.device.image
-    
-    def _avtivity_fragment(self):
+
+    def exist_image(self) -> bool:
         """
-        活动碎片检测
-        :return:
+        判断当前设备是否有图片
+        :return: 有返回True，没有返回False
         """
-        
-        if self.appear(self.I_AVTIVITY_FRAGMENT):
-            logger.warning(f"Activity fragment detected")
-            self.click(self.C_RANDOM_CLICK)
-    
+        return hasattr(self.device, 'image') and self.device.image is not None
+
     def appear(self,
-               target: RuleImage | RuleGif,
+               target: RuleImage | RuleGif | RuleOcr,
                interval: float = None,
                threshold: float = None):
         """
@@ -167,9 +161,6 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
         :param threshold:
         :return:
         """
-        if not isinstance(target, RuleImage) and not isinstance(target, RuleGif):
-            return False
-
         if interval:
             if target.name in self.interval_timer:
                 if self.interval_timer[target.name].limit != interval:
@@ -178,8 +169,10 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
                 self.interval_timer[target.name] = Timer(interval)
             if not self.interval_timer[target.name].reached():
                 return False
-
-        appear = target.match(self.device.image, threshold=threshold)
+        if isinstance(target, RuleOcr):
+            appear = self.ocr_appear(target, interval)
+        else:
+            appear = target.match(self.device.image, threshold=threshold)
 
         if appear and interval:
             self.interval_timer[target.name].reset()
@@ -381,7 +374,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
         点击或者长按
         :param interval:
         :param click:
-        :return:
+        :return: 返回值不是click是否成功，而是interval是否设置以及是否到时间
         """
         if not click:
             return False
@@ -490,31 +483,30 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
         :param name:
         :return:
         """
-        if target.is_image:
-            while True:
-                self.screenshot()
+        swipe_down = False
+        swipe_distance_ratio = None
+        result = None
+        if not target:
+            return False
+        while True:
+            self.screenshot()
+            if target.is_image:
                 result = target.image_appear(self.device.image, name=name)
-                if result is not None:
-                    return result
-                x1, y1, x2, y2 = target.swipe_pos()
-                self.device.swipe(p1=(x1, y1), p2=(x2, y2))
-
-        elif target.is_ocr:
-            while True:
-                self.screenshot()
+                swipe_down = True
+            elif target.is_ocr:
                 result = target.ocr_appear(self.device.image, name=name)
-                if isinstance(result, tuple):
-                    return result
-
-                after = True
-                if isinstance(result, int) and result > 0:
-                    after = True
-                elif isinstance(result, int) and result < 0:
-                    after = False
-
-                x1, y1, x2, y2 = target.swipe_pos(number=1, after=after)
-                self.device.swipe(p1=(x1, y1), p2=(x2, y2))
-                sleep(1)  # 等待滑动完成， 还没想好如何优化
+                swipe_down = isinstance(result, int) and result > 0
+                swipe_distance_ratio = 1
+            if not result:
+                return False
+            if isinstance(result, tuple):
+                return result
+            if swipe_distance_ratio:
+                x1, y1, x2, y2 = target.swipe_pos(number=swipe_distance_ratio, after=swipe_down)
+            else:
+                x1, y1, x2, y2 = target.swipe_pos(after=swipe_down)
+            self.device.swipe(p1=(x1, y1), p2=(x2, y2))
+            sleep(random.uniform(0.8, 1.3))  # 等待滑动完成, 待优化
 
     def list_appear_click(self, target: RuleList) -> bool:
         appear = self.list_find(target, name=target.array[0])

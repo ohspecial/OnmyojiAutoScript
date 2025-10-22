@@ -1,8 +1,10 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
+from contextlib import asynccontextmanager
+
 import argparse
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from module.logger import logger
@@ -10,12 +12,19 @@ from module.ocr.rpc import start_ocr_server_process
 
 from module.server.home_router import home_app
 from module.server.script_router import script_app
-from module.server.setting import State
+from starlette import status
+from starlette.responses import JSONResponse
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await on_startup()
+    yield
+    await on_shutdown()
 app = FastAPI(
     title='OAS',
     description='OAS web service',
     version='0.0.0',
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -37,26 +46,24 @@ if State.deploy_config.UseOcrServer:
 @app.on_event("startup")
 async def startup_event():
     logger.info('OAS web service startup done')
-    pass
 
-@app.on_event("shutdown")
-async def shutdown_event():
+
+async def on_shutdown():
     logger.info('OAS web service shutdown done')
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Internal Server Error: ", exc_info=True)
 
+    message = ', '.join(str(arg) for arg in exc.args) if exc.args else str(exc)
 
-
-
-
-
-
-
-
-
-
-
-
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            'message': message
+        },
+    )
 
 
 def fastapi_app():
@@ -76,6 +83,5 @@ def fastapi_app():
         help="Run OAS by config names on startup",
     )
     args, _ = parser.parse_known_args()
-
 
     return app
