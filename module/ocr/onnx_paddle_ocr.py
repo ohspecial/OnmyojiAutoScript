@@ -5,7 +5,6 @@ import base64
 import cv2
 import numpy as np
 
-
 from module.ocr.onnxocr import onnx_paddleocr
 
 
@@ -30,8 +29,9 @@ class BoxedResult(object):
     def to_dict(self):
         """Convert BoxedResult to a serializable dictionary"""
         return {
-            'box': self.box,
-            'text_img': base64.b64encode(pickle.dumps(self.text_img)).decode('utf-8') if self.text_img is not None else None,
+            'box': self.box.tolist(),
+            'text_img': base64.b64encode(pickle.dumps(self.text_img)).decode(
+                'utf-8') if self.text_img is not None else None,
             'ocr_text': self.ocr_text,
             'score': self.score
         }
@@ -44,11 +44,12 @@ class BoxedResult(object):
             text_img = pickle.loads(base64.b64decode(data['text_img'].encode('utf-8')))
 
         return cls(
-            box=data['box'],
+            box=np.array(data['box']),
             text_img=text_img,
             ocr_text=data['ocr_text'],
             score=data['score']
         )
+
 
 class ONNXPaddleOcr(onnx_paddleocr.ONNXPaddleOcr):
     def __init__(self,
@@ -76,7 +77,7 @@ class ONNXPaddleOcr(onnx_paddleocr.ONNXPaddleOcr):
             use_onnx=use_onnx
         )
 
-    def detect_and_ocr(self,img: np.ndarray, drop_score = None):
+    def detect_and_ocr(self, img: np.ndarray, drop_score=None):
         """
         Detect text boxes and recognize text from the image.
         :param img: Input image in RGB format.
@@ -96,6 +97,8 @@ class ONNXPaddleOcr(onnx_paddleocr.ONNXPaddleOcr):
         for box, rec_result in rec_res:
             text, score = rec_result
             if score >= drop_score:
+                if not isinstance(box, np.ndarray):
+                    box = np.array(box)
                 res.append(BoxedResult(box, img, text, score))
         return res
 
@@ -109,6 +112,7 @@ class ONNXPaddleOcr(onnx_paddleocr.ONNXPaddleOcr):
 
         rec_res = self.text_recognizer(tmp_img_list)
         return rec_res
+
     def ocr_single_line(self, img):
         res = self.ocr_lines([img])
         if res:
