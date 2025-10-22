@@ -70,9 +70,9 @@ class Honor(Special):
         if not self.mall_check_money(4, 1500):
             logger.warning('No enough money')
             return
-        # 使用动态位置点击购买
-        self.appear_then_click(self.I_HONOR_BLUE)
-        time.sleep(1)
+        # 使用buy_more完成购买流程
+        self.buy_more(self.I_HONOR_BLUE, remain_number)
+        time.sleep(0.5)
 
     def _honor_black_daruma_scrap(self, enable: bool=False):
         logger.hr('Buy black daruma scrap', 3)
