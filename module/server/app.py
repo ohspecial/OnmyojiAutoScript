@@ -12,14 +12,18 @@ from module.ocr.rpc import start_ocr_server_process
 
 from module.server.home_router import home_app
 from module.server.script_router import script_app
+from module.server.setting import State
+
 from starlette import status
 from starlette.responses import JSONResponse
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await on_startup()
     yield
     await on_shutdown()
+
 app = FastAPI(
     title='OAS',
     description='OAS web service',
@@ -42,9 +46,8 @@ app.include_router(script_app)
 if State.deploy_config.UseOcrServer:
     port = State.deploy_config.OcrServerPort
     start_ocr_server_process(port=port)
-
-@app.on_event("startup")
-async def startup_event():
+    
+async def on_startup():
     logger.info('OAS web service startup done')
 
 
