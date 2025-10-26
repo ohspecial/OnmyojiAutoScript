@@ -329,6 +329,8 @@ class Script:
         strategy_map = {
             "close_game": self._wait_close_game,
             "goto_main": self._wait_goto_main,
+            "close_emulator_or_goto_main": self._wait_close_emulator_or_goto_main,
+            "close_emulator_or_close_game": self._wait_close_emulator_or_close_game,
         }
         func = strategy_map.get(method)
         if not func:
@@ -354,6 +356,58 @@ class Script:
     def _wait_stay_there(self, next_run: datetime) -> bool:
         logger.info("Stay_there (no action) during wait")
         self.device.release_during_wait()
+        return self.wait_until(next_run)
+
+    def _wait_close_emulator_or_goto_main(self, next_run: datetime) -> bool:
+        """
+        根据等待时间决定是否关闭模拟器，否则回到主页
+        """
+        close_emulator_limit_time = self.config.script.optimization.close_emulator_limit_time
+        time_until_next = next_run - datetime.now()
+        limit_timedelta = timedelta(hours=close_emulator_limit_time.hour,
+                                   minutes=close_emulator_limit_time.minute,
+                                   seconds=close_emulator_limit_time.second)
+
+        if time_until_next > limit_timedelta:
+            logger.info("Close emulator during wait (close_emulator_or_goto_main)")
+            self.device.emulator_stop()
+            self.device.release_during_wait()
+            self._emulator_down = True
+        else:
+            logger.info("Goto main page during wait (close_emulator_or_goto_main)")
+            self.run("GotoMain")
+            self.device.release_during_wait()
+
+        return self.wait_until(next_run)
+
+    def _wait_close_emulator_or_close_game(self, next_run: datetime) -> bool:
+        """
+        根据等待时间决定是否关闭模拟器，否则关闭游戏
+        """
+        close_game_limit_time = self.config.script.optimization.close_game_limit_time
+        close_emulator_limit_time = self.config.script.optimization.close_emulator_limit_time
+        time_until_next = next_run - datetime.now()
+
+        emulator_limit_timedelta = timedelta(hours=close_emulator_limit_time.hour,
+                                            minutes=close_emulator_limit_time.minute,
+                                            seconds=close_emulator_limit_time.second)
+        game_limit_timedelta = timedelta(hours=close_game_limit_time.hour,
+                                        minutes=close_game_limit_time.minute,
+                                        seconds=close_game_limit_time.second)
+
+        if time_until_next > emulator_limit_timedelta:
+            logger.info("Close emulator during wait (close_emulator_or_close_game)")
+            self.device.emulator_stop()
+            self.device.release_during_wait()
+            self._emulator_down = True
+        elif time_until_next > game_limit_timedelta:
+            logger.info("Close game during wait (close_emulator_or_close_game)")
+            self.device.app_stop()
+            self.device.release_during_wait()
+        else:
+            logger.info("Stay there during wait (close_emulator_or_close_game)")
+            self.device.release_during_wait()
+
         return self.wait_until(next_run)
 
     def _handle_goto_main(self):
