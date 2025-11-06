@@ -70,5 +70,23 @@
     "method": "Template matching",
     "threshold": 0.6,
     "description": "购买黑碎检查"
+  },
+  {
+    "itemName": "guild_soul",
+    "imageName": "guild_guild_soul.png",
+    "roiFront": "343,186,71,69",
+    "roiBack": "243,133,719,489",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "六星御魂"
+  },
+  {
+    "itemName": "guild_check_soul",
+    "imageName": "guild_guild_check_soul.png",
+    "roiFront": "593,217,89,88",
+    "roiBack": "593,217,89,88",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "六星御魂检测"
   }
 ]

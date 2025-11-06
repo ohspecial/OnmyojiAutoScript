@@ -37,11 +37,11 @@ class ScriptTask(Mall, Guild, ThousandThings, Shrine):
 if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
-    c = Config('zhu')
+    c = Config('xiaohao')
     d = Device(c)
     t = ScriptTask(c, d)
 
-    t.run()
+    t.execute_guild(con=c.rich_man.guild_store)
     # t.execute_mall()
 
 
