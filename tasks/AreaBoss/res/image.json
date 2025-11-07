@@ -198,21 +198,12 @@
     "description": "小组内未取得名次"
   },
   {
-  "itemName": "ab_famous",
-  "imageName": "ab_famous.png",
-  "roiFront": "1190,238,41,93",
-  "roiBack": "1190,238,41,93",
-  "method": "Template matching",
-  "threshold": 0.8,
-  "description": "热门选择"
-},
-  {
-  "itemName": "ab_full_20000",
-  "imageName": "ab_full_20000.png",
-  "roiFront": "874,643,38,21",
-  "roiBack": "874,643,38,21",
-  "method": "Template matching",
-  "threshold": 0.8,
-  "description": "地鬼识别到满20000攻打人数标志"
-}
+    "itemName": "ab_num_challenge_rail",
+    "imageName": "ab_num_challenge_rail.png",
+    "roiFront": "895,639,14,27",
+    "roiBack": "895,639,14,27",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "挑战数进度条"
+  }
 ]
