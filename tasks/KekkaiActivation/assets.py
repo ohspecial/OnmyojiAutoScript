@@ -20,7 +20,6 @@ class KekkaiActivationAssets:
 	# Ocr Rule Assets
 	# 这张卡一共有多少小时 
 	O_CARD_ALL_TIME = RuleOcr(roi=(926,262,95,31), area=(926,262,95,31), mode="Duration", method="Default", keyword="", name="card_all_time")
-
 	# 识别结界卡每小时收益 
 	O_CHECK_CARD_NUMBER = RuleOcr(roi=(305,153,107,481), area=(305,153,107,481), mode="Single", method="Default", keyword="", name="check_card_number")
 

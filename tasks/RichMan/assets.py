@@ -24,13 +24,14 @@ class RichManAssets:
 	# 皮肤券 
 	I_GUILD_SKIN = RuleImage(roi_front=(609,447,71,72), roi_back=(265,126,681,477), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin.png")
 	# 皮肤券判断是否到末端 
-	I_GUILD_SKIN_CHECK = RuleImage(roi_front=(795,438,71,72), roi_back=(320,162,573,371), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin.png")
+	I_GUILD_SKIN_CHECK = RuleImage(roi_front=(343,436,74,75), roi_back=(343,436,74,75), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_skin_check.png")
 	# 购买黑碎检查 
 	I_GUILD_CHECK_SCRAP = RuleImage(roi_front=(592,248,90,88), roi_back=(593,249,90,88), threshold=0.6, method="Template matching", file="./tasks/RichMan/guild/guild_guild_check_scrap.png")
 	# 六星御魂 
 	I_GUILD_SOUL = RuleImage(roi_front=(343,186,71,69), roi_back=(243,133,719,489), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_soul.png")
 	# 六星御魂检测 
 	I_GUILD_CHECK_SOUL = RuleImage(roi_front=(593,217,89,88), roi_back=(593,217,89,88), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_check_soul.png")
+
 
 	# Ocr Rule Assets
 	# 总的功勋 

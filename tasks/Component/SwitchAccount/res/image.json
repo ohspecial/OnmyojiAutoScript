@@ -21,7 +21,7 @@
     "itemName": "sa_user_center_profile",
     "imageName": "sa_user_center_profile.png",
     "roiFront": "590,60,90,55",
-    "roiBack":  "590,60,90,55",
+    "roiBack": "590,60,90,55",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "游戏内-点击头像弹出的设置界面-顶部设置字样"
@@ -82,18 +82,18 @@
   },
   {
     "itemName": "sa_login_form_apple",
-    "imageName": "sa_login_form_apple.png",
-    "roiFront": "490,350,100,100",
-    "roiBack": "490,350,100,100",
+    "imageName": "res_sa_login_form_apple.png",
+    "roiFront": "510,360,95,95",
+    "roiBack": "490,350,154,121",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "登录界面-选择手机类型为苹果."
   },
   {
     "itemName": "sa_login_form_android",
-    "imageName": "sa_login_form_android.png",
-    "roiFront": "690,350,100,100",
-    "roiBack": "690,350,100,100",
+    "imageName": "res_sa_login_form_android.png",
+    "roiFront": "673.5,358,100,100",
+    "roiBack": "657,350,133,123",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "登录界面-选择手机类型为android"
