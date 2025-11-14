@@ -124,8 +124,6 @@ class LoginHandler(BaseTask, RestartAssets):
                 
             # 点击’进入游戏‘
             if not self.appear(self.I_LOGIN_8):
-                # 没有选区则点击，跳过动画
-                self.click(self.I_LOGIN_8, interval=6)
                 continue
             
             # 登录体验服时，点击“进入游戏”速度过快，可能会出现体验服的弹窗
