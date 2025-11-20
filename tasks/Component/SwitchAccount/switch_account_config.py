@@ -18,18 +18,34 @@ class AccountInfo(BaseModel):
     # 为防止ocr出错 暂定格式 字符串以#分割
     account_alias: str = Field(default="", description="account_alias_help")
     apple_or_android: bool = Field(default=True, description="apple_or_android_help")
-    # 上一次执行成功的时间 ,防止出错时重复登录浪费时间
-    last_complete_time: DateTime = Field(default=DateTime.fromisoformat("2023-01-01 00:00:00"), description="last_complete_time_help")
+
+    # 各个任务的最后执行时间
+    last_complete_time: DateTime = Field(default=DateTime.fromisoformat("2023-01-01 00:00:00"), description="多账号日常任务完成时间")
+    last_kekkai_utilize_time: DateTime = Field(default=DateTime.fromisoformat("2023-01-01 00:00:00"), description="寄养任务完成时间")
+    last_kekkai_activation_time: DateTime = Field(default=DateTime.fromisoformat("2023-01-01 00:00:00"), description="挂卡任务完成时间")
+    last_demon_encounter_time: DateTime = Field(default=DateTime.fromisoformat("2023-01-01 00:00:00"), description="逢魔任务完成时间")
 
     def is_account_alias(self, ocr_account):
-        tmp_account = AccountInfo.preprocessAccount(self.account)
-        if ocr_account == self.account or ocr_account.startswith(tmp_account):
+        # 先检查完全匹配
+        if ocr_account == self.account:
             return True
+
+        # 对两个账号都进行预处理后比较（去除@后面的部分）
+        tmp_account = AccountInfo.preprocessAccount(self.account)
+        tmp_ocr_account = AccountInfo.preprocessAccount(ocr_account)
+
+        # 预处理后的账号必须完全相等，而不是startswith
+        # 这样可以避免 jiyibanana 匹配到 jiyibanana2
+        if tmp_ocr_account == tmp_account:
+            return True
+
+        # 检查账号别名
         if not self.account_alias:
             return False
         _accountAliasList = self.account_alias.split('#')
         for alias in _accountAliasList:
-            if ocr_account.startswith(alias):
+            # 别名也使用完全匹配，避免 jiyibanana 匹配到 jiyibanana2
+            if tmp_ocr_account == alias or ocr_account == alias:
                 return True
         return False
 

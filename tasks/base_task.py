@@ -602,6 +602,28 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             start_time = self.start_time
         self.config.task_delay(task, start_time=start_time, success=success, server=server, target=target)
 
+    def update_account_task_time(self, character: str, svr: str, task_name: str) -> None:
+        """
+        更新指定账号的指定任务执行时间
+        :param character: 角色名称
+        :param svr: 服务器名称
+        :param task_name: 任务名称，可选值: 'KekkaiUtilize', 'KekkaiActivation', 'DemonEncounter'
+        :return:
+        """
+        from tasks.Component.SwitchAccount.switch_account_config import AccountInfo
+
+        # 创建临时账号信息用于匹配
+        temp_account = AccountInfo(character=character, svr=svr)
+
+        # 调用 MultiAccountDaily 配置的更新方法
+        if hasattr(self.config, 'multi_account_daily'):
+            self.config.multi_account_daily.update_account_task_time(temp_account, task_name)
+            # 保存配置
+            self.config.save()
+        else:
+            from module.logger import logger
+            logger.warning(f"配置中没有 multi_account_daily，无法更新账号任务时间")
+
     def custom_next_run(self, task: str, custom_time: Time = None, time_delta: float = 1) -> None:
         """
         设置下次自定义运行时间
