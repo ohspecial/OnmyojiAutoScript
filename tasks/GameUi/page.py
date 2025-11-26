@@ -1,7 +1,10 @@
+from itertools import compress
+
 import random
 
 import traceback
 from module.atom.click import RuleClick
+from tasks.BondlingFairyland.assets import BondlingFairylandAssets
 from tasks.GlobalGame.assets import GlobalGameAssets as GGA
 from tasks.GameUi.assets import GameUiAssets as G
 from tasks.KekkaiUtilize.assets import KekkaiUtilizeAssets
@@ -108,7 +111,7 @@ page_six_gates = Page(G.I_CHECK_SIX_GATES)
 page_six_gates.link(button=G.I_SIX_GATES_GOTO_EXPLORATION, destination=page_exploration)
 page_exploration.link(button=G.I_EXPLORATION_GOTO_SIX_GATES, destination=page_six_gates)
 # 契灵之境 bondling fairyland
-page_bondling_fairyland = Page(G.I_CHECK_BONDLING_FAIRYLAND)
+page_bondling_fairyland = Page(BondlingFairylandAssets.I_BALL_AREA)
 page_bondling_fairyland.link(button=G.I_BACK_YOLLOW, destination=page_exploration)
 page_exploration.link(button=G.I_EXPLORATION_GOTO_BONDLING_FAIRYLAND, destination=page_bondling_fairyland)
 
@@ -201,23 +204,29 @@ page_dokan.link(button=G.I_BACK_Y, destination=page_main)
 
 # ************************************* 活动部分 *****************************************#
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets as asa
+# from tasks.GuguArtStudio.assets import GuguArtStudioAssets as gasa
 
 # 活动列表页爬塔活动
 page_act_list_climb_act = Page(asa.I_CHECK_ACT_LIST_CLIMB_ACT)
 page_act_list.link(button=G.L_ACT_LIST_OCR, destination=page_act_list_climb_act)
 page_act_list_climb_act.link(button=G.I_BACK_ACT_LIST, destination=page_main)
+# 活动列表页呱呱画室活动
+# page_act_list_gugu_act = Page(gasa.I_CHECK_ACT_LIST_GUGU_ACT)
+# page_act_list.link(button=gasa.L_GOTO_GUGU_ACT, destination=page_act_list_gugu_act)
+# page_act_list_gugu_act.link(button=G.I_BACK_ACT_LIST, destination=page_main)
 
 # ************************************* 战斗部分 *****************************************#
 # 战斗界面
 page_battle = Page(GeneralBattleAssets.I_BATTLE_INFO)
 
 
-def random_click(low: int = None, high: int = None) -> RuleClick | list[RuleClick]:
+def random_click(low: int = None, high: int = None, ltrb: tuple = (True, False, True, False)) -> RuleClick | list[RuleClick]:
     """
     随机生成RuleClick, 不传入参数则返回1个RuleClick, 传入参数则生成范围内的click数组
     :return: RuleClick或者RuleClick的数组
     """
-    click = random.choice([asa.C_RANDOM_LEFT, asa.C_RANDOM_RIGHT, asa.C_RANDOM_TOP])
+    click_area_list = [asa.C_RANDOM_LEFT, asa.C_RANDOM_TOP, asa.C_RANDOM_RIGHT, asa.C_RANDOM_BOTTOM]
+    click = random.choice(list(compress(click_area_list, ltrb)))
     click.name = "SAFE_RANDOM_CLICK"
     if low is None or high is None:
         return click
