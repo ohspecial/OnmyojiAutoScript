@@ -9,13 +9,16 @@ class ModelPrecision(str, Enum):
     FP32 = 'FP32'
     INT8 = 'INT8'
 
+
 class InferenceEngine(str, Enum):
     ONNXRUNTIME = 'Onnxruntime'
     TENSORRT = 'TensorRT'
 
+
 class ScreenshotMethod(str, Enum):
     WINDOW_BACKGROUND = 'window_background'
     NEMU_IPC = 'nemu_ipc'
+
 
 class ControlMethod(str, Enum):
     MINITOUCH = 'minitouch'
@@ -69,7 +72,6 @@ class DebugConfig(ConfigBase):
 
     hide_fields = dynamic_hide('continuous_learning')
 
-
     @field_validator('continuous_learning', mode='after')
     @classmethod
     def false_continuous_learning(cls, v):
@@ -83,5 +85,3 @@ class Hyakkiyakou(ConfigBase):
     hyakkiyakou_config: HyakkiyakouConfig = Field(default_factory=HyakkiyakouConfig)
     hyakkiyakou_models: HyakkiyakouModels = Field(default_factory=HyakkiyakouModels)
     debug_config: DebugConfig = Field(default_factory=DebugConfig)
-
-
