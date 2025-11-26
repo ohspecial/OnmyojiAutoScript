@@ -32,13 +32,13 @@ class ActivityShikigamiAssets:
 
 	# Click Rule Assets
 	# description 
-	C_RANDOM_LEFT = RuleClick(roi_front=(17,69,132,599), roi_back=(17,70,137,599), name="random_left")
+	C_RANDOM_LEFT = RuleClick(roi_front=(93,129,157,427), roi_back=(93,129,157,427), name="random_left")
 	# description 
-	C_RANDOM_RIGHT = RuleClick(roi_front=(1133,55,131,638), roi_back=(1131,55,133,638), name="random_right")
+	C_RANDOM_RIGHT = RuleClick(roi_front=(1049,167,141,329), roi_back=(1049,167,141,329), name="random_right")
 	# description 
-	C_RANDOM_TOP = RuleClick(roi_front=(84,49,1159,93), roi_back=(85,46,1159,101), name="random_top")
+	C_RANDOM_TOP = RuleClick(roi_front=(235,67,775,77), roi_back=(235,67,775,77), name="random_top")
 	# description 
-	C_RANDOM_BOTTOM = RuleClick(roi_front=(179,577,972,100), roi_back=(179,579,972,100), name="random_bottom")
+	C_RANDOM_BOTTOM = RuleClick(roi_front=(293,502,584,100), roi_back=(293,502,584,100), name="random_bottom")
 	# description 
 	C_RANDOM_ALL = RuleClick(roi_front=(42,94,1207,543), roi_back=(42,94,1207,543), name="random_all")
 	# 替换buff1 
