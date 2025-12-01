@@ -33,7 +33,7 @@ class CostumeAssets:
 	# description 
 	I_MAIN_GOTO_TOWN_10 = RuleImage(roi_front=(712,328,41,42), roi_back=(270,307,999,78), threshold=0.7, method="Template matching", file="./tasks/Component/Costume/main10/main10_main_goto_town_10.png")
 	# description 
-	I_PET_HOUSE_10 = RuleImage(roi_front=(954,425,40,35), roi_back=(737,401,440,69), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main10/main10_pet_house_10.png")
+	I_PET_HOUSE_10 = RuleImage(roi_front=(955,436,30,30), roi_back=(737,401,408,111), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main10/main10_pet_house_10.png")
 
 
 	# Image Rule Assets

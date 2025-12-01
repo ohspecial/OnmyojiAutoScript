@@ -38,8 +38,8 @@
   {
     "itemName": "pet_house_10",
     "imageName": "main10_pet_house_10.png",
-    "roiFront": "954,425,40,35",
-    "roiBack": "737,401,440,69",
+    "roiFront": "955,436,30,30",
+    "roiBack": "737,401,408,111",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
