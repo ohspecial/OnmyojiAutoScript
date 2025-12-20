@@ -1,0 +1,11 @@
+[
+  {
+    "itemName": "remain_activity_ap",
+    "roiFront": "908,18,105,28",
+    "roiBack": "907,12,107,41",
+    "mode": "DigitCounter",
+    "method": "Default",
+    "keyword": "",
+    "description": "体力的数量检测"
+  }
+]

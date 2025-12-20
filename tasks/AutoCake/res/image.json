@@ -2,8 +2,8 @@
   {
     "itemName": "step_2",
     "imageName": "res_step_2.png",
-    "roiFront": "207,210,37,138",
-    "roiBack": "207,210,37,138",
+    "roiFront": "650,139,37,138",
+    "roiBack": "650,139,37,138",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "进入活动第二步"
@@ -20,8 +20,8 @@
   {
     "itemName": "is_over",
     "imageName": "res_is_over.png",
-    "roiFront": "706,254,69,64",
-    "roiBack": "706,254,69,64",
+    "roiFront": "706,253,69,64",
+    "roiBack": "706,253,69,64",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
@@ -29,8 +29,8 @@
   {
     "itemName": "is_close",
     "imageName": "res_is_close.png",
-    "roiFront": "970,663,22,21",
-    "roiBack": "970,663,22,21",
+    "roiFront": "891,653,28,23",
+    "roiBack": "891,653,28,23",
     "method": "Template matching",
     "threshold": 0.6,
     "description": "已关闭樱饼"
@@ -38,8 +38,8 @@
   {
     "itemName": "lock",
     "imageName": "res_lock.png",
-    "roiFront": "912,657,21,25",
-    "roiBack": "658,588,437,127",
+    "roiFront": "822,651,21,25",
+    "roiBack": "822,651,21,25",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "上锁"
@@ -47,10 +47,19 @@
   {
     "itemName": "unlock",
     "imageName": "res_unlock.png",
-    "roiFront": "909,661,22,21",
-    "roiBack": "774,619,330,100",
+    "roiFront": "815,646,30,33",
+    "roiBack": "815,646,30,33",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "未上锁"
+  },
+  {
+    "itemName": "is_reach2",
+    "imageName": "res_is_reach2.png",
+    "roiFront": "47,125,182,40",
+    "roiBack": "47,125,182,40",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "是否到达第二步界面"
   }
 ]

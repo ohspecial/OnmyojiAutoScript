@@ -5,6 +5,8 @@ import time
 
 import os
 import random
+import cv2
+import numpy as np
 
 from module.atom.image import RuleImage
 from module.exception import TaskEnd
@@ -61,73 +63,6 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
         self.set_next_run(task='AutoCake', success=True, finish=True)
         raise TaskEnd("AutoCake")
         
-        self.ui_get_current_page()
-        while 1:
-            self.screenshot()
-            # 获得奖励
-            if self.ui_reward_appear_click():
-                continue
-            # 误点聊天频道会自动关闭
-            if self.appear_then_click(RestartAssets.I_HARVEST_CHAT_CLOSE):
-                continue
-            for image_template in image_templates:
-                current_file = os.path.basename(image_template.file)
-
-                if current_file == '挑战.png':
-                    if self.appear(image_template):
-                        if over_task:
-                            return
-                        if enable:
-                            if datetime.now() - self.start_time >= self.limit_time:
-                                self.push_notify_and_log("时间限制已到，结束任务")
-                                return
-                            if self.current_count >= self.limit_count:
-                                self.push_notify_and_log("次数限制已到，结束任务")
-                                return
-
-                if self.appear_then_click(image_template, interval=1):
-                    if current_file == '御魂溢出确认.png':
-                        self.push_notify_and_log("御魂溢出，结束任务")
-                        over_task = True
-                        self.SoulsFUll = True
-                        self.set_next_run(task='SoulsTidy', success=False, finish=False, target=datetime.now())
-
-                    if current_file == '赢（鼓）.png' and current_file != last_clicked_file:
-                        flag = False
-                        while 1:
-                            if flag:
-                                break
-                            action_click = random.choice([self.C_REWARD_1, self.C_REWARD_2, self.C_REWARD_3])
-                            self.click(action_click)
-                            time.sleep(1)
-                            for image_template_new in image_templates:
-                                current_file_new = os.path.basename(image_template_new.file)
-                                if current_file_new == '挑战.png':
-                                    self.screenshot()
-                                    if self.appear(image_template_new):
-                                        flag = True
-                                        break
-
-                        self.current_count += 1
-                        logger.info(f"Current count: {self.current_count} / {self.limit_count}")
-                        task_run_time = datetime.now() - self.start_time
-                        task_run_time_seconds = timedelta(seconds=int(task_run_time.total_seconds()))
-                        logger.info(f"Current times: {task_run_time_seconds} / {self.limit_time}")
-                        logger.hr("General battle end", 2)
-
-                    # 判断是否连续点击同一图片
-                    if current_file == last_clicked_file:
-                        click_count += 1
-                        if click_count >= click_count_max:
-                            self.push_notify_and_log("点击同一图片最大次数，结束任务")
-                            over_task = True
-                    else:
-                        click_count = 0  # 点击不同图片时重置计数
-
-                    last_clicked_file = current_file  # 更新记录
-                    if current_file == '挑战.png' or current_file == '准备.png':
-                        self.device.stuck_record_add('BATTLE_STATUS_S')
-                    break
 
     def automatic_battle(self):
         config = self.config.auto_cake.auto_cake_config
@@ -136,7 +71,7 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
                                                    seconds=config.limit_time.second)
         
         #  进入活动界面，必须锁定阵容
-        if self.appear(self.I_IS_REACH):
+        if self.appear(self.I_IS_REACH2):
             while 1:
                 self.screenshot()
                 if self.appear_then_click(self.I_UNLOCK, interval=1):
@@ -145,21 +80,52 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
                     break
         
         # 开启樱饼
-        if self.appear_then_click(self.I_IS_CLOSE, interval=1):    
-                logger.info('click cake area')
-                self.click(self.C_CAKE_AREA,interval=1)
-                self.device.stuck_record_add('BATTLE_STATUS_S')
+        avtivity_ap =  self.O_REMAIN_ACTIVITY_AP.ocr_digit(self.device.image)
+        if avtivity_ap > 0:
+            logger.info(f"avtivity_ap : {avtivity_ap}")
+            self.appear_then_click(self.I_IS_CLOSE, interval=1)
+            logger.info('click cake area')
+            # self.click(self.C_CAKE_AREA,interval=1)
+            self.device.stuck_record_add('BATTLE_STATUS_S')
         
         # 任务开启
         swipe_timer = Timer(270)
         swipe_timer.start()
+        freeze_timer = Timer(5)
+        freeze_timer.start()
+        last_image = None
         while 1:
             self.screenshot()
+            
+            # 画面静止检测
+            if last_image is not None:
+                try:
+                    diff = cv2.absdiff(self.device.image, last_image)
+                    if np.mean(diff) < 1:
+                        if freeze_timer.reached():
+                            logger.warning("Screen frozen for 5 seconds, exiting automatic_battle")
+                            break
+                    else:
+                        freeze_timer.reset()
+                        last_image = self.device.image.copy()
+                except Exception as e:
+                    logger.warning(f"Freeze check failed: {e}")
+                    last_image = self.device.image.copy()
+                    freeze_timer.reset()
+            else:
+                last_image = self.device.image.copy()
+                freeze_timer.reset()
             # 时间结束判断
             if datetime.now() - self.start_time >= self.limit_time:
                 # 任务执行时间超过限制时间，退出
                 logger.info('Auto cake task is over time')
                 break
+            # 点击准备 适配不同副本的需要
+            # 点击准备 适配不同副本的需要
+            if self.appear(self.I_PREPARE_HIGHLIGHT, interval=5):
+                self.device.click_record_clear()
+                self.click(self.I_PREPARE_HIGHLIGHT)
+                logger.info("click prepare button")
             # 攻打次数上限判断
             if self.appear(self.I_IS_OVER):
                 logger.info('Auto cake task is over count')
@@ -196,6 +162,12 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
                 continue
             if self.appear_then_click(self.I_RED_EXIT, interval=1.5):
                 continue
+            
+        # 进入活动副本
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_IS_REACH2):
+                break
             if self.appear_then_click(self.I_STEP_2, interval=2):
                 continue
 
