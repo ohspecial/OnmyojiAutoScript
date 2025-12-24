@@ -105,6 +105,8 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
                         break
                 else:
                     freeze_timer.reset()
+            else:
+                freeze_timer.reset()
 
             # 时间结束判断
             if datetime.now() - self.start_time >= self.limit_time:
@@ -169,7 +171,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('switch')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
 
