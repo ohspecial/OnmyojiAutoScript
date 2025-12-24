@@ -4,9 +4,10 @@
 import time
 
 import os
+import os
 import random
-import cv2
-import numpy as np
+
+from module.atom.animate import RuleAnimate
 
 from module.atom.image import RuleImage
 from module.exception import TaskEnd
@@ -45,7 +46,7 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
             )
 
         self.ui_get_current_page()
-        self.ui_goto(page_main)
+        self.ui_goto_page(page_main)
 
         # 进入活动
         self.home_main()
@@ -54,9 +55,8 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
         self.automatic_battle()
         
         # 回到庭院
-        self.ui_get_current_page()
-        self.ui_goto(page_main)
-
+        # self.ui_get_current_page()
+        self.ui_goto_page(page_main, skip_first_screenshot=False)
         if config.auto_cake_config.active_souls_clean:
             self.set_next_run(task='SoulsTidy', success=False, finish=False, target=datetime.now())
 
@@ -78,7 +78,6 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
                     continue
                 if self.appear(self.I_LOCK):
                     break
-        
         # 开启樱饼
         avtivity_ap =  self.O_REMAIN_ACTIVITY_AP.ocr_digit(self.device.image)
         if avtivity_ap > 0:
@@ -92,40 +91,31 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
         swipe_timer = Timer(270)
         swipe_timer.start()
         freeze_timer = Timer(5)
-        freeze_timer.start()
-        last_image = None
+        screen_freeze = RuleAnimate(self.I_REWARD, threshold=0.8)
         while 1:
             self.screenshot()
             
             # 画面静止检测
-            if last_image is not None:
-                try:
-                    diff = cv2.absdiff(self.device.image, last_image)
-                    if np.mean(diff) < 1:
-                        if freeze_timer.reached():
-                            logger.warning("Screen frozen for 5 seconds, exiting automatic_battle")
-                            break
-                    else:
-                        freeze_timer.reset()
-                        last_image = self.device.image.copy()
-                except Exception as e:
-                    logger.warning(f"Freeze check failed: {e}")
-                    last_image = self.device.image.copy()
+            if self.appear(self.I_REWARD):
+                freeze_timer.start()
+                if screen_freeze.stable(self.device.image):
+                    if freeze_timer.reached():
+                        logger.warning("Screen frozen for 5 seconds, exiting automatic_battle")
+                        self.click(random.choice([self.C_WIN_1, self.C_WIN_2, self.C_WIN_3]), interval=1)
+                        break
+                else:
                     freeze_timer.reset()
-            else:
-                last_image = self.device.image.copy()
-                freeze_timer.reset()
+
             # 时间结束判断
             if datetime.now() - self.start_time >= self.limit_time:
                 # 任务执行时间超过限制时间，退出
                 logger.info('Auto cake task is over time')
                 break
-            # 点击准备 适配不同副本的需要
-            # 点击准备 适配不同副本的需要
-            if self.appear(self.I_PREPARE_HIGHLIGHT, interval=5):
-                self.device.click_record_clear()
-                self.click(self.I_PREPARE_HIGHLIGHT)
-                logger.info("click prepare button")
+            # # 点击准备 适配不同副本的需要
+            # if self.appear(self.I_PREPARE_HIGHLIGHT, interval=5):
+            #     self.device.click_record_clear()
+            #     self.click(self.I_PREPARE_HIGHLIGHT)
+            #     logger.info("click prepare button")
             # 攻打次数上限判断
             if self.appear(self.I_IS_OVER):
                 logger.info('Auto cake task is over count')
@@ -135,6 +125,7 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle ,AutoCakeAssets, ActivityShik
                 swipe_timer.reset()
                 self.device.stuck_record_clear()
                 self.device.stuck_record_add('BATTLE_STATUS_S')
+        
         
     def home_main(self) -> bool:
         """
@@ -178,7 +169,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('xiaohao')
+    c = Config('switch')
     d = Device(c)
     t = ScriptTask(c, d)
 

@@ -36,8 +36,7 @@ class GameUi(BaseTask, GameUiAssets):
                 GameUiAssets.I_BACK_FRIENDS, GameUiAssets.I_BACK_DAILY,
                 GameUiAssets.I_REALM_RAID_GOTO_EXPLORATION,
                 GameUiAssets.I_SIX_GATES_GOTO_EXPLORATION, SixRealmsAssets.I_EXIT_SIXREALMS,
-                ActivityShikigamiAssets.I_SKIP_BUTTON, ActivityShikigamiAssets.I_RED_EXIT, BaseTask.I_UI_BACK_BLUE,
-                ActivityShikigamiAssets.I_RED_EXIT_2]
+                ActivityShikigamiAssets.I_SKIP_BUTTON, ActivityShikigamiAssets.I_RED_EXIT, BaseTask.I_UI_BACK_BLUE]
 
     def __init__(self, config, device):
         super().__init__(config, device)
@@ -361,7 +360,7 @@ class GameUi(BaseTask, GameUiAssets):
                 logger.info(f'Page {page} additional {btn} clicked')
                 skip_first_screenshot = False
 
-    def appear_then_operate(self, target: RuleList | RuleImage | RuleGif | RuleOcr | RuleClick,
+    def appear_then_operate(self, target: RuleList | RuleImage | RuleGif | RuleOcr | RuleClick | list,
                             interval: float = None, skip_first_screenshot: bool = True):
         """
         出现对应目标执行操作(点击图像, 滑动列表至array第一个元素并点击, 点击OCR, 点击)
@@ -370,6 +369,12 @@ class GameUi(BaseTask, GameUiAssets):
         :param skip_first_screenshot: 是否跳过首次截图
         :return: 是否成功操作
         """
+        if isinstance(target, list):
+            for item in target:
+                if self.appear_then_operate(item, interval=interval, skip_first_screenshot=skip_first_screenshot):
+                    return True
+            return False
+
         self.maybe_screenshot(skip_first_screenshot)
         operated = False
         if isinstance(target, RuleList):
