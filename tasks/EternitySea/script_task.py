@@ -50,6 +50,8 @@ class ScriptTask(
 
         if success:
             self.set_next_run(self.task_name, finish=True, success=True)
+            # 调起真蛇任务
+            self.set_next_run(task='TrueOrochi', finish=True, success=True)
         else:
             self.set_next_run(self.task_name, finish=False, success=False)
 
