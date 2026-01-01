@@ -14,6 +14,7 @@ from tasks.Component.GeneralInvite.assets import GeneralInviteAssets
 from tasks.Component.GeneralInvite.config_invite import InviteConfig, InviteNumber, FindMode
 from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from module.logger import logger
+from module.atom.ocr import RuleOcr
 
 
 class FriendList(str, Enum):
@@ -311,10 +312,10 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             return False
 
         self.screenshot()
-        self.O_FRIEND_NAME_1.keyword = name
-        self.O_FRIEND_NAME_2.keyword = name
-        appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
-        appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
+        # appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
+        # appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
+        appear_1 = self._click_match_name(self.O_FRIEND_NAME_1, name)
+        appear_2 = self._click_match_name(self.O_FRIEND_NAME_2, name)
         if not appear_1 and not appear_2:
             logger.info('Current page no friend')
             return False
@@ -323,10 +324,38 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             self.screenshot()
             if self.appear(self.I_SELECTED):
                 break
-            appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
-            appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
+            # appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
+            # appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
+            appear_1 = self._click_match_name(self.O_FRIEND_NAME_1, name)
+            appear_2 = self._click_match_name(self.O_FRIEND_NAME_2, name)
 
         return True
+
+    def _click_match_name(self, rule: RuleOcr, name: str) -> bool:
+        """
+        匹配好友名字并点击 (包含关系)
+        :param rule:
+        :param name:
+        :return:
+        """
+        boxed_results = rule.detect_and_ocr(self.device.image)
+        for result in boxed_results:
+            # 修改为包含匹配，只要 target name 在 ocr result 中即可
+            # 满足: "最爱" in "最爱请" (True)
+            # 满足: "最爱" in "爱情" (False)
+            if name in result.ocr_text:
+                logger.info(f"Match found: {name} in {result.ocr_text}")
+                # 计算绝对坐标
+                rec_x = result.box[0, 0] + rule.roi[0]
+                rec_y = result.box[0, 1] + rule.roi[1]
+                rec_w = result.box[1, 0] - result.box[0, 0]
+                rec_h = result.box[2, 1] - result.box[0, 1]
+                # 点击中心位置
+                cx = rec_x + rec_w / 2
+                cy = rec_y + rec_h / 2
+                self.device.click(cx, cy, control_name=rule.name)
+                return True
+        return False
 
     def invite_friend(self, name: str = None, find_mode: FindMode = FindMode.AUTO_FIND) -> bool:
         """
