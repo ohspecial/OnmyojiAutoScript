@@ -60,7 +60,7 @@ class DuelAssets:
 
 	# Ocr Rule Assets
 	# 荣誉 
-	O_D_HONOR = RuleOcr(roi=(233,644,131,31), area=(233,643,131,31), mode="DigitCounter", method="Default", keyword="", name="d_honor")
+	O_D_HONOR = RuleOcr(roi=(149,665,105,24), area=(149,665,105,24), mode="DigitCounter", method="Default", keyword="", name="d_honor")
 	# 分数 
 	O_D_SCORE = RuleOcr(roi=(604,484,108,28), area=(604,484,108,28), mode="DigitCounter", method="Default", keyword="", name="d_score")
 	# 名士星星数 
