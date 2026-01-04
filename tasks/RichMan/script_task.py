@@ -41,8 +41,8 @@ if __name__ == '__main__':
     d = Device(c)
     t = ScriptTask(c, d)
 
-    t.execute_guild(con=c.rich_man.guild_store)
-    # t.execute_mall()
+    # t.run()
+    t.execute_mall()
 
 
 
