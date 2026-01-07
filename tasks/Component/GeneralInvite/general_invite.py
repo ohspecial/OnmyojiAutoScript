@@ -314,28 +314,38 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         self.screenshot()
         # appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
         # appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
-        appear_1 = self._click_match_name(self.O_FRIEND_NAME_1, name)
-        appear_2 = self._click_match_name(self.O_FRIEND_NAME_2, name)
+        appear_1 = self._click_match_name(self.O_FRIEND_NAME_1, name, interval=2.0)
+        appear_2 = self._click_match_name(self.O_FRIEND_NAME_2, name, interval=2.0)
         if not appear_1 and not appear_2:
             logger.info('Current page no friend')
             return False
 
-        while appear_1 or appear_2:
-            self.screenshot()
-            if self.appear(self.I_SELECTED):
-                break
-            # appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
-            # appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
-            appear_1 = self._click_match_name(self.O_FRIEND_NAME_1, name)
-            appear_2 = self._click_match_name(self.O_FRIEND_NAME_2, name)
+        # 增加超时限制，防止一直点击
+        # 8秒足够点击3-4次
+        # select_timer = Timer(8)
+        # select_timer.start()
+        # while appear_1 or appear_2:
+        #     self.screenshot()
+        #     if self.appear(self.I_SELECTED):
+        #         break
+        #     if select_timer.reached():
+        #         logger.warning('Select friend timeout (I_SELECTED not detected), assuming selected')
+        #         break
+        #     # appear_1 = self.ocr_appear_click(self.O_FRIEND_NAME_1, interval=2)
+        #     # appear_2 = self.ocr_appear_click(self.O_FRIEND_NAME_2, interval=2)
+        #     appear_1 = self._click_match_name(self.O_FRIEND_NAME_1, name, interval=2.0)
+        #     appear_2 = self._click_match_name(self.O_FRIEND_NAME_2, name, interval=2.0)
 
+        # 只要找到了好友并且点击了，就直接返回True，认为选中了
+        # 不再通过判断 I_SELECTED 来确认，因为 I_SELECTED 是一个固定的位置，而好友的位置是不固定的
         return True
 
-    def _click_match_name(self, rule: RuleOcr, name: str) -> bool:
+    def _click_match_name(self, rule: RuleOcr, name: str, interval: float = None) -> bool:
         """
         匹配好友名字并点击 (包含关系)
         :param rule:
         :param name:
+        :param interval:
         :return:
         """
         boxed_results = rule.detect_and_ocr(self.device.image)
@@ -345,6 +355,16 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             # 满足: "最爱" in "爱情" (False)
             if name in result.ocr_text:
                 logger.info(f"Match found: {name} in {result.ocr_text}")
+                
+                if interval:
+                    if rule.name in self.interval_timer:
+                        if self.interval_timer[rule.name].limit != interval:
+                            self.interval_timer[rule.name] = Timer(interval)
+                    else:
+                        self.interval_timer[rule.name] = Timer(interval)
+                    if not self.interval_timer[rule.name].reached():
+                        return True
+
                 # 计算绝对坐标
                 rec_x = result.box[0, 0] + rule.roi[0]
                 rec_y = result.box[0, 1] + rule.roi[1]
@@ -354,6 +374,10 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 cx = rec_x + rec_w / 2
                 cy = rec_y + rec_h / 2
                 self.device.click(cx, cy, control_name=rule.name)
+                
+                if interval:
+                    self.interval_timer[rule.name].reset()
+
                 return True
         return False
 
@@ -670,12 +694,12 @@ if __name__ == '__main__':
     from module.device.device import Device
     import cv2
 
-    c = Config('oas1')
+    c = Config('zhu')
     d = Device(c)
     t = GeneralInvite(c, d)
 
-    # t.run_invite(c.orochi.invite_config, is_first=True)
-    t.screenshot()
-    print(t.appear(t.I_FIRE, threshold=0.8))
+    t.run_invite(c.orochi.invite_config, is_first=True)
+    # t.screenshot()
+    # print(t.appear(t.I_FIRE, threshold=0.8))
 
 

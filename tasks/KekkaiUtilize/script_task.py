@@ -818,7 +818,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
             if self.appear_then_click(self.I_UI_BACK_RED, interval=1):
                 continue
-            if self.appear_then_click(self.I_UI_BACK_BLUE, interval=1):
+            if self.appear_then_click(self.I_UI_BACK_YELLOW, interval=1):
                 continue
 
     def back_realm(self):
@@ -831,7 +831,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 break
             if self.appear_then_click(self.I_UI_BACK_RED, interval=1):
                 continue
-            if self.appear_then_click(self.I_UI_BACK_BLUE, interval=1):
+            if self.appear_then_click(self.I_UI_BACK_YELLOW, interval=1):
                 continue
 
 
