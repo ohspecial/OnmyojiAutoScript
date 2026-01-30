@@ -1,0 +1,119 @@
+[
+  {
+    "itemName": "pian_ye",
+    "imageName": "pian_ye.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "片叶"
+  },
+  {
+    "itemName": "yin_nian",
+    "imageName": "yin_nian.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "隐念"
+  },
+  {
+    "itemName": "hai_yue",
+    "imageName": "hai_yue.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "海月火玉"
+  },
+  {
+    "itemName": "kuang_gu",
+    "imageName": "kuang_gu.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "狂骨"
+  },
+  {
+    "itemName": "wang_qie",
+    "imageName": "wang_qie.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "网切"
+  },
+  {
+    "itemName": "bang_jing",
+    "imageName": "bang_jing.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "蚌精"
+  },
+  {
+    "itemName": "huo_ling",
+    "imageName": "huo_ling.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "火灵"
+  },
+  {
+    "itemName": "yuan_xing_si",
+    "imageName": "yuan_xing_si.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "元兴寺"
+  },
+  {
+    "itemName": "yi_nian_huo",
+    "imageName": "yi_nian_huo.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "遗念火"
+  },
+  {
+    "itemName": "diao_ping_huo",
+    "imageName": "diao_ping_huo.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "吊瓶火"
+  },
+  {
+    "itemName": "e_lou",
+    "imageName": "e_lou.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "恶楼"
+  },
+  {
+    "itemName": "xin_yan",
+    "imageName": "xin_yan.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "心眼"
+  },
+  {
+    "itemName": "po_shi",
+    "imageName": "po_shi.png",
+    "roiFront": "962,240,95,95",
+    "roiBack": "151,165,984,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "破势"
+  }
+]

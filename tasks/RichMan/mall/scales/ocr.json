@@ -3,25 +3,25 @@
     "itemName": "sca_number_orochi",
     "roiFront": "41,318,34,25",
     "roiBack": "41,318,34,25",
-    "mode": "Quantity",
+    "mode": "Digit",
     "method": "Default",
     "keyword": "",
     "description": "蛇皮剩余可买的"
   },
   {
     "itemName": "sca_number_demon",
-    "roiFront": "627,319,30,25",
-    "roiBack": "627,319,30,25",
-    "mode": "Quantity",
+    "roiFront": "624,319,32,23",
+    "roiBack": "624,319,32,23",
+    "mode": "Digit",
     "method": "Default",
     "keyword": "",
     "description": "首领御魂剩余可买的"
   },
   {
     "itemName": "sca_number_sea",
-    "roiFront": "926,321,30,23",
-    "roiBack": "926,321,30,23",
-    "mode": "Quantity",
+    "roiFront": "921,320,35,22",
+    "roiBack": "921,320,35,22",
+    "mode": "Digit",
     "method": "Default",
     "keyword": "",
     "description": "永生之海"
@@ -57,7 +57,7 @@
     "itemName": "sca_res_sea",
     "roiFront": "1134,11,117,38",
     "roiBack": "1134,11,117,38",
-    "mode": "Digit",
+    "mode": "Quantity",
     "method": "Default",
     "keyword": "",
     "description": "永生之海"

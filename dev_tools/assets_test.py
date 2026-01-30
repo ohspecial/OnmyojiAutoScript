@@ -34,12 +34,15 @@ def detect_ocr(file: str, target: RuleOcr):
 
 
 # 图片文件路径 可以是相对路径
-IMAGE_FILE = r"C:\Users\Ryland\Desktop\ScreenShot_2026-01-04_222421_055.png"
+IMAGE_FILE = r"C:\Users\OYJ\Documents\MuMu共享文件夹\Screenshots\MuMu-20260117-181231-820.png"
 if __name__ == '__main__':
-    from tasks.RichMan.script_task import ScriptTask
-    targe = ScriptTask.I_MALL_BONDLINGS_SURE
-    print(detect_image(IMAGE_FILE, targe))
+    # from tasks.RichMan.script_task import ScriptTask
+    # targe = ScriptTask.I_MALL_BONDLINGS_SURE
+    # print(detect_image(IMAGE_FILE, targe))
     # ocr demo
-    # from tasks.KekkaiActivation.assets import KekkaiActivationAssets
-    # target = KekkaiActivationAssets.O_CARD_ALL_TIME
-    # print(detect_ocr(IMAGE_FILE, target))
+    from tasks.RichMan.assets import RichManAssets
+    target1 = RichManAssets.O_SCA_NUMBER_SEA
+    target2 = RichManAssets.O_SCA_RES_SEA
+    print(detect_ocr(IMAGE_FILE, target1))
+    print(detect_ocr(IMAGE_FILE, target2))
+
