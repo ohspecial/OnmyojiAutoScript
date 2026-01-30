@@ -342,43 +342,50 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
     def _click_match_name(self, rule: RuleOcr, name: str, interval: float = None) -> bool:
         """
-        匹配好友名字并点击 (包含关系)
+        匹配好友名字并点击 (优先全字匹配，其次包含关系)
         :param rule:
         :param name:
         :param interval:
         :return:
         """
         boxed_results = rule.detect_and_ocr(self.device.image)
-        for result in boxed_results:
-            # 修改为包含匹配，只要 target name 在 ocr result 中即可
-            # 满足: "最爱" in "最爱请" (True)
-            # 满足: "最爱" in "爱情" (False)
-            if name in result.ocr_text:
-                logger.info(f"Match found: {name} in {result.ocr_text}")
-                
-                if interval:
-                    if rule.name in self.interval_timer:
-                        if self.interval_timer[rule.name].limit != interval:
-                            self.interval_timer[rule.name] = Timer(interval)
-                    else:
+
+        def click_action(res):
+            if interval:
+                if rule.name in self.interval_timer:
+                    if self.interval_timer[rule.name].limit != interval:
                         self.interval_timer[rule.name] = Timer(interval)
-                    if not self.interval_timer[rule.name].reached():
-                        return True
+                else:
+                    self.interval_timer[rule.name] = Timer(interval)
+                if not self.interval_timer[rule.name].reached():
+                    return True
 
-                # 计算绝对坐标
-                rec_x = result.box[0, 0] + rule.roi[0]
-                rec_y = result.box[0, 1] + rule.roi[1]
-                rec_w = result.box[1, 0] - result.box[0, 0]
-                rec_h = result.box[2, 1] - result.box[0, 1]
-                # 点击中心位置
-                cx = rec_x + rec_w / 2
-                cy = rec_y + rec_h / 2
-                self.device.click(cx, cy, control_name=rule.name)
-                
-                if interval:
-                    self.interval_timer[rule.name].reset()
+            # 计算绝对坐标
+            rec_x = res.box[0, 0] + rule.roi[0]
+            rec_y = res.box[0, 1] + rule.roi[1]
+            rec_w = res.box[1, 0] - res.box[0, 0]
+            rec_h = res.box[2, 1] - res.box[0, 1]
+            # 点击中心位置
+            cx = rec_x + rec_w / 2
+            cy = rec_y + rec_h / 2
+            self.device.click(cx, cy, control_name=rule.name)
 
-                return True
+            if interval:
+                self.interval_timer[rule.name].reset()
+            return True
+
+        # 1. 优先全字匹配
+        for result in boxed_results:
+            if name == result.ocr_text:
+                logger.info(f"Exact match found: {name}")
+                return click_action(result)
+
+        # 2. 其次包含匹配
+        for result in boxed_results:
+            if name in result.ocr_text:
+                logger.info(f"Substring match found: {name} in {result.ocr_text}")
+                return click_action(result)
+
         return False
 
     def invite_friend(self, name: str = None, find_mode: FindMode = FindMode.AUTO_FIND) -> bool:
