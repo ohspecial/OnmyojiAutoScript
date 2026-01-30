@@ -6,10 +6,11 @@ from module.base.timer import Timer
 from module.exception import RequestHumanTakeover, GameTooManyClickError, GameStuckError
 from module.logger import logger
 from tasks.Restart.assets import RestartAssets
+from tasks.GameUi.assets import GameUiAssets
 from tasks.base_task import BaseTask
 import time
 
-class LoginHandler(BaseTask, RestartAssets):
+class LoginHandler(BaseTask, RestartAssets, GameUiAssets):
     character: str
 
     def __init__(self, *wargs, **kwargs):
@@ -50,13 +51,20 @@ class LoginHandler(BaseTask, RestartAssets):
                     continue
             if self.appear(self.I_MAIN_GOTO_SHIKIGAMI_RECORDS, interval=0.2):
                 if confirm_timer.reached():
-                    logger.info('Login to main confirm')
+                    logger.info('Login to main confirm (shikigami records button appears)')
+                    break
+            elif self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.2):
+                if confirm_timer.reached():
+                    logger.info('Login to main confirm (scroll open)')
                     break
             else:
                 confirm_timer.reset()
             # 登录成功
-            if self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.5):
-                logger.info('Login success')
+            if self.appear(self.I_MAIN_GOTO_SHIKIGAMI_RECORDS, interval=0.5):
+                logger.info('Login success: shikigami records button appears')
+                login_success = True
+            elif self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.5):
+                logger.info('Login success: scroll open')
                 login_success = True
 
             # 网络异常

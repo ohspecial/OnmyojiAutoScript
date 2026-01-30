@@ -13,12 +13,14 @@ from module.base.timer import Timer
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.SwitchOnmyoji.switch_onmyoji import SwitchOnmyoji
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_duel, page_onmyodo, random_click
-from tasks.Duel.config import Duel
+from tasks.GameUi.page import page_main, page_duel
+from tasks.Duel.config import Duel, Onmyoji
 from tasks.Duel.assets import DuelAssets
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
-from tasks.GameUi.page import page_main, page_shikigami_records
-
+from tasks.GameUi.page import page_main, page_team, page_shikigami_records
+import os
+from module.atom.image import RuleImage
+from tasks.GlobalGame.assets import GlobalGameAssets as GGA
 """ 斗技 """
 
 
@@ -40,8 +42,36 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
         limit_time = self.conf.duel_config.limit_time
         self.limit_time: timedelta = timedelta(hours=limit_time.hour, minutes=limit_time.minute,
                                                seconds=limit_time.second)
-        self.prepare_duel()
-        while True:
+
+        self.ui_get_current_page()
+        self.ui_goto(page_main)
+        # 切换阴阳师
+        if con.switch_enabled:
+            # 清明
+            if con.switch_onmyoji == Onmyoji.Qm:
+                self.switch_kagura(con, self.C_QM_ZHAN, self.I_QM_ZHAN)
+            # 神乐
+            elif con.switch_onmyoji == Onmyoji.Sl:
+                self.switch_kagura(con, self.C_SL_ZHAN, self.I_SL_ZHAN)
+            # 源博雅
+            elif con.switch_onmyoji == Onmyoji.Yby:
+                self.switch_kagura(con, self.C_YBY_ZHAN, self.I_YBY_ZHAN)
+            # 八百比丘尼
+            elif con.switch_onmyoji == Onmyoji.Bbbqn:
+                self.switch_kagura(con, self.C_BBBQN_ZHAN, self.I_BBBQN_ZHAN)
+            # 源赖光
+            elif con.switch_onmyoji == Onmyoji.Ylg:
+                self.switch_yorimitsu()
+
+        self.ui_get_current_page()
+        self.ui_goto(page_duel)
+        # 切换御魂
+        if con.switch_all_soul:
+            self.switch_all_soul()
+
+        # 循环
+        duel_week_over = False
+        while 1:
             self.screenshot()
             self.check_and_get_reward()
             if not self.duel_main():
