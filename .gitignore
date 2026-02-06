@@ -34,6 +34,7 @@ module/config/i18n/*.json
 !dev_tools/Spyxx/spyxx_amd64.exe
 !dev_tools/ViewWizard2/ViewWizard2.exe
 !dev_tools/ViewWizard3/ViewWizard.exe
+!tasks/AutoCheckinBigGod/platform-tools/adb.exe
 dev_tools/assets_test.py
 #hya
 deploy/launcher/oas-backend.bat
@@ -278,4 +279,5 @@ tasks/ActivityShikigami/__pycache__/config.cpython-310.pyc
 tasks/ActivityShikigami/__pycache__/script_task.cpython-310.pyc
 module/gui/qml_rc.py
 module/gui/res_rc.py
-**.pyc
+**.pyc.claude/settings.local.json
+tasks/AutoCheckinBigGod/frida-server-17.6.2-android-x86_64
