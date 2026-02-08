@@ -281,3 +281,4 @@ module/gui/qml_rc.py
 module/gui/res_rc.py
 **.pyc.claude/settings.local.json
 tasks/AutoCheckinBigGod/frida-server-17.6.2-android-x86_64
+oas.bat
