@@ -112,10 +112,13 @@ class GameUiAssets:
 	I_TOWN_GOTO_DRAFT_DUEL = RuleImage(roi_front=(335,159,55,72), roi_back=(170,145,567,100), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_town_goto_draft_duel.png")
 	# 百鬼奕 
 	I_TOWN_GOTO_HYAKKISEN = RuleImage(roi_front=(192,145,48,67), roi_back=(86,130,447,100), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_town_goto_hyakkisen.png")
+<<<<<<< HEAD
 
 	# description 
 	I_CHECK_DUEL = RuleImage(roi_front=(155,20,64,38), roi_back=(140,10,110,74), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_duel.png")
 
+=======
+>>>>>>> 12e8a4ba (fix(Duel): 优化斗技任务配置和界面识别)
 	# 斗技主界面左上角文字图像 
 	I_CHECK_DUEL = RuleImage(roi_front=(149,16,64,38), roi_back=(133,0,110,74), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_duel.png")
 	# description 

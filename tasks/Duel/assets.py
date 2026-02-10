@@ -19,13 +19,13 @@ class DuelAssets:
 
 	# Image Rule Assets
 	# 点击阵容 
-	I_D_TEAM = RuleImage(roi_front=(814,296,33,63), roi_back=(785,259,115,119), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_team.png")
+	I_D_TEAM = RuleImage(roi_front=(813,288,34,74), roi_back=(785,259,115,119), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_team.png")
 	# 一键切换所有的御魂 
 	I_D_TEAM_SWTICH = RuleImage(roi_front=(1082,85,38,41), roi_back=(1082,85,38,41), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_team_swtich.png")
 	# description 
 	I_D_BATTLE = RuleImage(roi_front=(1153,573,100,100), roi_back=(1123,537,154,177), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_battle.png")
 	# 战斗带保护的 
-	I_D_BATTLE_PROTECT = RuleImage(roi_front=(439,289,85,83), roi_back=(1118,553,155,149), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_battle_protect.png")
+	I_D_BATTLE_PROTECT = RuleImage(roi_front=(1153,578,100,100), roi_back=(1118,553,155,149), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_battle_protect.png")
 	# 自动上阵 
 	I_D_AUTO_ENTRY = RuleImage(roi_front=(23,118,53,54), roi_back=(2,97,93,96), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_auto_entry.png")
 	# 主界面的感叹号 
@@ -47,7 +47,7 @@ class DuelAssets:
 	# 练2 
 	I_BATTLE_WITH_TRAIN2 = RuleImage(roi_front=(1161,588,78,81), roi_back=(1114,547,163,172), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_battle_with_train2.png")
 	# 斗技模式（普通） 
-	I_BATTLE_TYPE_COMMON = RuleImage(roi_front=(35,18.5,90,66), roi_back=(439,278,90,88), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_battle_type_common.png")
+	I_BATTLE_TYPE_COMMON = RuleImage(roi_front=(439,278,90,88), roi_back=(439,278,90,88), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_battle_type_common.png")
 	# 活动的战斗按钮 
 	I_D_BATTLE2 = RuleImage(roi_front=(1171,592,69,78), roi_back=(1119,566,154,143), threshold=0.8, method="Template matching", file="./tasks/Duel/duel/duel_d_battle2.png")
 	# 禁用 
