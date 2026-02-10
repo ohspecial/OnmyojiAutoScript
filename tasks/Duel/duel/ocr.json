@@ -1,8 +1,13 @@
 [
   {
     "itemName": "d_honor",
+<<<<<<< HEAD
     "roiFront": "149,665,105,24",
     "roiBack": "149,665,105,24",
+=======
+    "roiFront": "233,644,131,31",
+    "roiBack": "233,643,131,31",
+>>>>>>> 12e8a4ba (fix(Duel): 优化斗技任务配置和界面识别)
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",

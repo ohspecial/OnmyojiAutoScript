@@ -74,11 +74,19 @@
   {
     "itemName": "check_duel",
     "imageName": "page_check_duel.png",
+<<<<<<< HEAD
     "roiFront": "157,22,64,38",
     "roiBack": "79,1,158,67",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+=======
+    "roiFront": "149,16,64,38",
+    "roiBack": "133,0,110,74",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "斗技主界面左上角文字图像"
+>>>>>>> 12e8a4ba (fix(Duel): 优化斗技任务配置和界面识别)
   },
   {
     "itemName": "check_demon_encounter",
