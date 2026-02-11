@@ -158,8 +158,11 @@ class Special(Buy, MallNavbar):
         # logger.info(f'上中点是：{upper_midpoint}')
         # logger.info(f'数字的ROI是: {self.O_SP_RES_NUMBER.roi}')
         result = self.O_SP_RES_NUMBER.ocr(self.device.image)
-        # result = result.replace('？', '2').replace('?', '2').replace(':', '；').replace('火', '次').replace('教', '数')
-        print(result)
+        # https://github.com/runhey/OnmyojiAutoScript/issues/1400
+        result = (result.replace('？', '2').replace('?', '2')
+                  .replace(':', '：').replace('火', '次')
+                  .replace('教', '数').replace('刺', '剩')
+                  .replace('头', '买'))
         try:
             if '：' in result or ':' in result:
                 result = re.findall(r'剩余购买次数[:：](\d+)', result)[0]
@@ -182,3 +185,4 @@ if __name__ == '__main__':
     t = Special(c, d)
 
     t.execute_special()
+
