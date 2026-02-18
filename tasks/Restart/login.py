@@ -311,4 +311,38 @@ class LoginHandler(BaseTask, RestartAssets, GameUiAssets):
                 continue
         self.ui_click_until_disappear(self.I_LOGIN_RED_CLOSE)
         return True
+    
+    def harvest_courtyard_affairs(self) -> bool:
+        if not self.ui_click_multi_scale(self.I_NOTE, self.I_PAGE, timeout=3, scale_range=(0.8, 1.2)):
+            logger.warning('courtyard affairs timeout!')
+            return False
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_NO_TASKS):
+                logger.info('courtyard affairs completed！')
+                return True
+            # 每日六星御魂
+            if self.appear_then_click(self.I_HARVEST_SOUL_2, interval=1) \
+                    or self.appear_then_click(self.I_HARVEST_SOUL_3, interval=1):
+                continue
+            # 点击'获得奖励'
+            if self.ui_reward_appear_click():
+                continue
+            # 获得奖励
+            if self.appear_then_click(self.I_UI_AWARD, interval=0.2):
+                continue
+            # 式神满级，是否提取物经验？确定
+            if self.appear_then_click(self.I_CONFIRM, interval=1):
+                continue
 
+            if self.appear_then_click(self.I_DAILY, interval=1):
+                continue
+            if self.appear_then_click(self.I_SUCCESS_CLAIMED, interval=1):
+                continue
+            if self.appear_then_click(self.I_SKIP):# 万花牌跳过
+                continue
+            if self.appear_then_click(self.I_LOGIN_RED_CLOSE, interval=1):# 万花牌X
+                continue
+            # 一键完成
+            if self.appear_then_click(self.I_COMPLETE_TASKS, interval=2.3):
+                continue
