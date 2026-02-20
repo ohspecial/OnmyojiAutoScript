@@ -115,5 +115,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "魇兽将的战斗图片"
+  },
+  {
+    "itemName": "boss_fire",
+    "imageName": "fire_boss_fire.png",
+    "roiFront": "1127,590,96,48",
+    "roiBack": "1098,556,158,149",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "BOSS挑战"
   }
 ]

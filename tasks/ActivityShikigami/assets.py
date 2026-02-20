@@ -86,6 +86,8 @@ class ActivityShikigamiAssets:
 	I_PASS12 = RuleImage(roi_front=(870,356,100,50), roi_back=(104,169,1109,425), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass12.png")
 	# 魇兽将的战斗图片 
 	I_PASS_13 = RuleImage(roi_front=(1018,570,100,100), roi_back=(984,538,169,152), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_13.png")
+	# BOSS挑战 
+	I_BOSS_FIRE = RuleImage(roi_front=(1127,590,96,48), roi_back=(1098,556,158,149), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_boss_fire.png")
 
 
 	# Ocr Rule Assets

@@ -25,9 +25,9 @@ from tasks.Component.config_base import Time
 from tasks.GlobalGame.assets import GlobalGameAssets
 from tasks.GlobalGame.config_emergency import FriendInvitation
 from typing import Union
-from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 
-class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
+
+class BaseTask(GlobalGameAssets, CostumeBase):
     config: Config = None
     device: Device = None
 
@@ -86,7 +86,6 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
                 if self.appear(self.I_G_JADE):
                     click_button = self.I_G_ACCEPT
                 else:
-                    logger.info(f"Ignore other invitation")
                     click_button = self.I_G_IGNORE
             case FriendInvitation.JADE_AND_FOOD:
                 # 如果是接受勾协和粮协
@@ -94,7 +93,6 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
                 if self.appear(self.I_G_JADE) or self.appear(self.I_G_CAT_FOOD) or self.appear(self.I_G_DOG_FOOD):
                     click_button = self.I_G_ACCEPT
                 else:
-                    logger.info(f"Ignore other invitation")
                     click_button = self.I_G_IGNORE
             case FriendInvitation.IGNORE:
                 # 如果是忽略
@@ -109,7 +107,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             if not self.appear(target=click_button):
                 logger.info('Deal with invitation done')
                 break
-            if self.appear_then_click(target=click_button, interval=0.8,threshold=0.8):
+            if self.appear_then_click(click_button, interval=0.8):
                 # 把悬赏加入任务列表
                 if click_button == self.I_G_ACCEPT:
                     self.set_next_run(task='WantedQuests', success=True, finish=False, target=datetime.now())
@@ -131,7 +129,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             self.device.screenshot()
         # 判断勾协
         self._burst()
-        
+
         # # 判断网络异常
         # if self.appear(self.I_NETWORK_ABNORMAL):
         #     logger.warning(f"Network abnormal")
@@ -210,6 +208,73 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             x, y = target.coord()
             self.device.click(x, y, control_name=target.name)
 
+        elif appear and action:
+            x, y = action.coord()
+            if isinstance(action, RuleLongClick):
+                if duration is None:
+                    self.device.long_click(x, y, duration=action.duration / 1000, control_name=target.name)
+                else:
+                    self.device.long_click(x, y, duration=duration / 1000, control_name=target.name)
+            elif isinstance(action, RuleClick):
+                self.device.click(x, y, control_name=target.name)
+
+        return appear
+
+    def appear_multi_scale(self,
+                           target: RuleImage,
+                           interval: float = None,
+                           threshold: float = None,
+                           scales: list = None,
+                           scale_range: tuple = None):
+        """
+        多尺度图片识别，自动尝试多个缩放比例以适应图片大小的变化
+        :param target: RuleImage对象
+        :param interval: 匹配间隔时间
+        :param threshold: 匹配阈值
+        :param scales: 缩放比例列表
+        :param scale_range: 缩放范围 (start, end, step)，例如 (0.8, 1.2, 0.1)
+        :return: interval时间到达且匹配成功则返回True, 否则False
+        """
+        if interval:
+            if target.name in self.interval_timer:
+                if self.interval_timer[target.name].limit != interval:
+                    self.interval_timer[target.name] = Timer(interval)
+            else:
+                self.interval_timer[target.name] = Timer(interval)
+            if not self.interval_timer[target.name].reached():
+                return False
+
+        appear = target.match_multi_scale(self.device.image, threshold=threshold, scales=scales, scale_range=scale_range)
+
+        if appear and interval:
+            self.interval_timer[target.name].reset()
+
+        return appear
+
+    def appear_then_click_multi_scale(self,
+                                      target: RuleImage,
+                                      action: Union[RuleClick, RuleLongClick] = None,
+                                      interval: float = None,
+                                      threshold: float = None,
+                                      scales: list = None,
+                                      scale_range: tuple = None,
+                                      duration: float = None):
+        """
+        多尺度图片识别并点击，自动尝试多个缩放比例以适应图片大小的变化
+        :param target: RuleImage对象
+        :param action: 点击位置，可以是RuleClick或RuleLongClick
+        :param interval: 匹配间隔时间
+        :param threshold: 匹配阈值
+        :param scales: 缩放比例列表
+        :param scale_range: 缩放范围 (start, end, step)，例如 (0.8, 1.2, 0.1)
+        :param duration: 长按时间（毫秒）
+        :return: True or False
+        """
+        appear = self.appear_multi_scale(target, interval=interval, threshold=threshold, scales=scales, scale_range=scale_range)
+
+        if appear and not action:
+            x, y = target.coord()
+            self.device.click(x, y, control_name=target.name)
         elif appear and action:
             x, y = action.coord()
             if isinstance(action, RuleLongClick):
@@ -620,8 +685,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
             self.config.save()
         else:
             from module.logger import logger
-            logger.warning(f"配置中没有 multi_account_daily，无法更新账号任务时间")
-
+            logger.warning(f"配置中没有 multi_account_daily，无法更新账号任务时间")     
     def custom_next_run(self, task: str, custom_time: Time = None, time_delta: float = 1) -> None:
         """
         设置下次自定义运行时间
@@ -649,7 +713,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
 
     def ui_get_reward(self, click_image: RuleImage or RuleOcr or RuleClick, click_interval: float = 1):
         """
-        传进来一个点击图片 或是 一个ocr， 会点击这个图片，然后等待‘获得奖励’，或者买御魂的“购买成功”出现
+        传进来一个点击图片 或是 一个ocr， 会点击这个图片，然后等待‘获得奖励’，
         最后当获得奖励消失后 退出
         :param click_interval:
         :param click_image:
@@ -670,7 +734,7 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
                         break
                     if not self.appear(self.I_UI_BUY_SUCCESS, threshold=0.6):
                         logger.info('Buy success')
-                        break
+                        break                            
                     # 一直点击
                     if self.ui_reward_appear_click():
                         continue
@@ -691,18 +755,23 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
 
         return True
 
-    def ui_click(self, click, stop, interval=1):
+    def ui_click(self, click, stop, interval=1, timeout=None):
         """
         循环的一个操作，直到出现stop
         :param click:
         :param stop:
-        :parm interval
+        :param interval: 点击间隔
+        :param timeout: 超时时间（秒），None表示不超时
         :return:
         """
+        timer = Timer(timeout).start() if timeout else None
         while 1:
             self.screenshot()
             if self.appear(stop):
-                break
+                return True
+            if timer and timer.reached():
+                logger.warning(f'ui_click timeout after {timeout}s')
+                return False
             if isinstance(click, RuleImage) and self.appear_then_click(click, interval=interval):
                 continue
             if isinstance(click, RuleClick) and self.click(click, interval=interval):
@@ -756,7 +825,33 @@ class BaseTask(GlobalGameAssets, CostumeBase ,GeneralBattleAssets):
                 self.click(click)
                 continue
 
+    def ui_click_multi_scale(self, click, stop, interval=1, scale_range=None, timeout=None):
+        """
+        循环的一个操作，直到出现stop（支持多尺度图片识别）
+        :param click:
+        :param stop:
+        :param interval:
+        :param scale_range: 多尺度缩放范围 (start, end, step)
+        :param timeout: 超时时间（秒），None表示不超时
+        :return: True-找到stop条件, False-超时
+        """
+        timer = Timer(timeout).start() if timeout else None
+        while 1:
+            self.screenshot()
+            if self.appear(stop):
+                return True
+            if timer and timer.reached():
+                logger.warning(f'ui_click_multi_scale timeout after {timeout}s')
+                return False
+            if isinstance(click, RuleImage) and self.appear_then_click_multi_scale(click, scale_range=scale_range, interval=interval):
+                continue
+            if isinstance(click, RuleClick) and self.click(click, interval=interval):
+                continue
+            elif isinstance(click, RuleOcr) and self.ocr_appear_click(click, interval=interval):
+                continue
+
     def push_notify(self, content='', title=None, level=3):
         logger.info(f'Push notify: {content}')
 
-    
+    def save_image(self, task_name=None, content=None, wait_time=2, image_type=False, push_flag=False, level=3):
+        logger.info(f'Save image: {task_name}')
