@@ -59,6 +59,7 @@ from tasks.KittyShop.config import KittyShop
 from tasks.DyeTrials.config import DyeTrials
 from tasks.ActivityCommon.config import ActivityCommon
 from tasks.AutoCake.config import AutoCake
+from tasks.NianTrue.config import NianTrue
 # ----------------------------------------------------------------------------------------------------------------------
 
 # 肝帝专属---------------------------------------------------------------------------------------------------------------
@@ -125,6 +126,7 @@ class ConfigModel(ConfigBase):
     dye_trials: DyeTrials = Field(default_factory=DyeTrials)
     activity_common:ActivityCommon = Field(default_factory=ActivityCommon)
     auto_cake: AutoCake = Field(default_factory=AutoCake)
+    nian_true: NianTrue = Field(default_factory=NianTrue)
     
     # 这些是肝帝专属
     bondling_fairyland: BondlingFairyland = Field(default_factory=BondlingFairyland)

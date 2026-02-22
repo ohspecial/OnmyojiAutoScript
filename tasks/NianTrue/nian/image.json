@@ -1,0 +1,47 @@
+[
+  {
+    "itemName": "n_waiting",
+    "imageName": "nian_n_waiting.png",
+    "roiFront": "735,28,54,51",
+    "roiBack": "735,28,54,51",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "等待进入，也是关闭按钮"
+  },
+  {
+    "itemName": "n_huabei",
+    "imageName": "nian_n_huabei.png",
+    "roiFront": "409,330,156,45",
+    "roiBack": "409,330,156,45",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "华北年兽"
+  },
+  {
+    "itemName": "battle_over",
+    "imageName": "nian_battle_over.png",
+    "roiFront": "531,212,205,61",
+    "roiBack": "531,212,205,61",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "年兽战斗结束，通关奖励"
+  },
+  {
+    "itemName": "n_page",
+    "imageName": "n_page.png",
+    "roiFront": "86,11,132,44",
+    "roiBack": "85,10,134,47",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "年兽来袭页面"
+  },
+  {
+    "itemName": "n_ok",
+    "imageName": "nian_n_ok.png",
+    "roiFront": "593,442,100,65",
+    "roiBack": "593,442,100,65",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "年兽战斗结束，已经拥有转为金币，点击确认"
+  }
+]
