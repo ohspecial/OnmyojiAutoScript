@@ -23,13 +23,14 @@ class AccountInfo(BaseModel):
 
     def is_account_alias(self, ocr_account):
         tmp_account = AccountInfo.preprocessAccount(self.account)
-        if ocr_account == self.account or ocr_account.startswith(tmp_account):
+        tmp_ocr_account = AccountInfo.preprocessAccount(ocr_account)
+        if ocr_account == self.account or tmp_ocr_account == tmp_account:
             return True
         if not self.account_alias:
             return False
         _accountAliasList = self.account_alias.split('#')
         for alias in _accountAliasList:
-            if ocr_account.startswith(alias):
+            if tmp_ocr_account == alias or ocr_account == alias:
                 return True
         return False
 

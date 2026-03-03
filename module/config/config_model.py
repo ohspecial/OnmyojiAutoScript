@@ -79,6 +79,12 @@ from tasks.MysteryShop.config import MysteryShop
 from tasks.Duel.config import Duel
 # ----------------------------------------------------------------------------------------------------------------------
 
+# 账号切换---------------------------------------------------------------------------------------------------------------
+from tasks.SwitchAccountConfig.config import SwitchAccountConfig
+from tasks.SwitchAccountLoop.config import SwitchAccountLoop
+from tasks.SwitchAccountOnce.config import SwitchAccountOnce
+# ----------------------------------------------------------------------------------------------------------------------
+
 class ConfigModel(ConfigBase):
     config_name: str = "oas"
     running_task: str = ''
@@ -147,6 +153,11 @@ class ConfigModel(ConfigBase):
     abyss_shadows: AbyssShadows = Field(default_factory=AbyssShadows)
     guild_banquet: GuildBanquet = Field(default_factory=GuildBanquet)
     demon_retreat: DemonRetreat = Field(default_factory=DemonRetreat)
+
+    # 账号切换
+    switch_account_config: SwitchAccountConfig = Field(default_factory=SwitchAccountConfig)
+    switch_account_once: SwitchAccountOnce = Field(default_factory=SwitchAccountOnce)
+    switch_account_loop: SwitchAccountLoop = Field(default_factory=SwitchAccountLoop)
 
     def __init__(self, config_name: str=None) -> None:
         """

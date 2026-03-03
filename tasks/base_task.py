@@ -643,7 +643,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             return True
         return False
 
-    def set_next_run(self, task: str, finish: bool = False,
+    def set_next_run(self, task: str = None, finish: bool = False,
                      success: bool = None, server: bool = True, target: datetime = None) -> None:
         """
         设置下次运行时间  当然这个也是可以重写的

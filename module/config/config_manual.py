@@ -20,6 +20,8 @@ class ConfigManual:
         > Secret > WeeklyTrifles > MysteryShop > Duel 
         > TrueOrochi > RichMan
         > MetaDemon > FrogBoss > FloatParade > Quiz > KittyShop > DyeTrials > MemoryScrolls
+        > SwitchAccountLoop
+        > SwitchAccountOnce
         """
 
     DEVICE_OVER_HTTP = False

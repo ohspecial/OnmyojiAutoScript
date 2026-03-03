@@ -1,0 +1,14 @@
+[
+    {
+        "character": "角色名称",
+        "svr": "服务器名称",
+        "account": "账号",
+        "accountAlias": "账号别名",
+        "appleOrAndroid": false,
+        "dailyTime": "2026-03-03",
+        "weekTime": "2025-12-01",
+        "limitTime": "2025-12-02",
+        "isAssist50": false,
+        "assist50Time": "2025-09-09"
+    }
+]
