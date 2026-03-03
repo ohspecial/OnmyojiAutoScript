@@ -57,7 +57,7 @@
     "itemName": "sca_res_sea",
     "roiFront": "1136,11,88,38",
     "roiBack": "1136,11,88,38",
-    "mode": "Digit",
+    "mode": "Quantity",
     "method": "Default",
     "keyword": "",
     "description": "永生之海"

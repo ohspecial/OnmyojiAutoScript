@@ -296,7 +296,7 @@ class RichManAssets:
 	# 首领御魂数量 
 	O_SCA_RES_DEMON = RuleOcr(roi=(968,11,102,35), area=(968,11,102,35), mode="Digit", method="Default", keyword="", name="sca_res_demon")
 	# 永生之海 
-	O_SCA_RES_SEA = RuleOcr(roi=(1136,11,88,38), area=(1136,11,88,38), mode="Digit", method="Default", keyword="", name="sca_res_sea")
+	O_SCA_RES_SEA = RuleOcr(roi=(1136,11,88,38), area=(1136,11,88,38), mode="Quantity", method="Default", keyword="", name="sca_res_sea")
 
 
 	# Image Rule Assets

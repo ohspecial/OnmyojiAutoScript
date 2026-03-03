@@ -108,9 +108,27 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
             characterNameList = [ocrResItem.ocr_text.lstrip('1234567890 ([<>])【】（）《》') for ocrResItem in ocrRes]
             logger.info(characterNameList)
             ocrResBoxList = [ocrResItem.box for ocrResItem in ocrRes]
+            # 使用字符交集模糊匹配，提升OCR繁体字容错性
+            thresh = 0.5
+            found_index = -1
             for index, item in enumerate(characterNameList):
-                if item != characterName:
+                if len(item) < 2:
                     continue
+                common = set(characterName).intersection(set(item))
+                if len(common) > max(len(characterName), len(item)) * thresh:
+                    logger.info("found character %s which is similar with %s", item, characterName)
+                    found_index = index
+                    break
+            if found_index < 0:
+                if lastCharacterNameList == characterNameList:
+                    break
+                logger.info(f'{characterName} not found,start swipe')
+                lastCharacterNameList = characterNameList
+                self.swipe(self.S_SA_SVR_SWIPE_LEFT)
+                time.sleep(1.5)
+                continue
+            index = found_index
+            if True:
                 tmp = self.O_SA_SELECT_SVR_CHARACTER_LIST
                 from copy import deepcopy
                 tmpClick = RuleClick(
@@ -130,13 +148,6 @@ class LoginAccount(BaseTask, SwitchAccountAssets):
                                               interval=3)
                 logger.info("character %s found,and clicked svr icon", characterName)
                 return True
-            if lastCharacterNameList == characterNameList:
-                break
-            logger.info(f'{characterName} not found,start swipe')
-            lastCharacterNameList = characterNameList
-            self.swipe(self.S_SA_SVR_SWIPE_LEFT)
-            # 等待滑动动画完成
-            time.sleep(1.5)
 
         self.click(self.C_SA_LOGIN_FORM_CANCEL_SVR_SELECT, 1.5)
         return False
