@@ -82,7 +82,7 @@
   },
   {
     "itemName": "sa_login_form_apple",
-    "imageName": "res_sa_login_form_apple.png",
+    "imageName": "sa_login_form_apple.png",
     "roiFront": "510,360,95,95",
     "roiBack": "490,350,154,121",
     "method": "Template matching",
@@ -91,7 +91,7 @@
   },
   {
     "itemName": "sa_login_form_android",
-    "imageName": "res_sa_login_form_android.png",
+    "imageName": "sa_login_form_android.png",
     "roiFront": "673.5,358,100,100",
     "roiBack": "657,350,133,123",
     "method": "Template matching",
