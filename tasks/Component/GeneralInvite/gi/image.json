@@ -293,7 +293,7 @@
     "roiFront": "113,225,63,72",
     "roiBack": "113,225,63,280",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "队员接受邀请"
   },
   {
