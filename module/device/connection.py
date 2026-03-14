@@ -747,6 +747,17 @@ class Connection(ConnectionAttr):
         If serial=='auto' and only 1 device detected, use it
         """
         logger.hr('Detect device')
+
+        # Pre-connect configured serial to ensure it appears in device list.
+        # This prevents misidentification when another emulator's ADB server
+        # (e.g., MuMu12) has taken over port 5037 and doesn't know about our target device.
+        if self.serial != 'auto' and not self.serial.startswith('emulator-'):
+            try:
+                msg = self.adb_client.connect(self.serial)
+                logger.info(f'Pre-connect {self.serial}: {msg}')
+            except Exception as e:
+                logger.info(f'Pre-connect {self.serial} failed: {e}')
+
         logger.info('Here are the available devices, '
                     'copy to Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"')
         devices = self.list_device()
@@ -774,7 +785,7 @@ class Connection(ConnectionAttr):
                 raise RequestHumanTakeover
             elif available.count == 1:
                 logger.info(f'Auto device detection found only one device, using it')
-                self.serial = devices[0].serial
+                self.serial = available[0].serial
                 del_cached_property(self, 'adb')
             else:
                 logger.critical('Multiple devices found, auto device detection cannot decide which to choose, '
