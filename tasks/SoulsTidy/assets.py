@@ -54,6 +54,8 @@ class SoulsTidyAssets:
 	I_ST_SOULS_CLOSE = RuleImage(roi_front=(1180,227,56,83), roi_back=(1158,190,104,155), threshold=0.8, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_souls_close.png")
 	# 狗粮御魂的堆叠标识 
 	I_ST_SOUL_STACK = RuleImage(roi_front=(142,234,20,16), roi_back=(142,234,20,16), threshold=0.8, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_soul_stack.png")
+	# 御魂关闭状态 
+	I_ST_SOULS_CLOSE = RuleImage(roi_front=(1180,227,56,83), roi_back=(1158,190,104,155), threshold=0.8, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_souls_close.png")
 
 
 	# Long Click Rule Assets
