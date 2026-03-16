@@ -13,8 +13,8 @@ from tasks.Exploration.config import ChooseRarity, AutoRotate, UserStatus, Explo
 
 
 class SoloExploration(BaseExploration):
-    INVITE_FLAG_OFF = (157, 109, 83)
-    INVITE_FLAG_ON = (227, 193, 153)
+    INVITE_FLAG_OFF = (151, 104, 79)
+    INVITE_FLAG_ON = (210, 179, 144)
 
     @cached_property
     def _invite_config(self) -> InviteConfig:
@@ -308,12 +308,11 @@ class SoloExploration(BaseExploration):
                 continue
 
         friend_class = []
-        class_ocr = [self.O_F_LIST_1, self.O_F_LIST_2, self.O_F_LIST_3, self.O_F_LIST_4]
+        class_ocr = [self.O_F_LIST_1, self.O_F_LIST_2, self.O_F_LIST_3]
         class_index = 0
         list_1 = self.O_F_LIST_1.ocr(self.device.image)
         list_2 = self.O_F_LIST_2.ocr(self.device.image)
         list_3 = self.O_F_LIST_3.ocr(self.device.image)
-        list_4 = self.O_F_LIST_4.ocr(self.device.image)
         list_1 = list_1.replace(' ', '').replace('、', '')
         list_2 = list_2.replace(' ', '').replace('、', '')
         list_3 = list_3.replace(' ', '').replace('、', '')
@@ -323,8 +322,6 @@ class SoloExploration(BaseExploration):
             friend_class.append(list_2)
         if list_3 is not None and list_3 != '' and list_3 in self.friend_class:
             friend_class.append(list_3)
-        if list_4 is not None and list_4 != '' and list_4 in self.friend_class:
-            friend_class.append(list_4)
         for i in range(len(friend_class)):
             if friend_class[i] == '蔡友':
                 friend_class[i] = '寮友'
@@ -337,62 +334,31 @@ class SoloExploration(BaseExploration):
         logger.info(f'Friend class: {friend_class}')
 
         is_select: bool = False  # 是否选中了好友
-        if find_mode == FindMode.RECENT_FRIEND:
-            logger.info('Find recent friend')
-            # 获取’最近‘在friend_class中的index
-            if '最近' not in friend_class:
-                logger.warning('No recent friend')
-                return False
-            recent_index = friend_class.index('最近')
-            while recent_index == 1:
-                self.screenshot()
-                if self.appear(self.I_FLAG_2_ON):
-                    break
-                if self.appear_then_click(self.I_FLAG_2_OFF, interval=1):
-                    continue
-
-            logger.info(f'Now find friend in ”最近“')
-            sleep(1)
-            if not is_select:
-                if self.detect_select(name):
-                    is_select = True
-            sleep(1)
-            if not is_select:
-                if self.detect_select(name):
-                    is_select = True
-
+        
         for index in range(len(friend_class)):
-            # 如果不是自动寻找，就跳过
-            if find_mode != FindMode.AUTO_FIND:
-                continue
             # 如果已经选中了好友，就不需要再选中了
             if is_select:
                 continue
             # 首先切换到不同的好友列表
             while index == 0:
                 self.screenshot()
-                if self.I_FLAG_1_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 10):
+                if self.I_EXPL0RE_FRIENDS_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
                     break
-                if self.click(self.I_FLAG_1_OFF, interval=1):
+                if self.click(self.I_EXPL0RE_FRIENDS_FLAG_OFF, interval=1):
                     continue
             while index == 1:
                 self.screenshot()
-                if self.I_FLAG_2_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 10):
+                if self.I_EXPL0RE_GULID_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
                     break
-                if self.click(self.I_FLAG_2_OFF, interval=1):
+                if self.click(self.I_EXPL0RE_GULID_FLAG_OFF, interval=1):
                     continue
             while index == 2:
                 self.screenshot()
-                if self.I_FLAG_3_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 10):
+                if self.I_EXPL0RE_OTHER_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
                     break
-                if self.click(self.I_FLAG_3_OFF, interval=1):
+                if self.click(self.I_EXPL0RE_OTHER_FLAG_OFF, interval=1):
                     continue
-            while index == 3:
-                self.screenshot()
-                if self.I_FLAG_4_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 10):
-                    break
-                if self.click(self.I_FLAG_4_OFF, interval=1):
-                    continue
+            
 
             # 选中好友， 在这里游戏获取在线的好友并不是很快，根据不同的设备会有不同的时间，而且没有什么元素提供我们来判断
             # 所以这里就直接等待一段时间

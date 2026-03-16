@@ -1,0 +1,56 @@
+[
+  {
+    "itemName": "explore_friends_flag_on",
+    "imageName": "explore_invite_explpre_friends_flag_on.png",
+    "roiFront": "350,119,112,32",
+    "roiBack": "350,119,112,32",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "好友列表打开"
+  },
+  {
+    "itemName": "explore_friends_flag_off",
+    "imageName": "explore_invite_explpre_friends_flag_off.png",
+    "roiFront": "353,120,108,27",
+    "roiBack": "353,120,108,27",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "好友列表关闭"
+  },
+  {
+    "itemName": "explore_gulid_flag_on",
+    "imageName": "explore_invite_explpre_gulid_flag_on.png",
+    "roiFront": "472,118,100,29",
+    "roiBack": "472,118,100,29",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "寮友列表打开"
+  },
+  {
+    "itemName": "explore_other_flag_off",
+    "imageName": "explore_invite_explpre_other_flag_off.png",
+    "roiFront": "586,116,106,33",
+    "roiBack": "586,116,106,33",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "跨区列表关闭"
+  },
+  {
+    "itemName": "explore_gulid_flag_off",
+    "imageName": "explore_invite_explpre_gulid_flag_off.png",
+    "roiFront": "474,116,99,28",
+    "roiBack": "474,116,99,28",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "寮友列表关闭"
+  },
+  {
+    "itemName": "explore_other_flag_on",
+    "imageName": "explore_invite_explpre_other_flag_on.png",
+    "roiFront": "588,117,97,30",
+    "roiBack": "588,117,97,30",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "跨区列表打开"
+  }
+]

@@ -319,6 +319,7 @@ class RichManAssets:
 	# 向下滑动 
 	S_SP_DOWN = RuleSwipe(roi_front=(249,419,486,22), roi_back=(339,300,301,22), mode="default", name="sp_down")
 
+
 	# Image Rule Assets
 	# 片叶 
 	I_PIAN_YE = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/pian_ye.png")
@@ -346,6 +347,7 @@ class RichManAssets:
 	I_XIN_YAN = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/xin_yan.png")
 	# 破势 
 	I_PO_SHI = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/po_shi.png")
+
 
 	# Click Rule Assets
 	# 进入神龛 
