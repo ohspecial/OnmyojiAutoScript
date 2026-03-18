@@ -67,7 +67,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AreaBossAssets):
             self.boss_fight(self.I_BATTLE_1)
             self.boss_fight(self.I_BATTLE_2)
         elif con.boss_number - boss_fought == 1:
-            self.boss_fight(self.I_BATTLE_1)
+            # 第一个区域未开启，打第二个
+            self.boss_fight(self.I_BATTLE_2)
         # 退出
         self.ui_get_current_page()
         self.ui_goto_page(page_main)
