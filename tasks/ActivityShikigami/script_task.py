@@ -198,7 +198,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
             if not ocr_limit_timer.reached():
                 continue
             ocr_limit_timer.reset()
-            if not self.ocr_appear(self.O_FIRE):
+            if not self.check_fire():
                 continue
             #  --------------------------------------------------------------
             self.lock_team(self.conf.general_battle)
@@ -230,7 +230,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
             if not ocr_limit_timer.reached():
                 continue
             ocr_limit_timer.reset()
-            if not self.ocr_appear(self.O_FIRE):
+            if not self.check_fire():
                 self.appear_then_click(self.I_CHECK_BATTLE_MAIN, interval=4)
                 continue
             #  --------------------------------------------------------------
@@ -250,12 +250,47 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
         更新前请先看 ./README.md
         """
         logger.hr(f'Start run climb type BOSS')
+        self.ui_click(self.I_TO_BATTLE_BOSS, stop=self.I_BOSS_FIRE, timeout=1, interval=1)
+        self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS, self.I_BOSS_FIRE)
+
+        ocr_limit_timer = Timer(1).start()
+        while 1:
+            self.screenshot()
+            self.put_status()
+            # --------------------------------------------------------------
+            if not ocr_limit_timer.reached():
+                continue
+            ocr_limit_timer.reset()
+            if not self.check_fire():
+                self.appear_then_click(self.I_CHECK_BOSS, interval=4)
+                continue
+            #  --------------------------------------------------------------
+            # self.lock_team(self.conf.general_battle)
+            if not self.check_tickets_enough():
+                logger.warning(f'No tickets left, wait for next time')
+                break
+            if self.conf.general_climb.random_sleep:
+                random_sleep(probability=0.2)
+            if self.start_battle():
+                continue
 
     def _run_ap100(self):
         """
         更新前请先看 ./README.md
         """
         logger.hr(f'Start run climb type AP100')
+
+    def check_fire(self) -> bool:
+        if self.climb_type == 'boss':
+            res = self.ocr_appear(self.O_BOSS_FIRE)
+            logger.info(f'Check fire, res[{res}]')
+            return res
+        return self.ocr_appear(self.O_FIRE)
+
+    def click_fire(self, interval=2) -> bool:
+        if self.climb_type == 'boss':
+            return self.ocr_appear_click(self.O_BOSS_FIRE, interval=interval)
+        return self.ocr_appear_click(self.O_FIRE, interval=interval)
 
     def start_battle(self):
         click_times, max_times = 0, random.randint(2, 4)
@@ -269,7 +304,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
             if (self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1) or
                     self.appear_then_click(self.I_UI_CONFIRM, interval=1) ):
                 continue
-            if self.ocr_appear_click(self.O_FIRE, interval=2):
+            if self.click_fire(interval=2):
                 click_times += 1
                 logger.info(f'Try click fire, remain times[{max_times - click_times}]')
                 continue
@@ -292,7 +327,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
             if ok_cnt > max_retry:
                 break
             # 识别到挑战说明已经退出战斗
-            if ok_cnt > 0 and self.ocr_appear(self.O_FIRE):
+            if ok_cnt > 0 and self.check_fire():
                 return True
             # 战斗失败
             if self.appear(self.I_FALSE):
@@ -361,7 +396,8 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
         :return: True 可以运行 or False
         """
         logger.hr(f'Check {self.climb_type} tickets')
-        if not self.wait_until_appear(self.O_FIRE, wait_time=3):
+        fire_rule = self.I_BOSS_FIRE if self.climb_type == 'boss' else self.O_FIRE
+        if not self.wait_until_appear(fire_rule, wait_time=3):
             logger.warning(f'Detect fire fail, try reidentify')
             return False
         self.screenshot()
@@ -410,7 +446,7 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('zhu')
     d = Device(c)
     t = ScriptTask(c, d)
 

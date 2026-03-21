@@ -52,13 +52,15 @@ class ActivityShikigamiAssets:
 	# description 
 	I_CHECK_BATTLE_MAIN = RuleImage(roi_front=(842,565,39,45), roi_back=(688,499,415,203), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_check_battle_main.png")
 	# description 
-	I_CHECK_BATTLE_BOSS = RuleImage(roi_front=(34,365,45,35), roi_back=(20,328,100,100), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_check_battle_boss.png")
+	I_CHECK_BATTLE_BOSS = RuleImage(roi_front=(45,404,45,43), roi_back=(45,404,45,43), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_check_battle_boss.png")
 	# 从main进入到式神录 
 	I_BATTLE_MAIN_TO_RECORDS = RuleImage(roi_front=(1017,572,39,42), roi_back=(976,539,146,100), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_battle_main_to_records.png")
 	# description 
 	I_TO_BATTLE_MAIN_2 = RuleImage(roi_front=(15,94,247,38), roi_back=(2,68,311,100), threshold=0.65, method="Template matching", file="./tasks/ActivityShikigami/as/as_to_battle_main_2.png")
 	# 确认跳过 
 	I_CONFIRM_SKIP = RuleImage(roi_front=(707,442,137,38), roi_back=(656,397,231,124), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_confirm_skip.png")
+	# BOOS界面 
+	I_CHECK_BOSS = RuleImage(roi_front=(147,14,138,47), roi_back=(147,14,138,47), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_check_boss.png")
 
 
 	# Image Rule Assets
@@ -89,7 +91,7 @@ class ActivityShikigamiAssets:
 	# 魇兽将的战斗图片 
 	I_PASS_13 = RuleImage(roi_front=(1018,570,100,100), roi_back=(984,538,169,152), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_13.png")
 	# BOSS挑战 
-	I_BOSS_FIRE = RuleImage(roi_front=(1127,590,96,48), roi_back=(1098,556,158,149), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_boss_fire.png")
+	I_BOSS_FIRE = RuleImage(roi_front=(1045,538,96,48), roi_back=(989,478,267,227), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_boss_fire.png")
 
 
 	# Ocr Rule Assets
@@ -104,10 +106,12 @@ class ActivityShikigamiAssets:
 	# 活动票数（没有百分比） 
 	O_REMAIN_PASS2 = RuleOcr(roi=(750,17,88,29), area=(750,17,88,29), mode="Digit", method="Default", keyword="", name="remain_pass2")
 	# boss剩余攻击次数 
-	O_REMAIN_BOSS = RuleOcr(roi=(1113,669,131,31), area=(1099,659,162,52), mode="DigitCounter", method="Default", keyword="", name="remain_boss")
+	O_REMAIN_BOSS = RuleOcr(roi=(1033,621,131,33), area=(970,593,263,117), mode="DigitCounter", method="Default", keyword="", name="remain_boss")
 	# 100体活动门票检测 
 	O_REMAIN_AP100 = RuleOcr(roi=(922,21,112,39), area=(913,8,131,62), mode="Digit", method="Default", keyword="", name="remain_ap100")
 	# 进入100体活动标识 
 	O_ENTER_AP100 = RuleOcr(roi=(73,98,95,32), area=(5,79,256,108), mode="Single", method="Default", keyword="将魂试炼", name="enter_ap100")
+	# BOSS挑战 
+	O_BOSS_FIRE = RuleOcr(roi=(1041,537,96,48), area=(1015,501,149,156), mode="Single", method="Default", keyword="挑战", name="boss_fire")
 
 
