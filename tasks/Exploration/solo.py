@@ -342,21 +342,21 @@ class SoloExploration(BaseExploration):
             # 首先切换到不同的好友列表
             while index == 0:
                 self.screenshot()
-                if self.I_EXPL0RE_FRIENDS_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
+                if self.I_EXPLORE_FRIENDS_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
                     break
-                if self.click(self.I_EXPL0RE_FRIENDS_FLAG_OFF, interval=1):
+                if self.click(self.I_EXPLORE_FRIENDS_FLAG_OFF, interval=1):
                     continue
             while index == 1:
                 self.screenshot()
-                if self.I_EXPL0RE_GULID_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
+                if self.I_EXPLORE_GUILD_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
                     break
-                if self.click(self.I_EXPL0RE_GULID_FLAG_OFF, interval=1):
+                if self.click(self.I_EXPLORE_GUILD_FLAG_OFF, interval=1):
                     continue
             while index == 2:
                 self.screenshot()
-                if self.I_EXPL0RE_OTHER_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
+                if self.I_EXPLORE_OTHER_FLAG_ON.match_mean_color(self.device.image, self.INVITE_FLAG_ON, 30):
                     break
-                if self.click(self.I_EXPL0RE_OTHER_FLAG_OFF, interval=1):
+                if self.click(self.I_EXPLORE_OTHER_FLAG_OFF, interval=1):
                     continue
             
 

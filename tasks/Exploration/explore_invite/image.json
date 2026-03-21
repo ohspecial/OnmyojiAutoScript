@@ -18,8 +18,8 @@
     "description": "好友列表关闭"
   },
   {
-    "itemName": "explore_gulid_flag_on",
-    "imageName": "explore_invite_explpre_gulid_flag_on.png",
+    "itemName": "explore_guild_flag_on",
+    "imageName": "explore_invite_explpre_guild_flag_on.png",
     "roiFront": "472,118,100,29",
     "roiBack": "472,118,100,29",
     "method": "Template matching",
@@ -36,8 +36,8 @@
     "description": "跨区列表关闭"
   },
   {
-    "itemName": "explore_gulid_flag_off",
-    "imageName": "explore_invite_explpre_gulid_flag_off.png",
+    "itemName": "explore_guild_flag_off",
+    "imageName": "explore_invite_explpre_guild_flag_off.png",
     "roiFront": "474,116,99,28",
     "roiBack": "474,116,99,28",
     "method": "Template matching",
