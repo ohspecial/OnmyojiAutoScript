@@ -16,11 +16,11 @@ class ExplorationAssets:
 	# 好友列表关闭 
 	I_EXPLORE_FRIENDS_FLAG_OFF = RuleImage(roi_front=(353,120,108,27), roi_back=(353,120,108,27), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_friends_flag_off.png")
 	# 寮友列表打开 
-	I_EXPLORE_GUILD_FLAG_ON = RuleImage(roi_front=(472,118,100,29), roi_back=(472,118,100,29), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_gulid_flag_on.png")
+	I_EXPLORE_GUILD_FLAG_ON = RuleImage(roi_front=(472,118,100,29), roi_back=(472,118,100,29), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_guild_flag_on.png")
 	# 跨区列表关闭 
 	I_EXPLORE_OTHER_FLAG_OFF = RuleImage(roi_front=(586,116,106,33), roi_back=(586,116,106,33), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_other_flag_off.png")
 	# 寮友列表关闭 
-	I_EXPLORE_GUILD_FLAG_OFF = RuleImage(roi_front=(474,116,99,28), roi_back=(474,116,99,28), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_gulid_flag_off.png")
+	I_EXPLORE_GUILD_FLAG_OFF = RuleImage(roi_front=(474,116,99,28), roi_back=(474,116,99,28), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_guild_flag_off.png")
 	# 跨区列表打开 
 	I_EXPLORE_OTHER_FLAG_ON = RuleImage(roi_front=(588,117,97,30), roi_back=(588,117,97,30), threshold=0.8, method="Template matching", file="./tasks/Exploration/explore_invite/explore_invite_explpre_other_flag_on.png")
 
