@@ -25,9 +25,9 @@ class ActivityShikigamiAssets:
 
 	# Image Rule Assets
 	# 上锁图标 
-	I_LOCK = RuleImage(roi_front=(825,657,28,25), roi_back=(739,613,276,85), threshold=0.5, method="Template matching", file="./tasks/ActivityShikigami/as/as_lock.png")
+	I_LOCK = RuleImage(roi_front=(825,657,28,25), roi_back=(698,559,317,139), threshold=0.5, method="Template matching", file="./tasks/ActivityShikigami/as/as_lock.png")
 	# 还未上锁图片 
-	I_UNLOCK = RuleImage(roi_front=(884,648,28,25), roi_back=(733,607,266,95), threshold=0.5, method="Template matching", file="./tasks/ActivityShikigami/as/as_unlock.png")
+	I_UNLOCK = RuleImage(roi_front=(884,648,28,25), roi_back=(658,531,341,171), threshold=0.5, method="Template matching", file="./tasks/ActivityShikigami/as/as_unlock.png")
 	# 活动爬塔标志 
 	I_CLIMB_MODE_PASS = RuleImage(roi_front=(1151,534,21,21), roi_back=(1118,510,70,69), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/as/as_climb_mode_pass.png")
 	# 体力爬塔标志 
