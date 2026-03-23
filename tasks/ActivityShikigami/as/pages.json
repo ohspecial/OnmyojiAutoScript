@@ -65,8 +65,8 @@
   {
     "itemName": "check_battle_boss",
     "imageName": "as_check_battle_boss.png",
-    "roiFront": "34,365,45,35",
-    "roiBack": "20,328,100,100",
+    "roiFront": "45,404,45,43",
+    "roiBack": "45,404,45,43",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
@@ -97,5 +97,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "确认跳过"
+  },
+  {
+    "itemName": "check_boss",
+    "imageName": "as_check_boss.png",
+    "roiFront": "147,14,138,47",
+    "roiBack": "147,14,138,47",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "BOOS界面"
   }
 ]

@@ -428,21 +428,29 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         :return:
         """
         logger.hr('Start utilize')
-        if self.first_utilize:
-            self.swipe(self.S_U_END, interval=3)
-            self.first_utilize = False
-            if friend == SelectFriendList.SAME_SERVER:
-                self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-                self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            else:
-                self.switch_friend_list(SelectFriendList.SAME_SERVER)
-                self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-        else:
-            self.switch_friend_list(friend)
 
         # --------------- 结界卡选择 ---------------
-        if not self._select_optimal_resource_card():
-            return False
+        if friend == SelectFriendList.BOTH:
+            # BOTH 模式：同区和跨区都扫描，选最优
+            if self.first_utilize:
+                self.first_utilize = False
+            if not self._select_optimal_resource_card_both():
+                return False
+        else:
+            # 单区域模式：保持原逻辑
+            if self.first_utilize:
+                self.swipe(self.S_U_END, interval=3)
+                self.first_utilize = False
+                if friend == SelectFriendList.SAME_SERVER:
+                    self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+                    self.switch_friend_list(SelectFriendList.SAME_SERVER)
+                else:
+                    self.switch_friend_list(SelectFriendList.SAME_SERVER)
+                    self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+            else:
+                self.switch_friend_list(friend)
+            if not self._select_optimal_resource_card():
+                return False
 
         # 找到卡,重置次数
         self.utilize_add_count = 0
@@ -557,6 +565,99 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 self.ap_max_num, self.jade_max_num = 0, 0
                 return False
 
+    def _select_optimal_resource_card_both(self):
+        """BOTH 模式：先扫描同区，再扫描跨区，对比后选择最优卡"""
+        RESOURCE_PRESETS = {
+            '斗鱼': [151, 143, 134, 126, 101, 84],
+            '太鼓': [76,  76,  67,  67,  59,  50]
+        }
+        MAX_INDEX = 99
+
+        def get_resource_index(resource_name, current_value, preset_values):
+            for idx, val in enumerate(preset_values):
+                if current_value >= val:
+                    return idx
+            return MAX_INDEX
+
+        # ====== 阶段1: 扫描同区好友列表 ======
+        logger.hr('BOTH模式 - 阶段1: 扫描同区好友列表', 2)
+        self.ap_max_num, self.jade_max_num = 0, 0
+        # 先切跨区再切回同区，强制刷新列表到顶部
+        self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+        self.switch_friend_list(SelectFriendList.SAME_SERVER)
+
+        same_perfect = self._current_select_best()  # 探索模式
+        if same_perfect:
+            # 同区直接命中完美卡，无需继续
+            logger.info('✅ BOTH模式: 同区发现完美卡，直接使用')
+            self.ap_max_num, self.jade_max_num = 0, 0
+            return True
+
+        same_ap = self.ap_max_num
+        same_jade = self.jade_max_num
+        logger.info(f'📝 同区扫描结果 | 斗鱼:{same_ap} 太鼓:{same_jade}')
+
+        # ====== 阶段2: 扫描跨区好友列表 ======
+        logger.hr('BOTH模式 - 阶段2: 扫描跨区好友列表', 2)
+        self.ap_max_num, self.jade_max_num = 0, 0
+        self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+
+        diff_perfect = self._current_select_best()  # 探索模式
+        if diff_perfect:
+            # 跨区直接命中完美卡，无需继续
+            logger.info('✅ BOTH模式: 跨区发现完美卡，直接使用')
+            self.ap_max_num, self.jade_max_num = 0, 0
+            return True
+
+        diff_ap = self.ap_max_num
+        diff_jade = self.jade_max_num
+        logger.info(f'📝 跨区扫描结果 | 斗鱼:{diff_ap} 太鼓:{diff_jade}')
+
+        # ====== 阶段3: 对比决策 ======
+        logger.hr('BOTH模式 - 阶段3: 对比决策', 2)
+
+        # 收集所有候选: (resource_index, card_type, card_value, region)
+        candidates = []
+        for ap_val, jade_val, region in [
+            (same_ap, same_jade, SelectFriendList.SAME_SERVER),
+            (diff_ap, diff_jade, SelectFriendList.DIFFERENT_SERVER),
+        ]:
+            if ap_val > 0:
+                idx = get_resource_index('斗鱼', ap_val, RESOURCE_PRESETS['斗鱼'])
+                candidates.append((idx, '斗鱼', ap_val, region))
+            if jade_val > 0:
+                idx = get_resource_index('太鼓', jade_val, RESOURCE_PRESETS['太鼓'])
+                candidates.append((idx, '太鼓', jade_val, region))
+
+        # 过滤掉低于所有预设的候选
+        candidates = [(idx, ctype, cval, reg) for idx, ctype, cval, reg in candidates if idx < MAX_INDEX]
+
+        if not candidates:
+            logger.warning('🔄 BOTH模式: 同区和跨区均无合适卡，放弃本次')
+            self.ap_max_num, self.jade_max_num = 0, 0
+            return False
+
+        # 按 resource_index 升序排列（越小越优），相同 index 取 value 更大的
+        candidates.sort(key=lambda x: (x[0], -x[2]))
+        best_idx, best_type, best_value, best_region = candidates[0]
+        region_name = '同区' if best_region == SelectFriendList.SAME_SERVER else '跨区'
+        logger.info(f'⚖️ BOTH模式决策: 选择{region_name}的{best_type}卡 | 值:{best_value} 档位:{best_idx}')
+
+        # ====== 阶段4: 切换到最优区域并确认选卡 ======
+        logger.hr('BOTH模式 - 阶段4: 确认选卡', 2)
+        # 先切到对方tab再切回目标区域，强制刷新列表到顶部
+        other_region = SelectFriendList.SAME_SERVER if best_region == SelectFriendList.DIFFERENT_SERVER else SelectFriendList.DIFFERENT_SERVER
+        self.switch_friend_list(other_region)
+        self.switch_friend_list(best_region)
+        self.ap_max_num, self.jade_max_num = 0, 0
+
+        if self._current_select_best(best_type, best_value, selected_card=True):
+            logger.info(f'✅ BOTH模式: {region_name}{best_type}卡确认成功')
+            return True
+        else:
+            logger.warning(f'❌ BOTH模式: {region_name}{best_type}卡确认失败')
+            return False
+
     def _current_select_best(self, best_card_type=None, best_card_num=0, selected_card=False):
         """结界卡选择核心逻辑（集成版）
         功能：滑动屏幕寻找最优资源卡，支持两种模式：
@@ -574,7 +675,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             '太鼓': {'max': 76, 'record_attr': 'jade_max_num'}
         }
         MAX_SWIPES = 20  # 最大滑动次数
-        CONSEC_MISS = 3  # 允许连续无卡次数
+        CONSEC_MISS = 2  # 允许连续无卡次数
         TIMEOUT = 120  # 操作超时(秒)
 
         # ============== 初始化阶段 ==============#
