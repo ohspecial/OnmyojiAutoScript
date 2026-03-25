@@ -1,15 +1,16 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-
+import random
 from module.base.timer import Timer
 from module.exception import RequestHumanTakeover, GameTooManyClickError, GameStuckError
 from module.logger import logger
 from tasks.Restart.assets import RestartAssets
+from tasks.GameUi.assets import GameUiAssets
 from tasks.base_task import BaseTask
 import time
 
-class LoginHandler(BaseTask, RestartAssets):
+class LoginHandler(BaseTask, RestartAssets, GameUiAssets):
     character: str
 
     def __init__(self, *wargs, **kwargs):
@@ -38,20 +39,32 @@ class LoginHandler(BaseTask, RestartAssets):
                 orientation_timer.reset()
 
             self.screenshot()
-
-            # 确认进入庭院
-            if self.appear_then_click(self.I_LOGIN_SCROOLL_CLOSE, interval=2, threshold=0.9):
-                logger.info('Open scroll')
+            # 取消继续战斗
+            if self.appear_then_click(self.I_CANCEL_BATTLE, interval=0.8):
+                logger.info('Cancel continue battle')
                 continue
-            if self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.2):
+            # 确认进入庭院(优化：当出现闲庭图片时，点击卷轴关闭区域，然后判断式神录按钮出现就代表登录成功)
+            if self.appear(self.I_LOGIN_COURTYARD, interval=0.2):
+                if self.click(self.C_LOGIN_SCROLL_CLOSE_AREA, interval=2):
+                    logger.info('Click scroll close area because courtyard appears')
+                    self.screenshot()  # 点击后立即获取最新截图，确保后续状态检查准确
+                    continue
+            if self.appear(self.I_MAIN_GOTO_SHIKIGAMI_RECORDS, interval=0.2):
                 if confirm_timer.reached():
-                    logger.info('Login to main confirm')
+                    logger.info('Login to main confirm (shikigami records button appears)')
+                    break
+            elif self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.2):
+                if confirm_timer.reached():
+                    logger.info('Login to main confirm (scroll open)')
                     break
             else:
                 confirm_timer.reset()
             # 登录成功
-            if self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.5):
-                logger.info('Login success')
+            if self.appear(self.I_MAIN_GOTO_SHIKIGAMI_RECORDS, interval=0.5):
+                logger.info('Login success: shikigami records button appears')
+                login_success = True
+            elif self.appear(self.I_LOGIN_SCROOLL_OPEN, interval=0.5):
+                logger.info('Login success: scroll open')
                 login_success = True
 
             # 网络异常
@@ -160,6 +173,8 @@ class LoginHandler(BaseTask, RestartAssets):
         """
         logger.hr('Harvest')
         timer_harvest = Timer(5)  # 如果连续5秒没有发现任何奖励，退出
+        skip_default = False
+        courtyard_affairs_done = False  # 庭院事务只执行一次
         while 1:
             self.screenshot()
 
@@ -181,12 +196,18 @@ class LoginHandler(BaseTask, RestartAssets):
                 timer_harvest.reset()
                 logger.info('Close yellow close')
                 continue
-                # 关闭宠物小屋
+            # 关闭宠物小屋
             if self.appear_then_click(self.I_HARVEST_BACK_PET_HOUSE, interval=0.6):
                 timer_harvest.reset()
                 logger.info('Close yellow close')
                 continue
-                # 关闭姿度出现的蒙版
+            # 御魂溢确认
+            if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=2.5):
+                timer_harvest.reset()
+                skip_default = True
+                logger.info('Soul overflow')
+                continue
+            # 关闭姿度出现的蒙版
             if self.appear(self.I_HARVEST_ZIDU, interval=1):
                 timer_harvest.reset()
                 self.I_HARVEST_ZIDU.roi_front[0] -= 200
@@ -195,6 +216,12 @@ class LoginHandler(BaseTask, RestartAssets):
                     logger.info('Close zidu')
                 continue
 
+            # 庭院事务
+            if self.config.restart.harvest_config.enable_courtyard_affairs and not courtyard_affairs_done:
+                self.harvest_courtyard_affairs()
+                timer_harvest.reset()
+                courtyard_affairs_done = True
+                continue
             # 勾玉
             if self.appear_then_click(self.I_HARVEST_JADE, interval=1.5):
                 timer_harvest.reset()
@@ -219,63 +246,10 @@ class LoginHandler(BaseTask, RestartAssets):
             if self.appear_then_click(self.I_HARVEST_SIGN_999, interval=1.5):
                 timer_harvest.reset()
                 continue
-            # 邮件
             # 判断是否勾选了收取邮件（不收取邮件可以查看每日收获）
-            if self.config.restart.harvest_config.enable_mail:
-                # if self.appear_then_click(self.I_HARVEST_MAIL, interval=3) or\
-                #         self.appear_then_click(self.I_HARVEST_MAIL_COPY, interval=3):
-                #     timer_harvest.reset()
-                #     self.wait_until_appear(self.I_HARVEST_MAIL_TITLE, wait_time=2)
-                #     if self.appear(self.I_HARVEST_MAIL_TITLE, interval=2.5):
-                #         while 1:
-                #             self.screenshot()
-                #             if self.appear_then_click(self.I_HARVEST_MAIL_ALL, interval=2):
-                #                 timer_harvest.reset()
-                #                 pass
-                #             if self.appear_then_click(self.I_HARVEST_MAIL_CONFIRM, interval=1):
-                #                 continue
-                #
-                #             # 如果一直出现收取全部，那就说明还在进行中
-                #             if self.appear(self.I_HARVEST_MAIL_ALL):
-                #                 pass
-                #             # 如果没有出现 ‘收取全部’ 也没有出现 ‘还未读的邮件’ 那就可以退出了
-                #             if not self.appear(self.I_HARVEST_MAIL_ALL) and not self.appear(self.I_HARVEST_MAIL_OPEN):
-                #                 logger.info('Mail has been harvested')
-                #                 logger.info('Exit mail')
-                #                 break
-                #             if self.appear(self.I_LOGIN_RED_CLOSE, interval=2):
-                #                 self.click(self.I_LOGIN_RED_CLOSE)
-                #                 break
-                #             if self.appear_then_click(self.I_HARVEST_MAIL_OPEN, interval=1):
-                #                 timer_harvest.reset()
-                #                 continue
-                #         continue
-                # 体力
-                if self.appear(self.I_HARVEST_MAIL_CONFIRM):
-                    self.click(self.I_HARVEST_MAIL_CONFIRM, interval=2)
-                    timer_harvest.reset()
-                    continue
-                if self.appear(self.I_HARVEST_MAIL_ALL, threshold=0.9):
-                    self.click(self.I_HARVEST_MAIL_ALL, interval=2)
-                    self.wait_until_appear(self.I_HARVEST_MAIL_CONFIRM, wait_time=1)
-                    timer_harvest.reset()
-                    continue
-                # threshold如果是0.9，可能会导致有邮件但无法识别永久卡住
-                if self.appear(self.I_HARVEST_MAIL_OPEN, threshold=0.8):
-                    self.click(self.I_HARVEST_MAIL_OPEN, interval=0.8)
-                    timer_harvest.reset()
-                    continue
-                if self.appear(self.I_HARVEST_MAIL_2):
-                    self.click(self.I_HARVEST_MAIL_2, interval=0.8)
-                    timer_harvest.reset()
-                    continue
-                if ((self.appear(self.I_HARVEST_MAIL) or self.appear(self.I_HARVEST_MAIL_COPY))
-                        and not self.appear(self.I_LOGIN_RED_CLOSE)):
-                    self.click(self.I_HARVEST_MAIL, interval=2)
-                    self.wait_until_appear(self.I_HARVEST_MAIL_ALL, wait_time=2)
-                    timer_harvest.reset()
-                    continue
-
+            if not skip_default and self.config.restart.harvest_config.enable_mail and self.harvest_mail():
+                timer_harvest.reset()
+                continue
             if self.appear_then_click(self.I_HARVEST_AP, interval=1, threshold=0.7):
                 timer_harvest.reset()
                 continue
@@ -288,7 +262,7 @@ class LoginHandler(BaseTask, RestartAssets):
                 timer_harvest.reset()
                 continue
             # 自选御魂
-            if self.appear(self.I_HARVEST_SOUL_1):
+            if not skip_default and self.appear(self.I_HARVEST_SOUL_1):
                 logger.info('Select soul 2')
                 self.ui_click(self.I_HARVEST_SOUL_1, stop=self.I_HARVEST_SOUL_2)
                 self.ui_click(self.I_HARVEST_SOUL_2, stop=self.I_HARVEST_SOUL_3, interval=3)
@@ -312,3 +286,77 @@ class LoginHandler(BaseTask, RestartAssets):
     def set_specific_usr(self, character: str):
         self.character = character
         self.O_LOGIN_SPECIFIC_SERVE.keyword = character
+
+    def harvest_mail(self) -> bool:
+        if not self.appear(self.I_HARVEST_MAIL) and \
+                not self.appear(self.I_HARVEST_MAIL_COPY):
+            if not self.appear(self.I_READ_ALL_MAIL):
+                return False
+        logger.info('Harvest mail')
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_READ_ALL_MAIL):
+                break
+            if self.appear_then_click(self.I_HARVEST_MAIL, interval=1.5):
+                continue
+            if self.appear_then_click(self.I_HARVEST_MAIL_COPY, interval=1.5):
+                continue
+        timeout_timer = Timer(3).start()
+        logger.info('Exec harvest mail')
+        while 1:
+            self.screenshot()
+            if timeout_timer.reached():
+                break
+            if self.appear_then_click(self.I_HARVEST_MAIL_CONFIRM, interval=0.8):
+                break
+
+            if self.appear_then_click(self.I_READ_ALL_MAIL, interval=1.5):
+                continue
+            if self.appear_then_click(self.I_HARVEST_MAIL_ALL, interval=1.5):
+                continue
+            if self.appear_then_click(self.I_MAIL_RED_POINT, interval=4):
+                continue
+        self.ui_click_until_disappear(self.I_LOGIN_RED_CLOSE)
+        return True
+            
+    def harvest_courtyard_affairs(self) -> bool:
+        if not self.ui_click_multi_scale(self.I_NOTE, self.I_PAGE, timeout=3, scale_range=(0.8, 1.2)):
+            logger.warning('courtyard affairs timeout!')
+            return False
+        count_success = 0
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_NO_TASKS):
+                logger.info('courtyard affairs completed！')
+                break
+            # 每日六星御魂
+            if self.appear_then_click(self.I_HARVEST_SOUL_2, interval=1) \
+                    or self.appear_then_click(self.I_HARVEST_SOUL_3, interval=1):
+                continue
+            # 点击'获得奖励'
+            if self.ui_reward_appear_click():
+                continue
+            # 获得奖励
+            if self.appear_then_click(self.I_UI_AWARD, interval=0.2):
+                continue
+            # 式神满级，是否提取物经验？确定
+            if self.appear_then_click(self.I_CONFIRM, interval=1):
+                continue
+
+            if self.appear_then_click(self.I_DAILY, interval=1):
+                continue
+            # 领取成功： 太傻逼了收取结界奖励游戏里面居然没有加上限制
+            if self.appear_then_click(self.I_SUCCESS_CLAIMED, interval=1):
+                continue
+            if self.appear_then_click(self.I_SKIP):# 万花牌跳过
+                continue
+            if self.appear_then_click(self.I_LOGIN_RED_CLOSE, interval=1):# 万花牌X
+                continue
+            # 一键完成
+            if count_success >= 3:
+                logger.info(f'Click complete tasks {count_success} times')
+                break
+            if self.appear_then_click(self.I_COMPLETE_TASKS, interval=2.3):
+                count_success += 1
+                continue
+        return True

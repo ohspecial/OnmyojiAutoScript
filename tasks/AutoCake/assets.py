@@ -17,16 +17,23 @@ class AutoCakeAssets:
 
 	# Image Rule Assets
 	# 进入活动第二步 
-	I_STEP_2 = RuleImage(roi_front=(207,210,37,138), roi_back=(207,210,37,138), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_step_2.png")
+	I_STEP_2 = RuleImage(roi_front=(650,139,37,138), roi_back=(650,139,37,138), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_step_2.png")
 	# 是否到达活动界面 
 	I_IS_REACH = RuleImage(roi_front=(87,16,130,41), roi_back=(87,16,130,41), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_is_reach.png")
 	# description 
-	I_IS_OVER = RuleImage(roi_front=(706,254,69,64), roi_back=(706,254,69,64), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_is_over.png")
+	I_IS_OVER = RuleImage(roi_front=(706,253,69,64), roi_back=(706,253,69,64), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_is_over.png")
 	# 已关闭樱饼 
-	I_IS_CLOSE = RuleImage(roi_front=(970,663,22,21), roi_back=(970,663,22,21), threshold=0.6, method="Template matching", file="./tasks/AutoCake/res/res_is_close.png")
+	I_IS_CLOSE = RuleImage(roi_front=(891,653,28,23), roi_back=(891,653,28,23), threshold=0.6, method="Template matching", file="./tasks/AutoCake/res/res_is_close.png")
 	# 上锁 
-	I_LOCK = RuleImage(roi_front=(912,657,21,25), roi_back=(658,588,437,127), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_lock.png")
+	I_LOCK = RuleImage(roi_front=(822,651,21,25), roi_back=(822,651,21,25), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_lock.png")
 	# 未上锁 
-	I_UNLOCK = RuleImage(roi_front=(909,661,22,21), roi_back=(774,619,330,100), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_unlock.png")
+	I_UNLOCK = RuleImage(roi_front=(815,646,30,33), roi_back=(815,646,30,33), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_unlock.png")
+	# 是否到达第二步界面 
+	I_IS_REACH2 = RuleImage(roi_front=(47,125,182,40), roi_back=(47,125,182,40), threshold=0.8, method="Template matching", file="./tasks/AutoCake/res/res_is_reach2.png")
+
+
+	# Ocr Rule Assets
+	# 体力的数量检测 
+	O_REMAIN_ACTIVITY_AP = RuleOcr(roi=(908,18,105,28), area=(907,12,107,41), mode="DigitCounter", method="Default", keyword="", name="remain_activity_ap")
 
 

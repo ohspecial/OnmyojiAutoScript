@@ -11,6 +11,25 @@ class RestartAssets:
 
 
 	# Image Rule Assets
+	# 庭院事务按钮 
+	I_NOTE = RuleImage(roi_front=(782,415,27,31), roi_back=(134,363,968,189), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_note.png")
+	# 庭院事务主页 
+	I_PAGE = RuleImage(roi_front=(264,41,182,51), roi_back=(243,14,260,99), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_page.png")
+	# 一键完成 
+	I_COMPLETE_TASKS = RuleImage(roi_front=(1124,599,75,78), roi_back=(1116,588,93,98), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_complete_tasks.png")
+	# 领取成功 
+	I_SUCCESS_CLAIMED = RuleImage(roi_front=(302,27,184,51), roi_back=(257,10,272,84), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_success_claimed.png")
+	# 日常 
+	I_DAILY = RuleImage(roi_front=(1138,139,63,45), roi_back=(1126,90,125,249), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_daily.png")
+	# 暂无可完成的任务 
+	I_NO_TASKS = RuleImage(roi_front=(538,225,205,32), roi_back=(492,214,291,51), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_no_tasks.png")
+	# description 
+	I_CONFIRM = RuleImage(roi_front=(674,391,131,63), roi_back=(400,199,485,320), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_confirm.png")
+	# description 
+	I_SKIP = RuleImage(roi_front=(1170,36,56,28), roi_back=(1144,0,109,99), threshold=0.8, method="Template matching", file="./tasks/Restart/courtyard_affairs/courtyard_affairs_skip.png")
+
+
+	# Image Rule Assets
 	# 点击勾玉 
 	I_HARVEST_JADE = RuleImage(roi_front=(732,489,34,33), roi_back=(177,451,973,141), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_jade.png")
 	# 签到小图标 
@@ -22,7 +41,7 @@ class RestartAssets:
 	# 邮件小图标 
 	I_HARVEST_MAIL = RuleImage(roi_front=(337,505,37,25), roi_back=(38,465,880,89), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_mail.png")
 	# 全部收取 
-	I_HARVEST_MAIL_ALL = RuleImage(roi_front=(80,622,75,64), roi_back=(80,622,75,64), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_mail_all.png")
+	I_HARVEST_MAIL_ALL = RuleImage(roi_front=(69,579,80,67), roi_back=(28,551,142,144), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_mail_all.png")
 	# 有些邮件需要点击一次 
 	I_HARVEST_MAIL_OPEN = RuleImage(roi_front=(163,367,45,48), roi_back=(139,86,100,487), threshold=0.9, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_mail_open.png")
 	# 确认收取邮件 
@@ -55,11 +74,25 @@ class RestartAssets:
 	I_HARVEST_MAIL_COPY = RuleImage(roi_front=(257,509,29,21), roi_back=(192,472,790,100), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_mail_copy.png")
 	# description 
 	I_HARVEST_MAIL_2 = RuleImage(roi_front=(156,125,65,60), roi_back=(120,94,290,536), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_harvest_mail_2.png")
+	# 系统邮件打开状态 
+	I_SYSTEM_MAIL_OPEN = RuleImage(roi_front=(1201,223,51,112), roi_back=(1197,219,59,118), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_system_mail_open.png")
+	# 特殊邮件关闭状态 
+	I_SPECIAL_MAIL_CLOSE = RuleImage(roi_front=(1200,379,53,108), roi_back=(1185,342,80,178), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_special_mail_close.png")
+	# 系统邮件关闭状态 
+	I_SYSTEM_MAIL_CLOSE = RuleImage(roi_front=(1200,222,53,112), roi_back=(1186,193,81,156), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_system_mail_close.png")
+	# 特殊邮件打开状态 
+	I_SPECIAL_MAIL_OPEN = RuleImage(roi_front=(1201,380,55,110), roi_back=(1190,348,79,162), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_special_mail_open.png")
+	# 一键已读所有邮件 
+	I_READ_ALL_MAIL = RuleImage(roi_front=(180,605,130,35), roi_back=(149,588,182,72), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_read_all_mail.png")
+	# 邮件红点 
+	I_MAIL_RED_POINT = RuleImage(roi_front=(1229,200,16,21), roi_back=(1159,189,100,317), threshold=0.8, method="Template matching", file="./tasks/Restart/harvest/harvest_mail_red_point.png")
 
 
 	# Click Rule Assets
 	# 相同服务器多个角色选择界面,点击空白区域 确认登录 
 	C_LOGIN_ENSURE_LOGIN_CHARACTER_IN_SAME_SVR = RuleClick(roi_front=(600,240,500,400), roi_back=(600,240,500,400), name="login_ensure_login_character_in_same_svr")
+	# 卷轴关闭区域点击(用户新增，用于点击I_LOGIN_SCROOLL_CLOSE的区域而不依赖图片识别) 
+	C_LOGIN_SCROLL_CLOSE_AREA = RuleClick(roi_front=(1181,634,28,39), roi_back=(1162,595,77,112), name="login_scroll_close_area")
 
 
 	# Image Rule Assets
@@ -67,6 +100,10 @@ class RestartAssets:
 	I_LOGIN_SCROOLL_OPEN = RuleImage(roi_front=(1208,609,33,83), roi_back=(1208,609,33,83), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_scrooll_open.png")
 	# 庭院卷轴关闭 
 	I_LOGIN_SCROOLL_CLOSE = RuleImage(roi_front=(1181,634,28,39), roi_back=(1162,595,77,112), threshold=0.7, method="Template matching", file="./tasks/Restart/login/login_login_scrooll_close.png")
+	# 闲庭图片(用户新增，用于判断是否需要点击卷轴关闭区域) 
+	I_LOGIN_COURTYARD = RuleImage(roi_front=(40,640,100,50), roi_back=(40,640,100,50), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_courtyard.png")
+	# 卷轴关闭区域点击(用户新增，用于点击I_LOGIN_SCROOLL_CLOSE的区域而不依赖图片识别) 
+	I_LOGIN_SCROLL_CLOSE_AREA = RuleImage(roi_front=(1181,634,28,39), roi_back=(1162,595,77,112), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_scroll_close_area.png")
 	# description 
 	I_LOGIN_RED_CLOSE = RuleImage(roi_front=(800,0,480,290), roi_back=(800,0,480,290), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_red_close.png")
 	# description 
@@ -95,6 +132,8 @@ class RestartAssets:
 	I_EARLY_SERVER = RuleImage(roi_front=(596,269,115,33), roi_back=(596,269,115,33), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_early_server.png")
 	# 取消体验服切换弹窗 
 	I_EARLY_SERVER_CANCEL = RuleImage(roi_front=(435,404,172,56), roi_back=(435,404,172,56), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_early_server_cancel.png")
+	# 取消继续战斗 
+	I_CANCEL_BATTLE = RuleImage(roi_front=(471,395,129,55), roi_back=(367,227,545,296), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_cancel_battle.png")
 
 
 	# Ocr Rule Assets

@@ -5,17 +5,23 @@ import time
 import cv2
 import numpy as np
 
-from ppocronnx.predict_system import BoxedResult
 from enum import Enum
 
 
 from module.base.decorator import cached_property
 from module.base.utils import area_pad, crop, float2str
-from module.ocr.models import OCR_MODEL
+
 from module.exception import ScriptError
 from module.logger import logger
-from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr
+from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr, BoxedResult
+from module.server.setting import State
 
+if State.deploy_config.UseOcrServer:
+    from module.ocr.rpc import ModelProxyFactory
+    OCR_MODEL = ModelProxyFactory()
+else:
+    from module.ocr.models import OcrModel
+    OCR_MODEL = OcrModel()
 
 def enlarge_canvas(image):
     """
@@ -47,7 +53,6 @@ class BaseCor:
 
     lang: str = "ch"
     score: float = 0.6  # 阈值默认为0.5
-    min_score: float = 0.3  # 宽松阈值，用于挽救数字等结果
 
     name: str = "ocr"
     mode: OcrMode = OcrMode.FULL
@@ -102,8 +107,12 @@ class BaseCor:
         :param image:
         :return:
         """
-        # 增强对比度
-        image = cv2.convertScaleAbs(image, alpha=1.5, beta=0)
+        # to gray
+        if len(image.shape) == 3:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # to rgb
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         return image
 
     def after_process(self, result):
@@ -153,22 +162,16 @@ class BaseCor:
         :return:
         """
         # pre process
+        start_time = time.time()
         image = self.crop(image, self.roi)
-
+        image = self.pre_process(image)
         # ocr
         result, score = self.model.ocr_single_line(image)
-        logger.info(f"ocr result is {result} , score is {score}")
-        start_time = time.time()
-        # 如果分数低于目标分数，则进行预处理后重新识别
-        if score < self.score:
-            image = self.pre_process(image)
-            result, score = self.model.ocr_single_line(image)
-            logger.info(f"ocr result after pre process is {result} , score is {score}")
-        
         if score < self.score:
             result = ""
-        # after process
+        # after proces
         result = self.after_process(result)
+        # logger.info("ocr result score: %s" % score)
         logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
                     text=f'[{result}]')
         return result
@@ -194,15 +197,10 @@ class BaseCor:
         # after proces
         for result in boxed_results:
             result.ocr_text = self.after_process(result.ocr_text)
-            box = result.box  # 获取边界框坐标
-            x_min = self.roi[0] + box[0][0]
-            y_min = self.roi[1] + box[0][1]
-            width = box[1][0] - box[0][0]
-            height = box[2][1] - box[1][1]
-            result.after_box = [int(x_min), int(y_min), int(width), int(height)]
             results.append(result)
+
         logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
-                        text=str([result.ocr_text for result in results]))
+                    text=str([result.ocr_text for result in results]))
         return results
 
     def match(self, result: str, included: bool=False) -> bool:

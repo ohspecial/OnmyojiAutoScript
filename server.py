@@ -8,6 +8,7 @@
 • Win-Py ≤ 3.10            → TZ='CST-8'       + _tzset()（POSIX 语法）
 """
 import os, sys, time
+from module.ocr.rpc import start_ocr_server, start_ocr_server_process
 
 if hasattr(time, "tzset"):
     # Unix 全系  /  Windows 3.11+ 走这条
@@ -78,6 +79,8 @@ def fun(ev: threading.Event):
     logger.attr("Port", port)
     logger.attr("Reload", ev is not None)
 
+
+
     uvicorn.run("module.server.app:fastapi_app",
                 host=host,
                 port=port,
@@ -87,4 +90,3 @@ def fun(ev: threading.Event):
 
 if __name__ == "__main__":
     fun(None)
-

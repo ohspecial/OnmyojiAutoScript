@@ -193,8 +193,18 @@
         "option": [
           "stay_there",
           "goto_main",
-          "close_game"
+          "close_game",
+          "close_emulator_or_goto_main",
+          "close_emulator_or_close_game"
         ]
+      },
+      "CloseGameLimitTime": {
+        "type": "input",
+        "value": "00:10:00"
+      },
+      "CloseEmulatorLimitTime": {
+        "type": "input",
+        "value": "00:30:00"
       }
     },
     "DropRecord": {

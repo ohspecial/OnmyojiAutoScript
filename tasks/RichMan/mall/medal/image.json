@@ -77,7 +77,7 @@
     "roiFront": "585,230,100,100",
     "roiBack": "585,230,100,100",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "购买检查"
   },
   {
@@ -86,7 +86,7 @@
     "roiFront": "587,238,100,100",
     "roiBack": "587,238,100,100",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "购买检查"
   },
   {
@@ -95,7 +95,7 @@
     "roiFront": "588,242,100,100",
     "roiBack": "588,242,100,100",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "购买检查"
   },
   {
@@ -104,7 +104,7 @@
     "roiFront": "590,257,100,100",
     "roiBack": "590,257,100,100",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "购买检查"
   }
 ]

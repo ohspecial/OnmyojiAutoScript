@@ -1,19 +1,37 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
+from contextlib import asynccontextmanager
+
 import argparse
-from fastapi import FastAPI
+from pathlib import Path
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from module.logger import logger
+from module.ocr.rpc import start_ocr_server_process
 
 from module.server.home_router import home_app
 from module.server.script_router import script_app
+from module.server.tool_router import tool_app
+from module.server.setting import State
+
+from starlette import status
+from starlette.responses import JSONResponse
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await on_startup()
+    yield
+    await on_shutdown()
 
 app = FastAPI(
     title='OAS',
     description='OAS web service',
     version='0.0.0',
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -26,31 +44,37 @@ app.add_middleware(
 
 app.include_router(home_app)
 app.include_router(script_app)
+app.include_router(tool_app)
 
-@app.on_event("startup")
-async def startup_event():
+annotator_static_dir = Path(__file__).resolve().parent / "web" / "annotator" / "static"
+if annotator_static_dir.exists():
+    app.mount("/tool/annotator/static", StaticFiles(directory=str(annotator_static_dir)), name="annotator_static")
+
+# ocrServer
+if State.deploy_config.UseOcrServer:
+    port = State.deploy_config.OcrServerPort
+    start_ocr_server_process(port=port)
+    
+async def on_startup():
     logger.info('OAS web service startup done')
-    pass
 
-@app.on_event("shutdown")
-async def shutdown_event():
+
+async def on_shutdown():
     logger.info('OAS web service shutdown done')
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Internal Server Error: ", exc_info=True)
 
+    message = ', '.join(str(arg) for arg in exc.args) if exc.args else str(exc)
 
-
-
-
-
-
-
-
-
-
-
-
-
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            'message': message
+        },
+    )
 
 
 def fastapi_app():
@@ -70,6 +94,5 @@ def fastapi_app():
         help="Run OAS by config names on startup",
     )
     args, _ = parser.parse_known_args()
-
 
     return app

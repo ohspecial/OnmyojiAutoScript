@@ -211,11 +211,14 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
             if not self.appear(self.I_E_OPEN_SETTINGS):
                 logger.warning('Opening settings failed due to now in battle')
                 return
+
+        # 先点候补式神区域，再切换稀有度，避免点击失败
+        self.click(self.C_CLICK_STANDBY_TEAM)
+
         choose_rarity = self._config.exploration_config.choose_rarity
         rarity = ShikigamiClass.N if choose_rarity == ChooseRarity.N else ShikigamiClass.MATERIAL
         self.switch_shikigami_class(rarity)
 
-        self.click(self.C_CLICK_STANDBY_TEAM)
         # 移动至未候补的狗粮
         while 1:
             # 慢一点
@@ -348,16 +351,37 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
         logger.info('Quit explore')
         boss_timer = Timer(15)
         boss_timer.start()
+        click_yellow_button = 0 #用于保证只点一次左上返回按钮，不要直接触发连点回到主界面
+        
         while 1:
             self.screenshot()
+            
+            #探索章节标题界面
             if self.appear(self.I_UI_BACK_RED) and self.appear(self.I_E_EXPLORATION_CLICK):
                 break
+            
+            #探索大世界界面
+            if self.appear(self.I_CHECK_EXPLORATION) and not self.appear(self.I_E_SETTINGS_BUTTON):
+                break
+  
+            # 防止BOSS打完箱子刚落地，脚本就手快点退出了
+            if self.appear_then_click(self.I_BATTLE_REWARD, interval=1.5):
+                logger.info("Found battle reward during exit, picking it up.")
+                boss_timer.reset()
+                continue
+
             if boss_timer.reached():
                 # https://github.com/runhey/OnmyojiAutoScript/issues/548
                 logger.warning('Exit immediately after the boss battle')
                 break
             if self.appear_then_click(self.I_E_EXIT_CONFIRM, interval=0.8):
                 continue
+            
+            if click_yellow_button == 0:
+                if self.appear_then_click(self.I_BACK_YOLLOW, interval=3.5):
+                    click_yellow_button = 1
+                    continue
+            
             if self.appear(self.I_EXPLORATION_TITLE) or self.appear(self.I_CHECK_EXPLORATION):
                 continue
             if self.appear_then_click(self.I_UI_BACK_BLUE, interval=3.5):

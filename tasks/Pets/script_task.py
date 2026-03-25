@@ -31,8 +31,8 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle,OrochiAssets):
             if self.appear_then_click(self.I_PET_CLAW, interval=1):
                 continue
         logger.info('Enter Pets')
-        if con.pets_happy:
-            self._play()
+        # if con.pets_happy:
+        #     self._play()
         if con.pets_feast:
             self._feed()
         self.ui_click(self.I_PET_EXIT, self.I_CHECK_MAIN)
@@ -146,6 +146,8 @@ class ScriptTask(GameUi, PetsAssets,SwitchSoul,GeneralBattle,OrochiAssets):
             if not self.appear(self.I_FORM_TEAM):
                 break
             if self.appear_then_click(self.I_BACK_BL, interval=1):
+                continue
+            if self.appear_then_click(self.I_UI_BACK_YELLOW, interval=1):
                 continue
 
         self.ui_current = page_soul_zones

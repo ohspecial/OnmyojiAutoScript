@@ -56,13 +56,15 @@ class GlobalGameAssets:
 	# description 
 	I_UI_AWARD = RuleImage(roi_front=(577,499,100,100), roi_back=(530,408,199,220), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_award.png")
 	# 短一点的确认 
-	I_UI_CONFIRM_SAMLL = RuleImage(roi_front=(677,390,130,62), roi_back=(677,390,130,62), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_confirm_samll.png")
+	I_UI_CONFIRM_SAMLL = RuleImage(roi_front=(681,392,130,62), roi_back=(558,380,265,99), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_confirm_samll.png")
 	# 短一点的取消 
 	I_UI_CANCEL_SAMLL = RuleImage(roi_front=(472,389,128,62), roi_back=(472,389,128,62), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_cancel_samll.png")
 	# description 
 	I_UI_UNCHECK = RuleImage(roi_front=(567,343,33,36), roi_back=(497,303,216,100), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_uncheck.png")
 	# 勾选 
 	I_UI_CHECK = RuleImage(roi_front=(564,341,40,38), roi_back=(512,329,164,78), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_check.png")
+	# 知道了 
+	I_UI_GOTIT_SMALL = RuleImage(roi_front=(678,396,127,60), roi_back=(622,371,242,100), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_gotit_small.png")
 	# description 
 	I_UI_EXIT_ENSURE = RuleImage(roi_front=(691,378,167,52), roi_back=(627,339,357,180), threshold=0.8, method="Template matching", file="./tasks/GlobalGame/ui/ui_ui_exit_ensure.png")
 	# description 

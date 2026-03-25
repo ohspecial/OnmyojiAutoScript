@@ -28,8 +28,10 @@ class Bondlings(Buy, MallNavbar):
         self._bondlings_base(buy_button=self.I_BL_BUY_STONE, remain_number=self.O_BL_RES_STONE, check_class=2,
                              buy_number=con.bondling_stone, buy_max=10, buy_money=30)
         # 购买御魂
+        self.I_BL_BUY_SOULS.threshold = 0.95   #售罄时需要提高阈值
         self._bondlings_base(buy_button=self.I_BL_BUY_SOULS, remain_number=self.O_BL_RES_SOULS, check_class=1,
                              buy_number=con.random_soul, buy_max=25, buy_money=20)
+        self.I_BL_BUY_SOULS.threshold = 0.8
         # 购买高级盘
         self._bondlings_base(buy_button=self.I_BL_BUY_HIGH, remain_number=self.O_BL_RES_HIGH, check_class=3,
                              buy_number=con.high_bondling_discs, buy_max=10, buy_money=50)

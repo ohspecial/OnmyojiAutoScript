@@ -88,7 +88,6 @@ class ScriptTask(OrochiScriptTask, TrueOrochiAssets):
             raise TaskEnd('TrueOrochi')
         # 如果有真蛇，那么就开始战斗
         logger.hr('True Orochi Battle')
-        conf.current_success += 1
         while 1:
             self.screenshot()
             if self.appear(self.I_ST_CREATE_ROOM):

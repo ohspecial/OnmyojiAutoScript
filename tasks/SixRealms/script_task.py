@@ -86,4 +86,4 @@ if __name__ == '__main__':
     t = ScriptTask(c, d)
     t.screenshot()
 
-    t.run()
+    t.run_moon_sea()

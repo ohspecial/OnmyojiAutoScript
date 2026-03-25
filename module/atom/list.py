@@ -8,10 +8,11 @@ import numpy as np
 
 from random import randint
 
-from ppocronnx.predict_system import BoxedResult
+
 from module.atom.ocr import RuleOcr
 from module.atom.image import RuleImage
 from module.logger import logger
+from module.ocr.onnx_paddle_ocr import BoxedResult
 
 
 class RuleList:
@@ -42,6 +43,13 @@ class RuleList:
         self.is_bottom = False  # 表示是否已经滑动到底部了
         self._target = None  # 目标
         self.targets = {}  # 目标列表 只是针对image
+
+    @property
+    def name(self):
+        return f'RuleList[{self.__hash__()}]'
+
+    def __hash__(self):
+        return hash((self.folder, self.is_vertical, self.is_image, self.is_ocr, tuple(self.roi_back), tuple(self.size), tuple(self.array)))
 
     def swipe_pos(self, number: int=2, after: bool=True) -> tuple:
         """

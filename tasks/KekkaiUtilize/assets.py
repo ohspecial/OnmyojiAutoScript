@@ -20,9 +20,9 @@ class KekkaiUtilizeAssets:
 	# 神灶 
 	I_GUILD_SHIRNE = RuleImage(roi_front=(872,624,60,62), roi_back=(872,624,60,62), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/ku/ku_guild_shirne.png")
 	# 寮体力 
-	I_GUILD_AP = RuleImage(roi_front=(483,314,22,22), roi_back=(1,134,582,363), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/ku/ku_guild_ap.png")
+	I_GUILD_AP = RuleImage(roi_front=(483,314,22,22), roi_back=(290,224,894,345), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/ku/ku_guild_ap.png")
 	# 寮资金 
-	I_GUILD_ASSETS = RuleImage(roi_front=(315,311,23,28), roi_back=(1,134,782,363), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/ku/ku_guild_assets.png")
+	I_GUILD_ASSETS = RuleImage(roi_front=(315,311,23,28), roi_back=(290,224,894,345), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/ku/ku_guild_assets.png")
 	# 领取寮资金 
 	I_GUILD_ASSETS_RECEIVE = RuleImage(roi_front=(565,426,144,63), roi_back=(565,426,144,63), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/ku/ku_guild_assets_receive.png")
 	# 收起的寮活动横幅 
@@ -59,6 +59,8 @@ class KekkaiUtilizeAssets:
 	I_EXP_EXTRACT = RuleImage(roi_front=(592,448,100,73), roi_back=(592,448,100,73), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/realm/realm_exp_extract.png")
 	# 盒子经验满 
 	I_BOX_EXP_MAX = RuleImage(roi_front=(889,430,61,64), roi_back=(829,372,228,186), threshold=0.7, method="Template matching", file="./tasks/KekkaiUtilize/realm/realm_box_exp_max.png")
+	# 种树活动关闭标识 
+	I_PLANT_TREE_CLOSE = RuleImage(roi_front=(777,91,36,34), roi_back=(711,52,169,125), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/realm/realm_plant_tree_close.png")
 
 
 	# Click Rule Assets

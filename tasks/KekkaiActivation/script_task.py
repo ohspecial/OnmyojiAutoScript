@@ -57,9 +57,8 @@ class ScriptTask(KU, KekkaiActivationAssets):
 
         if con.exchange_max:
             self.check_max_lv(con.shikigami_class)
-        # self.back_guild()
         self.ui_get_current_page()
-        self.ui_goto(page_main)
+        self.ui_goto_page(page_main)
 
         raise TaskEnd('KekkaiActivation')
 
@@ -260,8 +259,6 @@ class ScriptTask(KU, KekkaiActivationAssets):
                     if not self.appear(self.I_A_EMPTY):
                         self.config.kekkai_activation.activation_config.card_not_found_count = 0
                         self.config.save()
-                        message = f'✅ 确认挂卡: {rule}'
-                        self.save_image(content=message, push_flag=False, wait_time=0)
                         return
                     if self.click(target, interval=1):
                         continue
@@ -301,8 +298,17 @@ class ScriptTask(KU, KekkaiActivationAssets):
                 # 按数字大到小排序
                 sorted_results = [result for _, result in sorted(numeric_results, key=lambda x: x[0], reverse=True)]
                 max_result = sorted_results[0]  # 获取数字最大的结果对象
-                target = RuleClick(roi_front=max_result.after_box, roi_back=max_result.after_box, name="tmpclick")
-                logger.info(f"选择挂卡: [{max_result.ocr_text}] {max_result.after_box}")
+
+                box = max_result.box  # 获取边界框坐标
+                x_min = self.O_CHECK_CARD_NUMBER.roi[0] + box[0][0]
+                y_min = self.O_CHECK_CARD_NUMBER.roi[1] + box[0][1]
+                width = box[1][0] - box[0][0]
+                height = box[2][1] - box[1][1]
+                roi = int(x_min), int(y_min), int(width), int(height)
+
+                target = RuleClick(roi_front=roi, roi_back=roi, name="tmpclick")
+                logger.info(f"选择挂卡: [{max_result.ocr_text}] {roi}")
+
                 return target
             else:
                 if ocr_count > 3:
@@ -332,6 +338,7 @@ class ScriptTask(KU, KekkaiActivationAssets):
             # 达到重试上限时的处理
             log_msg = f"⚠️{activation_config.card_type}卡未检出（累计{retry_count}次），{retry_minutes}分钟后重试"
             activation_config.card_not_found_count = 0  # 重置计数器并延长下次执行时间
+            logger.info(log_msg)
             next_run = datetime.now() + timedelta(minutes=retry_minutes)
         else:
             # # 未达上限切换卡类型
@@ -341,11 +348,9 @@ class ScriptTask(KU, KekkaiActivationAssets):
                 else CardType.TAIKO
             )
             log_msg = f"🔄{activation_config.card_type}卡未检出 → 切换{new_type}"
+            logger.info(log_msg)
             activation_config.card_type = new_type
             next_run = datetime.now()
-
-        # 统一记录日志和推送
-        self.save_image(content=log_msg, push_flag=True)
 
         # 保存配置并设置下次执行
         self.config.save()

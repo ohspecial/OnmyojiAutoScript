@@ -1,6 +1,7 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
+from tasks.GuildActivityMonitor.config import GuildActivityMonitor
 from typing import Dict, Any
 
 import re
@@ -35,6 +36,7 @@ from tasks.SoulsTidy.config import SoulsTidy
 from tasks.Delegation.config import Delegation
 from tasks.WantedQuests.config import WantedQuests
 from tasks.Tako.config import Tako
+from tasks.AutoCheckinBigGod.config import AutoCheckinBigGod
 # ----------------------------------------------------------------------------------------------------------------------
 from tasks.Orochi.config import Orochi
 from tasks.OrochiMoans.config import OrochiMoans
@@ -48,6 +50,7 @@ from tasks.Hunt.config import Hunt
 from tasks.AbyssShadows.config import AbyssShadows
 from tasks.GuildBanquet.config import GuildBanquet
 from tasks.DemonRetreat.config import DemonRetreat
+from tasks.GuildActivityMonitor.config import GuildActivityMonitor
 
 # 这一部分是活动的配置-----------------------------------------------------------------------------------------------------
 from tasks.ActivityShikigami.config import ActivityShikigami
@@ -59,6 +62,7 @@ from tasks.KittyShop.config import KittyShop
 from tasks.DyeTrials.config import DyeTrials
 from tasks.ActivityCommon.config import ActivityCommon
 from tasks.AutoCake.config import AutoCake
+from tasks.NianTrue.config import NianTrue
 # ----------------------------------------------------------------------------------------------------------------------
 
 # 肝帝专属---------------------------------------------------------------------------------------------------------------
@@ -69,6 +73,7 @@ from tasks.Hyakkiyakou.config import Hyakkiyakou
 from tasks.HeroTest.config import HeroTest
 from tasks.FindJade.config import FindJade
 from tasks.MemoryScrolls.config import MemoryScrolls
+from tasks.MultiAccountDaily.config import MultiAccountDaily
 # ----------------------------------------------------------------------------------------------------------------------
 
 # 每周任务---------------------------------------------------------------------------------------------------------------
@@ -78,6 +83,12 @@ from tasks.Secret.config import Secret
 from tasks.WeeklyTrifles.config import WeeklyTrifles
 from tasks.MysteryShop.config import MysteryShop
 from tasks.Duel.config import Duel
+# ----------------------------------------------------------------------------------------------------------------------
+
+# 账号切换---------------------------------------------------------------------------------------------------------------
+from tasks.SwitchAccountConfig.config import SwitchAccountConfig
+from tasks.SwitchAccountLoop.config import SwitchAccountLoop
+from tasks.SwitchAccountOnce.config import SwitchAccountOnce
 # ----------------------------------------------------------------------------------------------------------------------
 
 class ConfigModel(ConfigBase):
@@ -105,6 +116,7 @@ class ConfigModel(ConfigBase):
     exploration: Exploration = Field(default_factory=Exploration)
     wanted_quests: WantedQuests = Field(default_factory=WantedQuests)
     tako: Tako = Field(default_factory=Tako)
+    auto_checkin_big_god: AutoCheckinBigGod = Field(default_factory=AutoCheckinBigGod)
 
     # 这些是刷御魂的
     orochi: Orochi = Field(default_factory=Orochi)
@@ -124,6 +136,7 @@ class ConfigModel(ConfigBase):
     dye_trials: DyeTrials = Field(default_factory=DyeTrials)
     activity_common:ActivityCommon = Field(default_factory=ActivityCommon)
     auto_cake: AutoCake = Field(default_factory=AutoCake)
+    nian_true: NianTrue = Field(default_factory=NianTrue)
     
     # 这些是肝帝专属
     bondling_fairyland: BondlingFairyland = Field(default_factory=BondlingFairyland)
@@ -133,6 +146,7 @@ class ConfigModel(ConfigBase):
     hero_test: HeroTest = Field(default_factory=HeroTest)
     find_jade: FindJade = Field(default_factory=FindJade)
     memory_scrolls: MemoryScrolls = Field(default_factory=MemoryScrolls)
+    multi_account_daily: MultiAccountDaily = Field(default_factory=MultiAccountDaily)
 
     # 这些是每周任务
     true_orochi: TrueOrochi = Field(default_factory=TrueOrochi)
@@ -149,6 +163,12 @@ class ConfigModel(ConfigBase):
     abyss_shadows: AbyssShadows = Field(default_factory=AbyssShadows)
     guild_banquet: GuildBanquet = Field(default_factory=GuildBanquet)
     demon_retreat: DemonRetreat = Field(default_factory=DemonRetreat)
+    guild_activity_monitor: GuildActivityMonitor = Field(default_factory=GuildActivityMonitor)
+
+    # 账号切换
+    switch_account_config: SwitchAccountConfig = Field(default_factory=SwitchAccountConfig)
+    switch_account_once: SwitchAccountOnce = Field(default_factory=SwitchAccountOnce)
+    switch_account_loop: SwitchAccountLoop = Field(default_factory=SwitchAccountLoop)
 
     def __init__(self, config_name: str=None) -> None:
         """
@@ -408,6 +428,35 @@ class ConfigModel(ConfigBase):
             setattr(group_object, argument, value)
             logger.info(f'Set arg {self.config_name}.{task}.{group}.{argument}.{value}')
             self.save()  # 我是没有想到什么方法可以使得属性改变自动保存的
+            return True
+        except ValidationError as e:
+            logger.error(e)
+            return False
+
+    def copy_script_task(self, task_name: str, source_task: BaseModel) -> bool:
+        model_task_name = convert_to_underscore(task_name)
+        try:
+            setattr(self, model_task_name, source_task)
+            self.save()
+            logger.info(f'Copy task {model_task_name} success')
+            return True
+        except ValidationError as e:
+            logger.error(e)
+            return False
+
+    def copy_task_group(self, task_name: str, group_name: str, source_task: BaseModel) -> bool:
+        model_task_name = convert_to_underscore(task_name)
+        model_group_name = convert_to_underscore(group_name)
+        task_object = getattr(self, model_task_name, None)
+        if not task_object:
+            return False
+        source_group_obj = getattr(source_task, model_group_name, None)
+        if not source_group_obj:
+            return False
+        try:
+            setattr(task_object, model_group_name, source_group_obj)
+            self.save()
+            logger.info(f'Copy task group {model_task_name}.{model_group_name} success')
             return True
         except ValidationError as e:
             logger.error(e)

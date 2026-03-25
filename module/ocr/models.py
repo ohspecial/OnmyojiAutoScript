@@ -1,12 +1,6 @@
-from typing import List
 
-import cv2
-import time
-
-import numpy as np
-
-import sys
-import time
+from module.server.setting import State
+from deploy.logger import logger
 from module.base.decorator import cached_property
 from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr
 
@@ -14,26 +8,33 @@ from module.ocr.onnx_paddle_ocr import ONNXPaddleOcr
 class OcrModel:
     @cached_property
     def ch(self):
-        return ONNXPaddleOcr(use_angle_cls=True,use_gpu=False)
+        use_gpu=False
+        if State.deploy_config and State.deploy_config.UseGpu:
+            use_gpu = State.deploy_config.UseGpu
+            logger.info(f"[UseGpu] {use_gpu}")
+        return ONNXPaddleOcr(use_angle_cls=True,use_gpu=use_gpu)
 
+# OCR_MODEL = OcrModel()
+from module.ocr.rpc import ModelProxyFactory
 
-OCR_MODEL = OcrModel()
+OCR_MODEL = ModelProxyFactory()
 
 
 
 if __name__ == "__main__":
-    model = OCR_MODEL.ch
+
+    model = OCR_MODEL.__getattribute__('ch')
     import cv2
     import time
     from memory_profiler import profile
-    image = cv2.imread(r"F:\OnmyojiAutoScript-easy-install\O_SE_JADE.png")
+    image = cv2.imread(r"E:\img_tmp\2025-07-22_21-41-44-818362.png")
 
     # 引入ocr 会导致非常巨大的内存开销
-    # @profile
+    @profile
     def test_memory():
-        for i in range(2):
+        for i in range(29999):
             start_time = time.time()
-            result = model.ocr_single_line(image)
+            result = model.detect_and_ocr(image)
             print(result)
             end_time = time.time()
             print(f'耗时：{end_time-start_time}')

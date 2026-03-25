@@ -17,6 +17,7 @@ from tasks.Component.GeneralInvite.general_invite import GeneralInvite
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.Hunt.assets import HuntAssets
 
+
 class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
     kirin_day = True  # 不是麒麟就是阴界之门
     tomorrow_kirin_day = True  # 明天是麒麟还是阴界之门
@@ -84,7 +85,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
                 return True
         else:
             logger.info('Today is the Netherworld day')
-            if now.time() < time(19, 0):
+            if now.time() < time(17, 0):
                 self.custom_next_run(task='Hunt', custom_time=self.con_time.netherworld_time, time_delta=0)
                 raise TaskEnd('Hunt')
             # 如果是阴界日在23:00-23:59之间则设定时间为明天的自定义时间，返回False
@@ -119,12 +120,8 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
                 # 你的阴阳寮已经打过的麒麟了
                 logger.warning('Your guild have already challenged the Kirin')
                 return
-            if self.appear_then_click(self.I_KIRIN_CHALLAGE, interval=1):
-                continue
-            if self.appear(self.I_PREPARE_HIGHLIGHT):
-                break
-        logger.info('Arrive the Kirin')
-        self.run_general_battle()
+        logger.info('Start battle')
+        self.run_general_battle(self.config.hunt.kirin_battle_config)
 
     def netherworld(self):
         logger.hr('阴界之门', 2)
@@ -151,8 +148,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
                 self.ui_click_until_disappear(self.I_UI_BACK_RED)
                 return
         logger.info('Start battle')
-        self.run_general_battle()
-
+        self.run_general_battle(self.config.hunt.netherworld_battle_config)
 
     def battle_wait(self, random_click_swipt_enable: bool) -> bool:
         """
@@ -183,17 +179,15 @@ class ScriptTask(GameUi, GeneralBattle, GeneralInvite, SwitchSoul, HuntAssets):
                 logger.info("Battle result is false")
                 self.ui_click_until_disappear(self.I_FALSE)
                 return False
+            if self.appear_then_click(self.I_PREPARE_HIGHLIGHT, interval=1.5):
+                logger.info('Netherworld click prepare after maybe failed')
+                self.device.stuck_record_add('BATTLE_STATUS_S')
+                continue
             # 如果三分钟还没打完，再延长五分钟
             if stuck_timer and stuck_timer.reached():
                 stuck_timer = None
                 self.device.stuck_record_clear()
                 self.device.stuck_record_add('BATTLE_STATUS_S')
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

@@ -270,8 +270,15 @@ class GeneralBuff(BaseTask, GeneralBuffAssets):
         :return:
         """
         logger.info('Soul buff')
-        self.screenshot()
-        area = self.get_area_image(self.I_SOUL)
+        # 尝试下滑查找御魂buff
+        for i in range(3):
+            self.screenshot()
+            area = self.get_area_image(self.I_SOUL)
+            if area:
+                break
+            logger.info(f'Soul buff not found, swipe down to search ({i + 1}/3)')
+            self.device.swipe(p2=(530, 240), p1=(580, 320))
+            time.sleep(1)
         if not area:
             logger.warning('No soul buff')
             return None
@@ -325,3 +332,4 @@ if __name__ == '__main__':
     t.gold_100(is_open=True)
     t.exp_50(is_open=True)
     t.exp_100(is_open=True)
+        
