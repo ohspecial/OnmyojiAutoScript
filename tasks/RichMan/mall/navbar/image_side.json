@@ -2,10 +2,10 @@
   {
     "itemName": "side_sure_special",
     "imageName": "navbar_side_sure_special.png",
-    "roiFront": "1172,91,70,74",
-    "roiBack": "1172,91,70,74",
+    "roiFront": "1172,91,72,78",
+    "roiBack": "1169,93,84,192",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.6,
     "description": "特殊"
   },
   {
@@ -21,7 +21,7 @@
     "itemName": "side_suer_honor",
     "imageName": "navbar_side_suer_honor.png",
     "roiFront": "1180,191,59,60",
-    "roiBack": "1150,159,103,132",
+    "roiBack": "1150,159,116,217",
     "method": "Template matching",
     "threshold": 0.6,
     "description": "荣誉"
@@ -39,7 +39,7 @@
     "itemName": "side_sure_friends",
     "imageName": "navbar_side_sure_friends.png",
     "roiFront": "1190,287,43,52",
-    "roiBack": "1163,258,93,126",
+    "roiBack": "1163,258,97,221",
     "method": "Template matching",
     "threshold": 0.7,
     "description": "友情点"
@@ -57,7 +57,7 @@
     "itemName": "side_sure_medal",
     "imageName": "navbar_side_sure_medal.png",
     "roiFront": "1190,404,39,62",
-    "roiBack": "1156,352,112,128",
+    "roiBack": "1156,352,114,242",
     "method": "Template matching",
     "threshold": 0.7,
     "description": "勋章"
