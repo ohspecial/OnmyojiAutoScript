@@ -50,8 +50,6 @@ class MallNavbar(GameUi, RichManAssets):
         :return:
         """
         self._enter_sundry()
-        if self.appear(self.I_SIDE_SURE_NEW):
-            self.ui_click
         self.ui_click(self.I_SIDE_SURE_SPECIAL, self.I_SIDE_CHECK_SPECIAL)
 
     def _enter_honor(self):
