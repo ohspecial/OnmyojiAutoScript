@@ -222,39 +222,54 @@ class BaseCor:
         :param boxed_results:
         :return:
         """
-        # 首先先将所有的ocr的str顺序拼接起来, 然后再进行匹配
-        result = None
-        strings = [boxed_result.ocr_text for boxed_result in boxed_results]
-        concatenated_string = "".join(strings)
         if keyword is None:
             keyword = self.keyword
-        if keyword in concatenated_string:
-            result = [index for index, word in enumerate(strings) if keyword in word]
-        else:
-            result = None
 
-        if result is not None:
-            # logger.info("Filter result: %s" % result)
+        strings = [boxed_result.ocr_text for boxed_result in boxed_results]
+        
+        # 1. 完整包含匹配：某个单独的框直接包含整个 keyword
+        result = [index for index, word in enumerate(strings) if keyword in word]
+        if result:
             return result
 
-        # 如果适用顺序拼接还是没有匹配到，那可能是竖排的，使用单个字节的keyword进行匹配
-        indices = []
-        # 对于keyword中的每一个字符，都要在strings中进行匹配
-        # 如果这个字符在strings中的某一个string中，那么就记录这个string的index
-        max_index = len(strings) - 1
-        for index, char in enumerate(keyword):
-            for i, string in enumerate(strings):
-                if char not in string:
-                    continue
-                if i <= max_index:
+        # 2. 跨框拼接匹配：应对文字被分割到多个相邻框的情况（比如竖排文字被逐字识别）
+        concatenated_string = "".join(strings)
+        if keyword in concatenated_string:
+            start_pos = concatenated_string.find(keyword)
+            end_pos = start_pos + len(keyword)
+            
+            current_len = 0
+            indices = []
+            for i, word in enumerate(strings):
+                word_end = current_len + len(word)
+                if current_len < end_pos and word_end > start_pos:
                     indices.append(i)
+                current_len = word_end
+            if indices:
+                return list(set(indices))
+
+        # 3. 散落匹配容错：针对部分识别遗漏或混入杂符。
+        # 原代码中任意单字匹配都会被视为成功，极易发生误判。
+        # 这里加以严控：要求至少大部分字符都能被匹配到。
+        indices = []
+        matched_chars = 0
+        for char in keyword:
+            for i, string in enumerate(strings):
+                if char in string:
+                    indices.append(i)
+                    matched_chars += 1
                     break
-        if indices:
-            # 剔除掉重复的index
-            indices = list(set(indices))
-            return indices
+                    
+        is_valid = False
+        if len(keyword) <= 2:
+            is_valid = matched_chars == len(keyword)
         else:
-            return None
+            is_valid = matched_chars >= len(keyword) * 0.7
+            
+        if is_valid and indices:
+            return list(set(indices))
+
+        return None
 
     def detect_text(self, image) -> str:
         """

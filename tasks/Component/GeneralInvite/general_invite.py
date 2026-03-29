@@ -562,8 +562,15 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         if not self.appear(self.I_I_ACCEPT):
             return False
         logger.info('Click accept')
+        accept_timer = Timer(120)
+        accept_timer.start()
         while 1:
             self.screenshot()
+            # 等待进入房间期间重置超时计时器，避免加载慢时误报 GameStuckError
+            self.device.stuck_record_clear()
+            if accept_timer.reached():
+                logger.warning('Accept timeout after 120s')
+                return False
             if self.is_in_room():
                 return True
             # 被秒开
