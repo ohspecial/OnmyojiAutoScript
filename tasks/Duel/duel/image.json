@@ -32,7 +32,7 @@
     "roiFront": "1153,578,100,100",
     "roiBack": "1118,553,155,149",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "战斗带保护的"
   },
   {
@@ -61,6 +61,15 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "准备"
+  },
+  {
+    "itemName": "d_prepare_done",
+    "imageName": "duel_d_prepare_done.png",
+    "roiFront": "495,82,75,55",
+    "roiBack": "495,82,75,55",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "准备完毕 "
   },
   {
     "itemName": "d_victory",

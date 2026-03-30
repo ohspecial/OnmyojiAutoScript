@@ -123,7 +123,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
             if self.timer_invite and self.timer_invite.reached():
                 if is_first:
-                    logger.info('Invitation is triggered every 20s')
+                    logger.info('Invitation is triggered every 25s')
                     self.timer_invite.reset()
                 else:
                     logger.info('Wait for 30s and invite again')
@@ -478,6 +478,9 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             logger.warning('Invite friend 1 failed')
         # 如果是邀请第二个人
         if config.invite_number == InviteNumber.TWO:
+            # 避免频繁
+            logger.info("wait 2 seconds")
+            sleep(2)
             success = self.invite_friend(config.friend_2, config.find_mode)
             if not success:
                 logger.warning('Invite friend 2 failed')
@@ -559,8 +562,15 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         if not self.appear(self.I_I_ACCEPT):
             return False
         logger.info('Click accept')
+        accept_timer = Timer(120)
+        accept_timer.start()
         while 1:
             self.screenshot()
+            # 等待进入房间期间重置超时计时器，避免加载慢时误报 GameStuckError
+            self.device.stuck_record_clear()
+            if accept_timer.reached():
+                logger.warning('Accept timeout after 120s')
+                return False
             if self.is_in_room():
                 return True
             # 被秒开

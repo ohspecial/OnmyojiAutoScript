@@ -82,6 +82,8 @@ class MallNavbar(GameUi, RichManAssets):
         :return:
         """
         self._enter_sundry()
+        if not self.appear(self.I_SIDE_CHECK_CHARISMA):
+            self.device.swipe(p1=(1200, 480), p2=(1200, 320))
         self.ui_click(self.I_SIDE_SURE_CHARISMA, self.I_SIDE_CHECK_CHARISMA)
 
     def back_mall(self):

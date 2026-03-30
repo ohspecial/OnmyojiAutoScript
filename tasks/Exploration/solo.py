@@ -246,6 +246,8 @@ class SoloExploration(BaseExploration):
                     break
                 if self.check_then_accept():
                     pass
+                # 作为队员等待邀请是正常行为，重置超时计时器避免误报 GameStuckError
+                self.device.stuck_record_clear()
                 if wait_timer.started() and wait_timer.reached():
                     logger.warning('Wait timer reached')
                     break
@@ -260,6 +262,9 @@ class SoloExploration(BaseExploration):
                 continue
             #
             elif scene == Scene.MAIN:
+                # 进入探索内部说明已成功组队，重置等待计时器
+                if wait_timer.started():
+                    wait_timer = Timer(50)
                 if not explore_init:
                     self.ui_click(self.I_E_AUTO_ROTATE_OFF, stop=self.I_E_AUTO_ROTATE_ON)
                     if self._config.exploration_config.auto_rotate == AutoRotate.yes:
