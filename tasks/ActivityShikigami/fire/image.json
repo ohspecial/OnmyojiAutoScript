@@ -111,18 +111,18 @@
     "itemName": "pass_13",
     "imageName": "fire_pass_13.png",
     "roiFront": "1018,570,100,100",
-    "roiBack": "984,538,169,152",
+    "roiBack": "984,538,261,167",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "魇兽将的战斗图片"
   },
   {
-    "itemName": "boss_fire",
-    "imageName": "fire_boss_fire.png",
-    "roiFront": "1045,538,96,48",
-    "roiBack": "989,478,267,227",
+    "itemName": "rich_man_fire",
+    "imageName": "fire_rich_man_fire.png",
+    "roiFront": "983,555,82,78",
+    "roiBack": "924,479,225,213",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "BOSS挑战"
+    "description": ""
   }
 ]
