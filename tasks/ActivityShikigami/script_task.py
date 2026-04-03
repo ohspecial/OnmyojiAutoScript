@@ -145,21 +145,32 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
         logger.hr(f'Start run climb type PASS', 1)
         self.click(self.I_TO_BATTLE_MAIN)
         switch_souled = False
-        click_ticket, no_tickets = 0, random.randint(3, 5)
+        # 增大门票点击容忍次数，避免因页面响应慢导致误判无门票
+        click_ticket, no_tickets = 0, random.randint(8, 12)
         click_fire, no_fire = 0, random.randint(3, 5)
         already_passed = False
+        # 用于判断门票是否连续无响应的计时器（连续 15 秒点击门票无任何事件发生才判定无门票）
+        ticket_no_response_timer = None
         while True:
             self.screenshot()
             self.put_status()
             if click_ticket > no_tickets:
                 logger.warning(f'Click ticket {click_ticket} times, no tickets left')
                 break
+            # 连续长时间点击门票都没有触发任何事件，判定为无门票
+            if ticket_no_response_timer is not None and ticket_no_response_timer.reached():
+                logger.warning(f'No response after clicking ticket for a long time, no tickets left')
+                break
             if click_fire > no_fire:
                 logger.warning(f'Click fire {click_fire} times, no fire left')
                 break
             if self.ui_reward_appear_click():  # 获得奖励
+                click_ticket = 0
+                ticket_no_response_timer = None
                 continue
             if self.appear(self.I_RM_FORWARD, interval=1.2):  # 等待骰子结果
+                click_ticket = 0
+                ticket_no_response_timer = None
                 continue
             if not already_passed and self.appear(self.I_RM_CHECK_BOSS, interval=1.2):
                 already_passed = True
@@ -174,6 +185,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
             if self.appear_then_click(self.I_RM_THROW, interval=2):  # 开始扔骰子
                 logger.hr('Throw ticket', 3)
                 click_ticket = 0
+                ticket_no_response_timer = None
                 self.device.stuck_record_clear()
                 self.device.stuck_record_add('BATTLE_STATUS_S')
                 while True:
@@ -196,6 +208,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
                     self.appear(self.I_RM_BUY_TICKET):  # 开始买东西
                 logger.hr('Buy envent', 3)
                 click_ticket = 0
+                ticket_no_response_timer = None
                 rich_man_conf = self.config.model.activity_shikigami.rich_man
                 timeout_timer = Timer(5).start()
                 while True:
@@ -224,6 +237,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
                         continue
             if self.appear(self.I_RM_QUESTION, interval=2):  # 开始答题
                 click_ticket = 0
+                ticket_no_response_timer = None
                 logger.hr('Start question', 3)
                 q, a1, a2, a3 = self.detect_question_and_answers()
                 index = self.anwser.answer_one(question=q, options=[a1, a2, a3])
@@ -239,6 +253,7 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
                 continue
             if self.appear(self.I_RICH_MAN_FIRE, interval=2):  # 开始战斗
                 click_ticket = 0
+                ticket_no_response_timer = None
                 if not switch_souled:
                     self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS, self.I_CHECK_BATTLE_MAIN)
                     switch_souled = True
@@ -252,6 +267,12 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
                 self.click(self.I_CHECK_BATTLE_MAIN)
                 click_ticket += 1
                 click_fire = 0
+                # 首次开始计时，用于判断是否连续无响应
+                if ticket_no_response_timer is None:
+                    ticket_no_response_timer = Timer(15).start()
+                logger.info(f'Click ticket {click_ticket}/{no_tickets}')
+                # 点击后等待页面响应，避免因截图太快导致识别不到后续事件
+                sleep(random.uniform(1.5, 2.5))
                 continue
         while True:
             self.screenshot()
