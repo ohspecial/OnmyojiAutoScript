@@ -12,7 +12,7 @@ from tasks.Component.GeneralBuff.general_buff import GeneralBuff
 from tasks.Component.GeneralRoom.general_room import GeneralRoom
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_soul_zones, page_shikigami_records, page_team
+from tasks.GameUi.page import page_main, page_soul_zones, page_shikigami_records
 from tasks.Orochi.assets import OrochiAssets
 from tasks.Orochi.config import Orochi, UserStatus, Layer
 from module.logger import logger
@@ -117,8 +117,21 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
     def run_leader(self):
         logger.info('Start run leader')
         self.ui_get_current_page()
-        self.ui_goto(page_team)
-        self.check_zones('御魂')
+        self.ui_goto(page_soul_zones)
+        self.orochi_enter()
+        layer = self.config.orochi.orochi_config.layer
+        self.check_layer(layer)
+        # https://github.com/runhey/OnmyojiAutoScript/issues/592
+        self.config.orochi.general_battle_config.lock_team_enable = True
+        self.check_lock(self.config.orochi.general_battle_config.lock_team_enable)
+        # 创建队伍
+        logger.info('Create team')
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_CHECK_TEAM):
+                break
+            if self.appear_then_click(self.I_FORM_TEAM, interval=1):
+                continue
         # 创建房间
         self.create_room()
         self.ensure_private()

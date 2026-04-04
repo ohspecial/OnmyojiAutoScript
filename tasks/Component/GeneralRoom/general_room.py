@@ -142,8 +142,6 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
                 break
             if name == '经验妖怪' and '经验' in text_ocr:
                 break
-            if name == '御魂' and '御魂' in text_ocr:
-                break
             if click_timer.reached():
                 click_timer.reset()
                 self.device.click(x=pos[0] + randint(-5, 5), y=pos[1] + randint(-5, 5))
