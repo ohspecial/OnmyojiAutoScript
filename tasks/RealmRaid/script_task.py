@@ -167,6 +167,22 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             if self.current_count >= con.raid_config.number_attack:
                 logger.info(f'Current count {self.current_count}, max count {con.raid_config.number_attack}')
                 break
+            # 先检测是否需要刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
+            if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
+                logger.info('Three refresh')
+                # 如果勾选了退4，且第一个位置没有失败标志也没有击破标志，则先执行退4操作
+                # 如果已被击破，说明之前已经退过4并击败了这个结界，不需要再退4
+                # 也需要先检查票数是否足够
+                if con.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
+                    logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
+                    for _ in range(4):
+                        self.fire(1)
+                        self.run_general_battle_back(con.general_battle_config, exit_four=True)
+                if self.check_refresh():
+                    continue
+                else:
+                    success = False
+                    break
             # ----------------------------------------开始进攻
             medal, index = self.find_one(False)
             if not medal and not index:
@@ -215,9 +231,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             # 刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
             if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
                 logger.info('Three refresh')
-                # 如果勾选了退4，且第一个位置没有失败标志，则先执行退4操作
-                if con.raid_config.exit_four and not self.check_position_failed(0):
-                    logger.info('Three refresh with exit_four: position 1 has no fail sign, executing retreat four')
+                # 如果勾选了退4，且第一个位置没有失败标志也没有击破标志，则先执行退4操作
+                # 如果已被击破，说明之前已经退过4并击败了这个结界，不需要再退4
+                # 也需要先检查票数是否足够
+                if con.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
+                    logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
                     for _ in range(4):
                         self.fire(1)
                         self.run_general_battle_back(con.general_battle_config, exit_four=True)
