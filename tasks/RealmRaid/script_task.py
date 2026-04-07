@@ -215,6 +215,12 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             # 刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
             if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
                 logger.info('Three refresh')
+                # 如果勾选了退4，且第一个位置没有失败标志，则先执行退4操作
+                if con.raid_config.exit_four and not self.check_position_failed(0):
+                    logger.info('Three refresh with exit_four: position 1 has no fail sign, executing retreat four')
+                    for _ in range(4):
+                        self.fire(1)
+                        self.run_general_battle_back(con.general_battle_config, exit_four=True)
                 if self.check_refresh():
                     continue
                 else:
@@ -524,6 +530,23 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 continue
                 
         logger.info(f'Click fire {order} success')
+
+    def check_position_failed(self, position: int) -> bool:
+        """
+        检查指定位置是否出现了失败标志
+        :param position: 位置索引（0-8，对应九宫格的9个位置）
+        :return: 如果该位置有失败标志返回True，否则返回False
+        """
+        if position < 0 or position >= len(self.false_roi):
+            logger.warning(f'Invalid position {position}')
+            return False
+        self.screenshot()
+        roi = self.false_roi[position]
+        self.false_image.roi_back = roi
+        if self.appear(self.false_image):
+            logger.info(f'Position {position + 1} has a fail sign')
+            return True
+        return False
 
     @cached_property
     def false_roi(self) -> list:
