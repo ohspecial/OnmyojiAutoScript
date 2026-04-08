@@ -51,6 +51,8 @@ class RealmRaidAssets:
 	I_MEDAL_3_2 = RuleImage(roi_front=(575,489,188,32), roi_back=(575,489,188,32), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_medal_3_2.png")
 	# description 
 	I_MEDAL_3_3 = RuleImage(roi_front=(902,479,201,50), roi_back=(902,479,201,50), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_medal_3_3.png")
+	# 第一个击破 
+	I_RAID_SUCCESS = RuleImage(roi_front=(405,169,50,46), roi_back=(405,169,50,46), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_raid_success.png")
 
 
 	# Image Rule Assets
