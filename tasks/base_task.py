@@ -728,13 +728,10 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 sleep(0.5)
                 while 1:
                     self.screenshot()
-                    # 等待动画结束
-                    if not self.appear(self.I_UI_REWARD, threshold=0.6):
+                    # 等待动画结束: 两种奖励弹窗都不出现时才认为已关闭
+                    if not self.appear(self.I_UI_REWARD, threshold=0.6) and not self.appear(self.I_UI_BUY_SUCCESS, threshold=0.6):
                         logger.info('Get reward success')
                         break
-                    if not self.appear(self.I_UI_BUY_SUCCESS, threshold=0.6):
-                        logger.info('Buy success')
-                        break                            
                     # 一直点击
                     if self.ui_reward_appear_click():
                         continue
