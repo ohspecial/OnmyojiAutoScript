@@ -71,6 +71,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
             self.ui_goto_page(page_main)
             self.set_next_run(task='BondlingFairyland', finish=True, success=True)
             raise TaskEnd
+        self.pre_summon_tomb_guard_for_team()
         match cong.bondling_config.user_status:
             case UserStatus.handoff1:
                 self.limit_count //= 2
@@ -81,6 +82,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
                 self.current_count = 0
                 self.ui_get_current_page()
                 self.ui_goto(page_bondling_fairyland)
+                self.pre_summon_tomb_guard_for_team()
                 self.switch_ball()
             case UserStatus.LEADER | UserStatus.ALONE:
                 self.switch_ball()
@@ -88,6 +90,55 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
                 self.run_member()
             case _:
                 logger.error(f'Unknown user status: {cong.bondling_config.user_status}')
+
+    def pre_summon_tomb_guard_for_team(self):
+        bondling_config = self.config.bondling_fairyland.bondling_config
+        tomb_guard_ball_index = 1
+        if bondling_config.user_status not in {
+            UserStatus.LEADER, UserStatus.MEMBER, UserStatus.handoff1, UserStatus.handoff2
+        }:
+            return
+        if not self.in_search_ui(screenshot=True):
+            return
+
+        original_index = BondlingClass.get_index(bondling_config.bondling_stone_class)
+        current_stone, _, total_stone = self.O_B_STONE_NUMBER.ocr(self.device.image)
+        logger.info(f'Check bondling stone before team run: {current_stone}/{total_stone}')
+        if current_stone <= 5:
+            return
+
+        def back_to_search_ui():
+            for _ in range(5):
+                self.screenshot()
+                if self.in_search_ui():
+                    return
+                if self.appear_then_click(self.I_STONE_CLOSE, interval=0.8):
+                    continue
+                if self.appear_then_click(self.I_BACK_Y, interval=0.8):
+                    continue
+
+        self.goto_ball_area(tomb_guard_ball_index)
+        if not self.ball_click(tomb_guard_ball_index):
+            logger.info('Tomb guard ball not entered, skip pre summon')
+            if original_index is not None and original_index != tomb_guard_ball_index:
+                self.goto_ball_area(original_index)
+            return
+
+        if not self.appear_then_click(self.I_STONE_ENTER, interval=1):
+            logger.info('Stone summon entrance not found after entering tomb guard, skip pre summon')
+            back_to_search_ui()
+            if original_index is not None and original_index != tomb_guard_ball_index:
+                self.goto_ball_area(original_index)
+            return
+
+        sleep(1)
+        if self.run_stone(True):
+            logger.info('Pre summon tomb guard before team run success')
+        else:
+            logger.info('Pre summon tomb guard before team run skipped')
+        back_to_search_ui()
+        if original_index is not None and original_index != tomb_guard_ball_index:
+            self.goto_ball_area(original_index)
 
     def run_leader(self):
         """  点击 求援， 组队模式  """
@@ -186,6 +237,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
         # 引用配置
         if UserStatus.handoff1 == self.config.bondling_fairyland.bondling_config.user_status:
             self.current_count = 0
+            self.pre_summon_tomb_guard_for_team()
             self.run_member()
         self.ui_get_current_page()
         self.ui_goto(page_main)
@@ -325,16 +377,30 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, BondlingBattle, SwitchSoul,
         (0) 不开启使用结契石，(探查界面)返回False
         (1) 没有结契石了，(探查界面)返回False
         """
-        # 没有启用使用石头购买契灵或者当前不在购买界面则直接退出
-        if not bondling_stone_enable or not self.appear(self.I_STONE_SURE):
+        if not bondling_stone_enable:
             self.ui_click_until_disappear(self.I_STONE_CLOSE, interval=1.2)
             return False
-        cu, res, total = self.O_B_STONE_NUMBER.ocr(self.device.image)
-        # 如果没有石头了
-        if cu == 0 and cu + res == total:
+
+        # 点击召唤入口后弹窗会有一点延迟，这里先等待弹窗稳定出现
+        for _ in range(3):
+            self.screenshot()
+            if self.appear(self.I_STONE_SURE):
+                break
+            sleep(0.4)
+
+        # 当前不在购买界面则直接退出
+        if not self.appear(self.I_STONE_SURE):
             self.ui_click_until_disappear(self.I_STONE_CLOSE, interval=1.2)
-            logger.warning(f'已经没有鸣契石召唤契灵了')
             return False
+        
+        # 在外面判断数量，不再召唤界面重新检测
+        # cu, res, total = self.O_B_STONE_NUMBER.ocr(self.device.image)
+        # # 如果没有石头了
+        # if cu == 0 and cu + res == total:
+        #     self.ui_click_until_disappear(self.I_STONE_CLOSE, interval=1.2)
+        #     logger.warning(f'已经没有鸣契石召唤契灵了')
+        #     return False
+        
         while 1:
             self.screenshot()
             if not self.appear(self.I_STONE_SURE):

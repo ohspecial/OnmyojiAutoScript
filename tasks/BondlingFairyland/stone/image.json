@@ -2,11 +2,11 @@
   {
     "itemName": "stone_enter",
     "imageName": "stone_stone_enter.png",
-    "roiFront": "1172,444,38,41",
-    "roiBack": "1172,444,38,41",
+    "roiFront": "332,435,38,41",
+    "roiBack": "332,435,38,41",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "description"
+    "description": "鸣契石召唤"
   },
   {
     "itemName": "stone_sure",
