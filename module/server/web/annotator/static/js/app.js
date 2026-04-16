@@ -19,6 +19,7 @@
       naturalWidth: 1280,
       naturalHeight: 720,
     },
+    roiMode: "none",
 
     sourceDirs: [],
     sourceLeafHasDirs: false,
@@ -91,6 +92,7 @@
     noImagePlaceholder: document.getElementById("noImagePlaceholder"),
     roiFront: document.getElementById("roiFront"),
     roiBack: document.getElementById("roiBack"),
+    roiMode: document.getElementById("roiMode"),
     roiFrontValue: document.getElementById("roiFrontValue"),
     roiBackValue: document.getElementById("roiBackValue"),
     testRoiFront: document.getElementById("testRoiFront"),
@@ -819,6 +821,88 @@
     box.style.height = `${height}px`;
   }
 
+  function getBoxRect(box) {
+    return {
+      left: Number.parseFloat(box.style.left || "0"),
+      top: Number.parseFloat(box.style.top || "0"),
+      width: Number.parseFloat(box.style.width || "1"),
+      height: Number.parseFloat(box.style.height || "1"),
+    };
+  }
+
+  function setBoxRect(box, rect) {
+    box.style.left = `${rect.left}px`;
+    box.style.top = `${rect.top}px`;
+    box.style.width = `${rect.width}px`;
+    box.style.height = `${rect.height}px`;
+  }
+
+  function constrainFrontWithinBack() {
+    const front = getBoxRect(el.roiFront);
+    const back = getBoxRect(el.roiBack);
+    const minSize = 8;
+
+    let width = Math.min(front.width, back.width);
+    let height = Math.min(front.height, back.height);
+    width = Math.max(minSize, width);
+    height = Math.max(minSize, height);
+
+    const backRight = back.left + back.width;
+    const backBottom = back.top + back.height;
+
+    const maxLeft = backRight - width;
+    const maxTop = backBottom - height;
+    let left = Math.min(Math.max(front.left, back.left), maxLeft);
+    let top = Math.min(Math.max(front.top, back.top), maxTop);
+
+    if (!Number.isFinite(left)) {
+      left = back.left;
+    }
+    if (!Number.isFinite(top)) {
+      top = back.top;
+    }
+
+    setBoxRect(el.roiFront, { left, top, width, height });
+  }
+
+  function applyRoiModeConstraints(changedBox = null) {
+    if (state.roiMode === "same") {
+      if (changedBox === el.roiFront) {
+        setBoxRect(el.roiBack, getBoxRect(el.roiFront));
+      } else {
+        setBoxRect(el.roiFront, getBoxRect(el.roiBack));
+      }
+      clampBox(el.roiFront);
+      clampBox(el.roiBack);
+      return;
+    }
+
+    if (state.roiMode === "include") {
+      clampBox(el.roiBack);
+      constrainFrontWithinBack();
+      clampBox(el.roiFront);
+    }
+  }
+
+  function setRoiMode(mode, showTip = true) {
+    const nextMode = mode === "same" || mode === "include" ? mode : "none";
+    state.roiMode = nextMode;
+    if (el.roiMode) {
+      el.roiMode.value = nextMode;
+    }
+    applyRoiModeConstraints(el.roiBack);
+    syncRoiToRule();
+    if (!showTip) {
+      return;
+    }
+    const labels = {
+      none: "No limit",
+      same: "Same range",
+      include: "Front in back",
+    };
+    showMessage(`ROI mode: ${labels[nextMode] || labels.none}`, "ok");
+  }
+
   function setMainImage(url) {
     if (!url) {
       el.mainImage.removeAttribute("src");
@@ -1167,7 +1251,7 @@
     return state.rules[state.activeRuleIndex];
   }
 
-  function syncRoiToRule() {
+  function syncRoiToRule(markChanged = true) {
     const rule = getCurrentRule();
     if (!rule) {
       return;
@@ -1185,7 +1269,9 @@
 
     el.roiFrontValue.value = front;
     el.roiBackValue.value = back;
-    markDirty();
+    if (markChanged) {
+      markDirty();
+    }
   }
 
   function captureCurrentCanvasRois() {
@@ -1196,6 +1282,7 @@
 
     clampBox(el.roiFront);
     clampBox(el.roiBack);
+    applyRoiModeConstraints(el.roiBack);
 
     return {
       front: boxToRoi(el.roiFront),
@@ -1241,21 +1328,14 @@
 
     applyBoxFromRoi(box, parsed);
     clampBox(box);
+    applyRoiModeConstraints(box);
     const normalized = boxToRoi(box);
     input.value = normalized;
     if (normalized !== parsed) {
       showMessage(`${isFront ? "roiFront" : "roiBack"} 超出图像显示范围，已自动规范化`, "ok");
     }
 
-    if (isFront) {
-      rule.roiFront = normalized;
-    } else if (state.ruleType === "list") {
-      state.listMeta.roiBack = normalized;
-    } else {
-      rule.roiBack = normalized;
-    }
-
-    markDirty();
+    syncRoiToRule();
   }
 
   function refreshRoiLayoutFromRule() {
@@ -1266,6 +1346,10 @@
       applyBoxFromRoi(el.roiBack, "0,0,100,100");
       clampBox(el.roiFront);
       clampBox(el.roiBack);
+      applyRoiModeConstraints(el.roiBack);
+      if (state.roiMode !== "none") {
+        syncRoiToRule(false);
+      }
       renderTestOverlay();
       return;
     }
@@ -1275,6 +1359,10 @@
     applyBoxFromRoi(el.roiBack, back);
     clampBox(el.roiFront);
     clampBox(el.roiBack);
+    applyRoiModeConstraints(el.roiBack);
+    if (state.roiMode !== "none") {
+      syncRoiToRule(false);
+    }
     renderTestOverlay();
   }
 
@@ -1324,6 +1412,7 @@
         box.style.height = `${height}px`;
       }
       clampBox(box);
+      applyRoiModeConstraints(box);
       syncRoiToRule();
     };
 
@@ -2094,7 +2183,7 @@
       throw new Error("请先选择规则 JSON");
     }
 
-    syncRoiToRule();
+    syncRoiToRule(showTip);
 
 
     const rules = state.rules.map((rule) => {
@@ -2641,6 +2730,10 @@
     const applyFrontInput = () => applyRoiInputToRule("front");
     const applyBackInput = () => applyRoiInputToRule("back");
 
+    if (el.roiMode) {
+      el.roiMode.addEventListener("change", () => setRoiMode(el.roiMode.value));
+    }
+
     el.roiFrontValue.addEventListener("change", applyFrontInput);
     el.roiFrontValue.addEventListener("blur", applyFrontInput);
     el.roiFrontValue.addEventListener("keydown", (event) => {
@@ -2725,6 +2818,7 @@
     setupRoiBox(el.roiBack);
     await loadRuleSchemas();
     bindEvents();
+    setRoiMode(el.roiMode ? el.roiMode.value : "none", false);
 
     resetListMeta();
     state.rules = [defaultRuleByType(state.ruleType)];
@@ -2763,4 +2857,3 @@
     showMessage(error.message || String(error), "error");
   });
 })();
-

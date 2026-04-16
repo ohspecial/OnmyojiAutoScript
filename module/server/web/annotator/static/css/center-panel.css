@@ -220,7 +220,7 @@ html[data-theme="light"] .roi .tag {
 
 .roi-values {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   margin-top: 8px;
   flex-shrink: 0;
@@ -295,4 +295,3 @@ html[data-theme="light"] .roi .tag {
     grid-template-columns: 1fr;
   }
 }
-

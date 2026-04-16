@@ -25,6 +25,13 @@
     </div>
   </div>
   <div class="roi-values">
+    <label>ROI 模式
+      <select id="roiMode">
+        <option value="none" selected>不做限制</option>
+        <option value="same">红绿同范围</option>
+        <option value="include">红框在绿框范围内</option>
+      </select>
+    </label>
     <label>roiFront<input id="roiFrontValue" type="text"></label>
     <label>roiBack<input id="roiBackValue" type="text"></label>
   </div>
@@ -37,4 +44,3 @@
     <pre id="outputLog" class="output-log"></pre>
   </section>
 </section>
-
