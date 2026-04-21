@@ -161,21 +161,20 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         # 开启智能伤害
         if cfg.abyss_shadows_combat_time.CombatTime_enable:
             while True:
-                # 1. 先攻打 1 个 BOSS
-                if self.boss_fight_count < 2:
-                    self.boss_fight_count = self.fight_and_switch(EmemyType.BOSS, 2, self.boss_fight_count,
-                                                             lambda: self.switch_area())
+                # 1. 攻打 3 个 ELITE
+                if self.elite_fight_count < 6:
+                    self.elite_fight_count = self.fight_and_switch(EmemyType.ELITE, 6, self.elite_fight_count,
+                                                              lambda: self.switch_area())
 
                 # 2. 攻打 2 个 GENERAL
                 if self.general_fight_count < 4:
                     self.general_fight_count = self.fight_and_switch(EmemyType.GENERAL, 4, self.general_fight_count,
                                                                 lambda: self.switch_area())
 
-                # 3. 攻打 3 个 ELITE
-                if self.elite_fight_count < 6:
-                    self.elite_fight_count = self.fight_and_switch(EmemyType.ELITE, 6, self.elite_fight_count,
-                                                              lambda: self.switch_area())
-
+                # 3. 攻打 1 个 BOSS
+                if self.boss_fight_count < 2:
+                    self.boss_fight_count = self.fight_and_switch(EmemyType.BOSS, 2, self.boss_fight_count,
+                                                             lambda: self.switch_area())
                 # 检查是否已完成所有任务
                 print(f"Current fight times: boss {self.boss_fight_count} times, general {self.general_fight_count} times, elite {self.elite_fight_count} times")
                 if self.boss_fight_count >= 2 and self.general_fight_count >= 4 and self.elite_fight_count >= 6:
@@ -184,7 +183,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                     break
                 else:
                     #没打满我也没办法就最后一张图，看看有没有剩余的吧没有也不想跑了
-                    find_list = [EmemyType.BOSS, EmemyType.GENERAL, EmemyType.ELITE]
+                    find_list = [EmemyType.ELITE, EmemyType.GENERAL, EmemyType.BOSS]
                     for enemy_type in find_list:
                         # 寻找敌人并开始战斗,
                         if not self.find_enemy(enemy_type):
