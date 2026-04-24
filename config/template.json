@@ -1509,6 +1509,7 @@
     },
     "abyss_shadows_combat_time": {
       "CombatTime_enable": false,
+      "all_area_attack_enable": false,
       "boss_combat_time": 60,
       "general_combat_time": 60,
       "elite_combat_time": 60

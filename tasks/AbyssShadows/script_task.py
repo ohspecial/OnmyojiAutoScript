@@ -159,7 +159,9 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                         break
 
         # 开启智能伤害
-        if cfg.abyss_shadows_combat_time.CombatTime_enable:
+        if cfg.abyss_shadows_combat_time.CombatTime_enable and cfg.abyss_shadows_combat_time.all_area_attack_enable:
+            success = self.run_full_area_sweep()
+        elif cfg.abyss_shadows_combat_time.CombatTime_enable:
             while True:
                 # 1. 攻打 3 个 ELITE
                 if self.elite_fight_count < 6:
@@ -256,6 +258,29 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
             raise StopIteration  # 退出循环
 
 
+
+    def run_full_area_sweep(self) -> bool:
+        logger.info("Enable full-area attack, attack all enemies once in each area")
+        area_list = [AreaType.DRAGON, AreaType.PEACOCK, AreaType.FOX, AreaType.LEOPARD]
+
+        for area in area_list:
+            self.appear_then_click(self.I_ABYSS_MAP_EXIT, interval=1)
+            current_area = self.check_current_area()
+            if current_area != area:
+                logger.info(f"Current area is {current_area}, switch to {area}")
+                self.change_area(area)
+            self.run_current_area_full_fight()
+            logger.info(
+                f"Current fight times: boss {self.boss_fight_count} times, general {self.general_fight_count} times, elite {self.elite_fight_count} times")
+
+        logger.info("Full-area sweep completed")
+        return True
+
+    def run_current_area_full_fight(self):
+        logger.info("Attack all enemies in current area once")
+        self.run_elite_fight(max_count=self.elite_fight_count + 3)
+        self.run_general_fight(max_count=self.general_fight_count + 2)
+        self.run_boss_fight(max_count=self.boss_fight_count + 1)
 
     def check_current_area(self) -> AreaType:
         ''' 获取当前区域
@@ -377,12 +402,12 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
             
         return success    
 
-    def run_boss_fight(self) -> bool:
+    def run_boss_fight(self, max_count: int = 2) -> bool:
         ''' 首领战斗
         只要进入了战斗都返回成功
         :return 
         '''
-        if self.boss_fight_count >= 2:
+        if self.boss_fight_count >= max_count:
             logger.info(f"boss fight count {self.boss_fight_count} times, skip")
             return True
         success = True
@@ -396,7 +421,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
             success = False
         return success
 
-    def run_general_fight(self) -> bool:
+    def run_general_fight(self, max_count: int = 4) -> bool:
         ''' 副将战斗
         :return 
         '''
@@ -404,7 +429,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         logger.info(f"Run general fight") 
         for general in general_list:
             # 副将战斗次数达到4个时，退出循环
-            if self.general_fight_count >= 4:
+            if self.general_fight_count >= max_count:
                 logger.info(f"general fight count {self.general_fight_count} times, skip")
                 break
             if self.click_emeny_area(general):
@@ -415,7 +440,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         return True
 
 
-    def run_elite_fight(self) -> bool:
+    def run_elite_fight(self, max_count: int = 6) -> bool:
         ''' 精英战斗
         :return 
         '''
@@ -423,7 +448,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         logger.info(f"Run elite fight")  
         for elite in elite_list:
             # 精英战斗次数达到6个时，退出循环
-            if self.elite_fight_count >= 6:
+            if self.elite_fight_count >= max_count:
                 logger.info(f"Elite fight count {self.elite_fight_count} times, skip")
                 break
             if self.click_emeny_area(elite):
