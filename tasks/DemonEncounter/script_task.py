@@ -49,6 +49,7 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
 
         self.ui_goto(page_demon_encounter)
         self.execute_lantern()
+        self.wait_and_click(self.I_DE_BOSS_ENTER)
         self.execute_boss()
 
         self.set_next_run(task='DemonEncounter', success=True, finish=False)
@@ -562,6 +563,25 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
             if check_timer and check_timer.reached():
                 logger.warning('Obtain battle timeout')
                 return True
+
+    def wait_and_click(self, target) -> bool:
+        """
+        等待目标出现并点击，然后返回True
+        :param target: 图片规则
+        :return: 点击成功返回True
+        """
+        from module.base.timer import Timer
+        from module.exception import TaskEnd
+        timeout = 60
+        timer = Timer(timeout)
+        timer.start()
+        while not timer.reached():
+            self.screenshot()
+            if self.appear(target):
+                if self.appear_then_click(target, interval=1):
+                    return True
+        logger.warning(f'wait_and_click {target.name} timeout')
+        return False
 
 
 if __name__ == '__main__':
