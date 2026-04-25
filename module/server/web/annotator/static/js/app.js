@@ -2183,7 +2183,7 @@
       throw new Error("请先选择规则 JSON");
     }
 
-    syncRoiToRule(showTip);
+    syncRoiToRule(false);
 
 
     const rules = state.rules.map((rule) => {
