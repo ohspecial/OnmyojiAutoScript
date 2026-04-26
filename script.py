@@ -120,7 +120,7 @@ class Script:
                     line = line.strip(' \r\t\n')
                     if re.match('^═{15,}$', line):
                         start = index
-                lines = lines[start - 2:]
+                lines = lines[start:] if start > 0 else lines
                 lines = handle_sensitive_logs(lines)
             with open(f'{folder}/log.txt', 'w', encoding='utf-8') as f:
                 f.writelines(lines)
