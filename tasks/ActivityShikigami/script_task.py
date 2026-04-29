@@ -38,6 +38,7 @@ class StateMachine(BaseTask):
     run_idx: int = 0
     _count_map = None
     _pre_tickets_map = None
+    switch_souled: dict[str, bool] = {}
 
     @cached_property
     def conf(self) -> ActivityShikigami:
@@ -202,7 +203,7 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
         elif enable_switch:
             group_team = getattr(conf, f"{self.climb_type}_group_team")
             self.run_switch_soul(group_team)
-        self.ui_goto(getattr(pages, f"page_act_{self.climb_type}"))
+        self.appear_then_click(self.I_UI_BACK_YELLOW)
 
     def lock_team(self, battle_conf: GeneralBattleConfig):
         enable = battle_conf.lock_team_enable
