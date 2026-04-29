@@ -55,8 +55,8 @@
   },
   {
     "itemName": "remain_ap100",
-    "roiFront": "922,21,112,39",
-    "roiBack": "913,8,131,62",
+    "roiFront": "978,26,48,30",
+    "roiBack": "978,26,48,30",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
