@@ -128,7 +128,7 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
                             unknown_page_timer.start()
                         if unknown_page_timer.reached():
                             self.ui_goto_page(dest_page)
-            except LimitCountOut | LimitTimeOut | TicketsNotEnough:
+            except (LimitCountOut, LimitTimeOut, TicketsNotEnough):
                 pass
             finally:
                 self.switch_next()
