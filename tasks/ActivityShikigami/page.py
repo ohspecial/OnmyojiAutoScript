@@ -18,13 +18,13 @@ page_act.link(button=asa.I_TO_BATTLE_AP, destination=page_act_ap)
 # 活动二级页
 page_act_2 = Page(asa.I_AS_CHECK_MAIN_2)
 page_act_2.additional = [gga.I_UI_BACK_RED]
-page_act_2.link(button=gba.I_EXIT, destination=page_act)
+page_act_2.link(button=gga.I_UI_BACK_CIRCLE, destination=page_act)
 page_act.link(button=asa.I_TO_BATTLE_MAIN, destination=page_act_2)
 
 # 暗黑页
 page_act_dark = Page(asa.I_AS_CLOSE_EYE)
 page_act_dark.additional = [gga.I_UI_BACK_RED, asa.I_AS_LOCATE]
-page_act_dark.link(button=gba.I_EXIT, destination=page_act)
+page_act_dark.link(button=gga.I_UI_BACK_CIRCLE, destination=page_act)
 page_act_2.link(button=asa.I_AS_OPEN_EYE, destination=page_act_dark)
 
 # 门票页

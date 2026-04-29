@@ -101,7 +101,6 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
                     logger.warning(f'{climb_type} page is not supported')
                     continue
                 self.ui_goto_page(dest_page)
-                self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS)
                 cur_battle_conf = getattr(self.conf, f'{climb_type}_battle_conf')
                 if cur_battle_conf is None:
                     logger.warning(f'{climb_type} battle config is not supported')
@@ -155,6 +154,7 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
         if not self.check_tickets_enough():
             logger.warning('No tickets left, wait for next time')
             raise TicketsNotEnough
+        self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS)
         if self.conf.general_climb.random_sleep:
             random_sleep(probability=0.2)
         if self.enter_battle():
@@ -185,11 +185,14 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
                 continue
 
     def switch_soul(self, enter_button: RuleImage):
+        if self.switch_souled.get(self.climb_type, False):
+            return
         conf = self.conf.switch_soul_config
         enable_switch = getattr(conf, f"enable_switch_{self.climb_type}", False)
         enable_by_name = getattr(conf, f"enable_switch_{self.climb_type}_by_name", False)
         if not enable_switch and not enable_by_name:
             return
+        self.switch_souled[self.climb_type] = True
         logger.hr('Start switch soul', 2)
         conf.validate_switch_soul()
         self.ui_click(enter_button, stop=self.I_CHECK_RECORDS, interval=1)
