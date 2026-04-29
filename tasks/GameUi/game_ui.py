@@ -36,7 +36,7 @@ class GameUi(BaseTask, GameUiAssets):
                 GameUiAssets.I_BACK_FRIENDS, GameUiAssets.I_BACK_DAILY,
                 GameUiAssets.I_REALM_RAID_GOTO_EXPLORATION,
                 GameUiAssets.I_SIX_GATES_GOTO_EXPLORATION, SixRealmsAssets.I_EXIT_SIXREALMS,
-                ActivityShikigamiAssets.I_SKIP_BUTTON, ActivityShikigamiAssets.I_RED_EXIT, BaseTask.I_UI_BACK_BLUE]
+                ActivityShikigamiAssets.I_SKIP_BUTTON, BaseTask.I_UI_BACK_BLUE]
 
     def __init__(self, config, device):
         super().__init__(config, device)
