@@ -1,36 +1,25 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-from cryptography.x509 import OCSPNonce
-from enum import Enum, auto
-from time import sleep
 from datetime import datetime, timedelta
-import cv2
-import numpy as np
 import random
-from tasks.DemonEncounter.data.answer import remove_symbols, Answer
-from tasks.Quiz.debug import Debugger
-from typing import Any
+
 from cached_property import cached_property
 
 from module.atom.image import RuleImage
-from module.atom.click import RuleClick
-from module.atom.ocr import RuleOcr
 from module.base.protect import random_sleep
 from module.base.timer import Timer
 from module.exception import TaskEnd
 from module.logger import logger
 
-from tasks.base_task import BaseTask
-from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
-from tasks.ActivityShikigami.config import SwitchSoulConfig, GeneralBattleConfig, ActivityShikigami
-from tasks.Component.BaseActivity.base_activity import BaseActivity
-from tasks.Component.BaseActivity.config_activity import GeneralClimb
+from tasks.ActivityShikigami.config import ActivityShikigami, GeneralBattleConfig
+from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
-import tasks.Component.GeneralBattle.config_general_battle
-import tasks.ActivityShikigami.page as game
+from tasks.GameUi.page import page_battle, page_failed, page_reward
+from tasks.base_task import BaseTask
+import tasks.ActivityShikigami.page as pages
 
 
 class LimitTimeOut(Exception):
@@ -41,12 +30,18 @@ class LimitCountOut(Exception):
     pass
 
 
+class TicketsNotEnough(Exception):
+    pass
+
+
 class StateMachine(BaseTask):
-    run_idx: int = 0  # 当前爬塔类型
+    run_idx: int = 0
     _count_map = None
+    _pre_tickets_map = None
+    switch_souled: dict[str, bool] = {}
 
     @cached_property
-    def conf(self) -> GeneralClimb:
+    def conf(self) -> ActivityShikigami:
         return self.config.model.activity_shikigami
 
     @property
@@ -57,418 +52,148 @@ class StateMachine(BaseTask):
 
     @property
     def count_map(self) -> dict[str, int]:
-        """
-        :return: key: climb type, value: run count
-        """
         if not getattr(self, "_count_map", None):
             self._count_map = {climb_type: 0 for climb_type in self.conf.general_climb.run_sequence_v}
         return self._count_map
 
-    # ----------------------------------------------------
-    def put_status(self):
-        """
-        更新全局状态
-        """
+    @property
+    def pre_tickets_map(self) -> dict[str, int]:
+        if not getattr(self, "_pre_tickets_map", None):
+            self._pre_tickets_map = {climb_type: -1 for climb_type in self.conf.general_climb.run_sequence_v}
+        return self._pre_tickets_map
 
-        def get_count(self) -> int:
+    def update_status(self):
+        def get_count() -> int:
             return self.count_map[self.climb_type]
 
-        def get_limit(self) -> int:
+        def get_limit() -> int:
             limit = getattr(self.conf.general_climb, f'{self.climb_type}_limit', 0)
             return 0 if not limit else limit
 
-        # 超过运行时间
         if self.limit_time is not None and datetime.now() - self.start_time >= self.limit_time:
             logger.info(f"Climb type {self.climb_type} time out")
             raise LimitTimeOut
-        # 次数达到限制
-        if get_count(self) >= get_limit(self):
+        if get_count() >= get_limit():
             logger.info(f"Climb type {self.climb_type} count limit reached")
             raise LimitCountOut
 
     def switch_next(self):
-        """
-        切换下一种爬塔类型
-        :return: True 切换成功 or False
-        """
         self.run_idx += 1
         if self.run_idx >= len(self.conf.general_climb.run_sequence_v):
             logger.info('All climbing activities have been completed')
             return False
-        # 切换爬塔类型了, 恢复所有状态
         self.current_count = 0
         logger.hr(f'Climb switch to {self.climb_type}', 2)
         return True
 
 
-class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikigamiAssets, Debugger):
+class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigamiAssets):
     """
     更新前请先看 ./README.md
     """
 
-    @cached_property
-    def anwser(self) -> Answer:
-        # Misspelling
-        return Answer()
-
     def run(self) -> None:
         self.limit_time: timedelta = self.conf.general_climb.limit_time_v
-        #
         for climb_type in self.conf.general_climb.run_sequence_v:
-            # 进入到活动的主页面，不是具体的战斗页面
-            self.ui_get_current_page()
-            self.ui_goto(game.page_climb_act)
             try:
-                method_func = getattr(self, f'_run_{climb_type}')
-                method_func()
-            except LimitCountOut as e:
-                self.ui_click(self.I_UI_BACK_YELLOW, stop=self.I_TO_BATTLE_MAIN, interval=1)
-            except LimitTimeOut as e:
-                break
+                logger.hr(f'Start run {self.climb_type}', 1)
+                dest_page = getattr(pages, f'page_act_{climb_type}', None)
+                if dest_page is None:
+                    logger.warning(f'{climb_type} page is not supported')
+                    continue
+                self.ui_goto_page(dest_page)
+                cur_battle_conf = getattr(self.conf, f'{climb_type}_battle_conf')
+                if cur_battle_conf is None:
+                    logger.warning(f'{climb_type} battle config is not supported')
+                    continue
+                self.lock_team(cur_battle_conf)
+                unknown_page_timer = Timer(10)
+                while True:
+                    self.update_status()
+                    current_page = self.ui_get_current_page()
+                    if current_page == pages.page_act_pass:
+                        self._run_pass()
+                    elif current_page == pages.page_act_ap:
+                        self._run_ap()
+                    elif current_page == pages.page_act_ap100:
+                        self._run_ap100()
+                    elif current_page == pages.page_act_boss:
+                        self._run_boss()
+                    elif current_page == page_battle:
+                        self.run_general_battle(cur_battle_conf)
+                    elif current_page == page_reward or current_page == page_failed:
+                        self.click(pages.random_click(ltrb=(False, False, True, False)), interval=1.5)
+                    else:
+                        if not unknown_page_timer.started():
+                            unknown_page_timer.start()
+                        if unknown_page_timer.reached():
+                            self.ui_goto_page(dest_page)
+            except (LimitCountOut, LimitTimeOut, TicketsNotEnough):
+                pass
             finally:
-                # 切换下一个爬塔类型
                 self.switch_next()
-
-        # 返回庭院
-        logger.hr("Exit Shikigami", 2)
-        self.ui_get_current_page(False)
-        self.ui_goto(game.page_main)
+        logger.hr("Exit Act", 2)
+        self.ui_goto_page(pages.page_main)
         if self.conf.general_climb.active_souls_clean:
             self.set_next_run(task='SoulsTidy', success=False, finish=False, target=datetime.now())
         self.set_next_run(task="ActivityShikigami", success=True)
         raise TaskEnd
 
     def _run_pass(self):
-        """
-            更新前请先看 ./README.md
-        """
-        logger.hr(f'Start run climb type PASS', 1)
-        self.click(self.I_TO_BATTLE_MAIN)
-        switch_souled = False
-        # 增大门票点击容忍次数，避免因页面响应慢导致误判无门票
-        click_ticket, no_tickets = 0, random.randint(8, 12)
-        click_fire, no_fire = 0, random.randint(3, 5)
-        already_passed = False
-        # 用于判断门票是否连续无响应的计时器（连续 15 秒点击门票无任何事件发生才判定无门票）
-        ticket_no_response_timer = None
-        while True:
-            self.screenshot()
-            self.put_status()
-            if click_ticket > no_tickets:
-                logger.warning(f'Click ticket {click_ticket} times, no tickets left')
-                break
-            # 连续长时间点击门票都没有触发任何事件，判定为无门票
-            if ticket_no_response_timer is not None and ticket_no_response_timer.reached():
-                logger.warning(f'No response after clicking ticket for a long time, no tickets left')
-                break
-            if click_fire > no_fire:
-                logger.warning(f'Click fire {click_fire} times, no fire left')
-                break
-            if self.ui_reward_appear_click():  # 获得奖励
-                click_ticket = 0
-                ticket_no_response_timer = None
-                continue
-            if self.appear(self.I_RM_FORWARD, interval=1.2):  # 等待骰子结果
-                click_ticket = 0
-                ticket_no_response_timer = None
-                continue
-            if self.appear(self.I_RM_CHECK_BOSS, interval=1.5):
-                already_passed = True
-                logger.info('Already passed')
-            if already_passed and self.appear(self.I_RM_BOSS, interval=1.2):  # 已经通关了且出现首领则退出,否则还要打
-                logger.info('Boss passed, exit')
-                self.appear_then_click(self.I_BACK_YOLLOW, interval=1.2)
-                continue
-            already_passed = False
-            if self.appear_then_click(self.I_UI_CONFIRM, interval=2):
-                continue
-            if self.appear_then_click(self.I_RM_THROW, interval=2):  # 开始扔骰子
-                logger.hr('Throw ticket', 3)
-                click_ticket = 0
-                ticket_no_response_timer = None
-                self.device.stuck_record_clear()
-                self.device.stuck_record_add('BATTLE_STATUS_S')
-                while True:
-                    self.screenshot()
-                    if self.ui_reward_appear_click():  # 获得奖励
-                        break
-                    if self.appear(self.I_RM_THROW_WIN, interval=1.5):  # 扔骰子获胜
-                        logger.info('Throw win')
-                        continue
-                    if self.appear(self.I_RM_THROW_EQUAL, interval=1.5):  # 扔骰子平局
-                        logger.info('Throw equal')
-                        continue
-                    if self.appear_then_click(self.I_RM_THROW, interval=2):  # 开始扔骰子
-                        logger.info('Throw again')
-                        self.device.stuck_record_clear()
-                        self.device.stuck_record_add('BATTLE_STATUS_S')
-                        continue
-                continue
-            if self.appear(self.I_RM_BUY_AP) or self.appear(self.I_RM_BUY_REWARD) or \
-                    self.appear(self.I_RM_BUY_TICKET):  # 开始买东西
-                logger.hr('Buy envent', 3)
-                click_ticket = 0
-                ticket_no_response_timer = None
-                rich_man_conf = self.config.model.activity_shikigami.rich_man
-                timeout_timer = Timer(5).start()
-                while True:
-                    self.screenshot()
-                    if self.ui_reward_appear_click():  # 获得奖励跳出循环
-                        break
-                    if self.appear_then_click(self.I_UI_CONFIRM, interval=1) or \
-                            self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1):
-                        timeout_timer.reset()
-                        continue
-                    if timeout_timer.reached():  # 如果购买超时了则说明购买有问题, 则不买了
-                        logger.warning('Buy timeout, exit buy')
-                        self.appear_then_click(self.I_RED_EXIT, interval=1.5)
-                        continue
-                    if not rich_man_conf.buy_ap and not rich_man_conf.buy_ticket and not rich_man_conf.buy_reward:
-                        self.appear_then_click(self.I_RED_EXIT, interval=1.5)  # 一个都不买直接退出
-                        continue
-                    if self.config.model.activity_shikigami.rich_man.buy_ticket and self.appear_then_click(
-                            self.I_RM_BUY_TICKET, interval=1.5):
-                        continue
-                    if self.config.model.activity_shikigami.rich_man.buy_reward and self.appear_then_click(
-                            self.I_RM_BUY_REWARD, interval=1.5):
-                        continue
-                    if self.config.model.activity_shikigami.rich_man.buy_ap and self.appear_then_click(self.I_RM_BUY_AP,
-                                                                                                       interval=1.5):
-                        continue
-            if self.appear(self.I_RM_QUESTION, interval=2):  # 开始答题
-                click_ticket = 0
-                ticket_no_response_timer = None
-                logger.hr('Start question', 3)
-                q, a1, a2, a3 = self.detect_question_and_answers()
-                index = self.anwser.answer_one(question=q, options=[a1, a2, a3])
-                if index is None:
-                    logger.error('Now question has no answer, please check')
-                    self.append_one(question=q, options=[a1, a2, a3])
-                    self.config.notifier.push(title='Quiz',
-                                              content=f"New question: \n{q} \n{[a1, a2, a3]}")
-                    index = 1
-                logger.attr(index, 'Answer')
-                self.click([self.O_RM_ANSWER_1, self.O_RM_ANSWER_2, self.O_RM_ANSWER_3][index - 1], interval=1)
-                self.device.click_record_clear()
-                continue
-            if self.appear(self.I_RICH_MAN_FIRE, interval=2):  # 开始战斗
-                click_ticket = 0
-                ticket_no_response_timer = None
-                if not switch_souled:
-                    self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS, self.I_CHECK_BATTLE_MAIN)
-                    switch_souled = True
-                if self.conf.general_climb.random_sleep:
-                    random_sleep(probability=0.2)
-                self.click(self.I_RICH_MAN_FIRE)
-                click_fire += 1
-                self.run_general_battle(config=self.get_general_battle_conf())
-                continue
-            if self.appear(self.I_CHECK_BATTLE_MAIN, interval=3):  # 扔门票骰子
-                self.click(self.I_CHECK_BATTLE_MAIN)
-                click_ticket += 1
-                click_fire = 0
-                # 首次开始计时，用于判断是否连续无响应
-                if ticket_no_response_timer is None:
-                    ticket_no_response_timer = Timer(15).start()
-                logger.info(f'Click ticket {click_ticket}/{no_tickets}')
-                # 点击后等待页面响应，避免因截图太快导致识别不到后续事件
-                sleep(random.uniform(1.5, 2.5))
-                continue
-        while True:
-            self.screenshot()
-            if self.appear(self.I_TO_BATTLE_MAIN, interval=1):
-                break
-            if self.appear_then_click(self.I_UI_CONFIRM, interval=1) or self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1):
-                continue
-            self.try_close_unknown_page()
-
-    def detect_question_and_answers(self) -> tuple:
-        self.screenshot()
-        results = self.O_RM_QUESTION.detect_and_ocr(self.device.image)
-        question = ''
-        answer_1 = remove_symbols(self.O_RM_ANSWER_1.ocr(self.device.image))
-        answer_2 = remove_symbols(self.O_RM_ANSWER_2.ocr(self.device.image))
-        answer_3 = remove_symbols(self.O_RM_ANSWER_3.ocr(self.device.image))
-
-        for result in results:
-            # box 是四个点坐标 左上， 右上， 右下， 左下
-            # x1, y1, x2, y2 = result.box[0][0], result.box[0][1], result.box[2][0], result.box[2][1]
-            # w, h = x2 - x1, y2 - y1
-            y_start = result.box[0][1]
-            y_end = result.box[2][1]
-            text = result.ocr_text
-            if y_start >= 0 and y_end <= 150:
-                question += text
-
-        return remove_symbols(question), answer_1, answer_2, answer_3
-
-    # def _run_pass(self):
-    #     """
-    #         更新前请先看 ./README.md
-    #     """
-    #     logger.hr(f'Start run climb type PASS', 1)
-    #     self.ui_clicks([self.I_TO_BATTLE_MAIN, self.I_TO_BATTLE_MAIN_2],
-    #                    stop=self.I_CHECK_BATTLE_MAIN, interval=1)
-    #     self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS, self.I_CHECK_BATTLE_MAIN)
-    #     self.switch_climb_mode_in_game('pass')
-    #
-    #     ocr_limit_timer = Timer(1).start()
-    #     click_limit_timer = Timer(4).start()
-    #     while 1:
-    #         self.screenshot()
-    #         self.put_status()
-    #         # --------------------------------------------------------------
-    #         if (self.appear_then_click(self.I_UI_CONFIRM, interval=0.5)
-    #                 or self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=0.5)):
-    #             continue
-    #         if self.ui_reward_appear_click():
-    #             continue
-    #         if not ocr_limit_timer.reached():
-    #             continue
-    #         ocr_limit_timer.reset()
-    #         if not self.ocr_appear(self.O_FIRE):
-    #             continue
-    #         #  --------------------------------------------------------------
-    #         self.lock_team(self.conf.general_battle)
-    #         if not self.check_tickets_enough():
-    #             logger.warning(f'No tickets left, wait for next time')
-    #             break
-    #         if self.conf.general_climb.random_sleep:
-    #             random_sleep(probability=0.2)
-    #         if self.start_battle():
-    #             continue
-    #
-    #     self.ui_click(self.I_UI_BACK_YELLOW, stop=self.I_TO_BATTLE_MAIN, interval=1)
+        self._run_common()
 
     def _run_ap(self):
-        """
-            更新前请先看 ./README.md
-        """
-        logger.hr(f'Start run climb type AP')
-        self.ui_clicks([self.I_TO_BATTLE_MAIN, self.I_TO_BATTLE_MAIN_2],
-                       stop=self.I_CHECK_BATTLE_MAIN, interval=1)
-        self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS, self.I_CHECK_BATTLE_MAIN)
-        self.switch_climb_mode_in_game('ap')
+        self._run_common()
 
-        ocr_limit_timer = Timer(1).start()
-        while 1:
-            self.screenshot()
-            self.put_status()
-            # --------------------------------------------------------------
-            if not ocr_limit_timer.reached():
-                continue
-            ocr_limit_timer.reset()
-            if not self.ocr_appear(self.O_FIRE):
-                self.appear_then_click(self.I_CHECK_BATTLE_MAIN, interval=4)
-                continue
-            #  --------------------------------------------------------------
-            self.lock_team(self.conf.general_battle)
-            if not self.check_tickets_enough():
-                logger.warning(f'No tickets left, wait for next time')
-                break
-            if self.conf.general_climb.random_sleep:
-                random_sleep(probability=0.2)
-            if self.start_battle():
-                continue
-
-        self.ui_click(self.I_UI_BACK_YELLOW, stop=self.I_TO_BATTLE_MAIN, interval=1)
+    def _run_ap100(self):
+        self._run_common()
 
     def _run_boss(self):
-        """
-        更新前请先看 ./README.md
-        """
-        logger.hr(f'Start run climb type BOSS')
-        self.click(self.I_TO_BATTLE_BOSS)
-        self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS, self.I_CHECK_BATTLE_BOSS)
+        self._run_common()
+
+    def _run_common(self):
+        if not self.check_tickets_enough():
+            logger.warning('No tickets left, wait for next time')
+            raise TicketsNotEnough
+        self.switch_soul(self.I_BATTLE_MAIN_TO_RECORDS)
+        if self.conf.general_climb.random_sleep:
+            random_sleep(probability=0.2)
+        if self.enter_battle():
+            self.run_general_battle(getattr(self.conf, f'{self.climb_type}_battle_conf'))
+
+    def enter_battle(self):
+        click_times, max_times = 0, random.randint(3, 5)
         while True:
             self.screenshot()
-            self.put_status()
-            self.lock_team(self.conf.general_battle)
-            if not self.check_tickets_enough():
-                logger.warning(f'No tickets left, wait for next time')
-                break
-            if self.conf.general_climb.random_sleep:
-                random_sleep(probability=0.2)
-            if self.appear_then_click(self.I_PASS_13, interval=2):
-                self.run_general_battle(config=self.get_general_battle_conf())
-                continue
-        self.ui_goto_page(game.page_climb_act)
-
-    def start_battle(self):
-        click_times, max_times = 0, random.randint(3, 4)
-        while 1:
-            self.screenshot()
             if self.is_in_battle(False):
-                break
+                return True
             if click_times >= max_times:
-                logger.warning(f'Climb {self.climb_type} cannot enter, maybe already end, try next')
-                return
-            if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1) or \
-                    self.appear_then_click(self.I_UI_CONFIRM, interval=1):
+                logger.warning(f'{self.climb_type} cannot enter battle, click reach max times')
+                raise TicketsNotEnough
+            if self.appear(self.I_UI_BACK_RED, interval=1):
+                logger.warning(
+                    f'{self.climb_type} cannot enter battle, appear red close button, maybe not enough tickets'
+                )
+                raise TicketsNotEnough
+            if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1) or self.appear_then_click(
+                self.I_UI_CONFIRM, interval=1
+            ):
                 continue
             if self.ocr_appear_click(self.O_FIRE, interval=1.5):
+                self.device.click_record_clear()
                 click_times += 1
                 logger.info(f'Try click fire, remain times[{max_times - click_times}]')
                 continue
-        # 运行战斗
-        self.run_general_battle(config=self.get_general_battle_conf())
 
-    def battle_wait(self, random_click_swipt_enable: bool) -> bool:
-        # 通用战斗结束判断
-        self.device.stuck_record_add("BATTLE_STATUS_S")
-        self.device.click_record_clear()
-        logger.info(f"Start {self.climb_type} battle process")
-        self.count_map[self.climb_type] = self.current_count
-        for btn in (self.C_RANDOM_LEFT, self.C_RANDOM_RIGHT, self.C_RANDOM_TOP, self.C_RANDOM_BOTTOM):
-            btn.name = "BATTLE_RANDOM"
-        ok_cnt, max_retry = 0, 8
-        while 1:
-            sleep(random.uniform(0.5, 1.5))
-            self.screenshot()
-            # 达到最大重试次数则直接交给上层处理
-            if ok_cnt > max_retry:
-                break
-            # 识别到挑战说明已经退出战斗
-            if ok_cnt > 0 and self.ocr_appear(self.O_FIRE):
-                return True
-            # 战斗失败
-            if self.appear(self.I_FALSE, interval=1.5):
-                logger.warning("Battle failed")
-                self.ui_click_until_smt_disappear(self.random_reward_click(click_now=False), self.I_FALSE, interval=1.5)
-                return False
-            # 战斗成功
-            if self.appear_then_click(self.I_WIN, interval=2):
-                continue
-            # 获得奖励
-            if self.ui_reward_appear_click():
-                continue
-            if self.appear(self.I_CHECK_BATTLE_MAIN, interval=1.5):  # 回到主界面了则退出
-                break
-            if self.appear(self.I_CHECK_BATTLE_BOSS, interval=1.5):  # 回到首领主界面了则退出
-                break
-            #  出现 “魂” 和 紫蛇皮
-            if self.appear(self.I_REWARD) or self.appear(self.I_REWARD_PURPLE_SNAKE_SKIN) or \
-                    self.appear(self.I_REWARD_GOLD) or self.appear(self.I_REWARD_GOLD_SNAKE_SKIN):
-                self.random_reward_click(exclude_click=[self.C_RANDOM_TOP, self.C_RANDOM_LEFT])
-                ok_cnt += 1
-                continue
-            # 已经不在战斗中了, 且奖励也识别过了, 则随机点击
-            if ok_cnt > 3 and not self.is_in_battle(False):
-                self.random_reward_click(exclude_click=[self.C_RANDOM_TOP, self.C_RANDOM_LEFT])
-                self.device.stuck_record_clear()
-                ok_cnt += 1
-                continue
-            # 战斗中随机滑动
-            if ok_cnt == 0 and random_click_swipt_enable:
-                self.random_click_swipt()
-        return True
-
-    def switch_soul(self, enter_button: RuleImage, cur_img: RuleImage):
+    def switch_soul(self, enter_button: RuleImage):
+        if self.switch_souled.get(self.climb_type, False):
+            return
         conf = self.conf.switch_soul_config
         enable_switch = getattr(conf, f"enable_switch_{self.climb_type}", False)
         enable_by_name = getattr(conf, f"enable_switch_{self.climb_type}_by_name", False)
         if not enable_switch and not enable_by_name:
             return
+        self.switch_souled[self.climb_type] = True
         logger.hr('Start switch soul', 2)
         conf.validate_switch_soul()
         self.ui_click(enter_button, stop=self.I_CHECK_RECORDS, interval=1)
@@ -478,37 +203,27 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
         elif enable_switch:
             group_team = getattr(conf, f"{self.climb_type}_group_team")
             self.run_switch_soul(group_team)
-        self.ui_click(self.I_UI_BACK_YELLOW, stop=cur_img, interval=1)
-
-    def switch_climb_mode_in_game(self, mode: str = 'ap'):
-        map_check = {
-            'ap': self.I_CLIMB_MODE_AP,
-            'pass': self.I_CLIMB_MODE_PASS,
-        }
-        logger.info(f'Switch climb mode to {mode}')
-        self.ui_click(self.I_CLIMB_MODE_SWITCH, stop=map_check[mode], interval=1.9)
+        self.appear_then_click(self.I_UI_BACK_YELLOW)
 
     def lock_team(self, battle_conf: GeneralBattleConfig):
-        """
-        根据配置判断当前爬塔类型是否锁定阵容, 并执行锁定或解锁
-        """
-        enable_preset = getattr(battle_conf, f"enable_{self.climb_type}_preset", False)
-        if not enable_preset:
+        enable = battle_conf.lock_team_enable
+        if enable:
             logger.info(f'Lock {self.climb_type} team')
-            self.ui_click(self.I_UNLOCK, stop=self.I_LOCK, interval=1.5)
+            match self.climb_type:
+                case 'ap':
+                    self.ui_click(self.I_AP_UNLOCK, stop=self.I_AP_LOCK, interval=1.5)
+                case _:
+                    self.ui_click(self.I_UNLOCK, stop=self.I_LOCK, interval=1.5)
             return
         logger.info(f'Unlock {self.climb_type} team')
-        self.ui_click(self.I_LOCK, stop=self.I_UNLOCK, interval=1.5)
+        match self.climb_type:
+            case 'ap':
+                self.ui_click(self.I_AP_LOCK, stop=self.I_AP_UNLOCK, interval=1.5)
+            case _:
+                self.ui_click(self.I_LOCK, stop=self.I_UNLOCK, interval=1.5)
 
     def check_tickets_enough(self) -> bool:
-        """
-        判断当前爬塔门票是否足够
-        :return: True 可以运行 or False
-        """
         logger.hr(f'Check {self.climb_type} tickets')
-        # if not self.wait_until_appear(self.O_FIRE, wait_time=3):
-        #     logger.warning(f'Detect fire fail, try reidentify')
-        #     return False
         self.screenshot()
         remain_times = 0
         if self.climb_type == 'pass':
@@ -519,36 +234,11 @@ class ScriptTask(StateMachine, GameUi, BaseActivity, SwitchSoul, ActivityShikiga
             remain_times = self.O_REMAIN_BOSS.ocr_digit(self.device.image)
         if self.climb_type == 'ap100':
             remain_times = self.O_REMAIN_AP100.ocr_digit(self.device.image)
+        if self.pre_tickets_map[self.climb_type] - remain_times > 1:
+            self.pre_tickets_map[self.climb_type] -= 1
+            return True
+        self.pre_tickets_map[self.climb_type] = remain_times
         return remain_times > 0
-
-    def get_general_battle_conf(self) -> tasks.Component.GeneralBattle.config_general_battle.GeneralBattleConfig:
-        from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig as gbc
-        self.conf.validate_switch_preset()
-        enable_preset = getattr(self.conf.general_battle, f'enable_{self.climb_type}_preset', False)
-        group, team = getattr(self.conf.switch_soul_config, f'{self.climb_type}_group_team').split(',')
-        return gbc(lock_team_enable=not enable_preset,
-                   preset_enable=enable_preset,
-                   preset_group=group if enable_preset else 1,
-                   preset_team=team if enable_preset else 1,
-                   green_enable=getattr(self.conf.general_battle, f'enable_{self.climb_type}_green', False),
-                   green_mark=getattr(self.conf.general_battle, f'{self.climb_type}_green_mark'),
-                   random_click_swipt_enable=getattr(self.conf.general_battle, f'enable_{self.climb_type}_anti_detect',
-                                                     False), )
-
-    def random_reward_click(self, exclude_click: list = None, click_now: bool = True) -> RuleClick:
-        """
-        随机点击
-        :param exclude_click: 排除的点击位置
-        :param click_now: 是否立即点击
-        :return: 随机的点击位置
-        """
-        options = [self.C_RANDOM_LEFT, self.C_RANDOM_RIGHT, self.C_RANDOM_TOP, self.C_RANDOM_BOTTOM]
-        if exclude_click:
-            options = [option for option in options if option not in exclude_click]
-        target = random.choice(options)
-        if click_now:
-            self.click(target, interval=1.8)
-        return target
 
 
 if __name__ == '__main__':
