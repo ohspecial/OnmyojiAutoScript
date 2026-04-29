@@ -185,7 +185,7 @@
     "roiFront": "405,169,50,46",
     "roiBack": "405,169,50,46",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "第一个击破"
   }
 ]
