@@ -220,9 +220,9 @@ class ActivityShikigamiAssets:
         name="remain_ap100",
     )
     O_ENTER_AP100 = RuleOcr(
-        roi=(67, 195, 95, 32),
-        area=(5, 79, 265, 284),
-        mode="Single",
+        roi=(67, 99, 92, 359),
+        area=(67, 99, 92, 359),
+        mode="Full",
         method="Default",
         keyword="雪山修行",
         name="enter_ap100",
