@@ -212,8 +212,8 @@ class ActivityShikigamiAssets:
         name="remain_boss",
     )
     O_REMAIN_AP100 = RuleOcr(
-        roi=(922, 21, 112, 39),
-        area=(913, 8, 131, 62),
+        roi=(978,26,48,30),
+        area=(978,26,48,30),
         mode="Digit",
         method="Default",
         keyword="",

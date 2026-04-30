@@ -3,6 +3,7 @@
 # github https://github.com/runhey
 from datetime import datetime, timedelta
 import random
+from time import sleep
 
 from cached_property import cached_property
 
@@ -122,7 +123,10 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
                     elif current_page == page_battle:
                         self.run_general_battle(cur_battle_conf)
                     elif current_page == page_reward or current_page == page_failed:
-                        self.click(pages.random_click(ltrb=(False, False, True, False)), interval=1.5)
+                        self.click(
+                            self.random_reward_click(exclude_click=[self.C_RANDOM_TOP, self.C_RANDOM_LEFT], click_now=False),
+                            interval=1.5,
+                        )
                     else:
                         if not unknown_page_timer.started():
                             unknown_page_timer.start()
@@ -184,6 +188,57 @@ class ScriptTask(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikig
                 click_times += 1
                 logger.info(f'Try click fire, remain times[{max_times - click_times}]')
                 continue
+
+    def battle_wait(self, random_click_swipt_enable: bool) -> bool:
+        self.device.stuck_record_add("BATTLE_STATUS_S")
+        self.device.click_record_clear()
+        logger.info(f"Start {self.climb_type} battle process")
+        self.count_map[self.climb_type] = self.current_count
+        for btn in (self.C_RANDOM_LEFT, self.C_RANDOM_RIGHT, self.C_RANDOM_TOP, self.C_RANDOM_BOTTOM):
+            btn.name = "BATTLE_RANDOM"
+
+        ok_cnt, max_retry = 0, 8
+        while True:
+            sleep(random.uniform(0.5, 1.5))
+            self.screenshot()
+            if ok_cnt > max_retry:
+                break
+            if ok_cnt > 0 and self.ocr_appear(self.O_FIRE):
+                return True
+            if self.appear(self.I_FALSE):
+                logger.warning("Battle failed")
+                self.ui_click_until_smt_disappear(
+                    self.random_reward_click(click_now=False), self.I_FALSE, interval=1.5
+                )
+                return False
+            if self.appear_then_click(self.I_WIN, interval=2):
+                continue
+            if (
+                self.appear(self.I_REWARD)
+                or self.appear(self.I_REWARD_PURPLE_SNAKE_SKIN)
+                or self.appear(self.I_REWARD_GOLD)
+                or self.appear(self.I_REWARD_GOLD_SNAKE_SKIN)
+            ):
+                self.random_reward_click(exclude_click=[self.C_RANDOM_TOP, self.C_RANDOM_LEFT])
+                ok_cnt += 1
+                continue
+            if ok_cnt > 0 and not self.is_in_battle(False):
+                self.random_reward_click(exclude_click=[self.C_RANDOM_TOP, self.C_RANDOM_LEFT])
+                self.device.stuck_record_clear()
+                ok_cnt += 1
+                continue
+            if ok_cnt == 0 and random_click_swipt_enable:
+                self.random_click_swipt()
+        return True
+
+    def random_reward_click(self, exclude_click: list = None, click_now: bool = True):
+        options = [self.C_RANDOM_BOTTOM, self.C_RANDOM_RIGHT, self.C_RANDOM_TOP, self.C_RANDOM_LEFT]
+        if exclude_click:
+            options = [option for option in options if option not in exclude_click]
+        target = options[0] if options else self.C_RANDOM_BOTTOM
+        if click_now:
+            self.click(target, interval=1.8)
+        return target
 
     def switch_soul(self, enter_button: RuleImage):
         if self.switch_souled.get(self.climb_type, False):
