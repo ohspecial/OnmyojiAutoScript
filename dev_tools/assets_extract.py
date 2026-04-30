@@ -309,11 +309,7 @@ class AssetsExtractor:
         :return:
         """
         item = data[0]
-        return all(key in item for key in ('itemName', 'roiFront', 'roiBack')) \
-            and 'imageName' not in item \
-            and 'keyword' not in item \
-            and 'duration' not in item \
-            and 'mode' not in item
+        return len(item) == 4
 
     @classmethod
     def is_long_click_file(cls, data: list) -> bool:
@@ -335,7 +331,7 @@ class AssetsExtractor:
         :return:
         """
         item = data[0]
-        if 'mode' in item and 'keyword' not in item and 'duration' not in item and 'imageName' not in item:
+        if 'mode' in item and len(item) == 5:
             return True
         return False
 

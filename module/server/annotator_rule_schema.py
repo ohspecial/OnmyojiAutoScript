@@ -192,7 +192,6 @@ def _field_defaults(fields: list[dict[str, Any]]) -> dict[str, Any]:
 def default_rule(rule_type: str) -> dict[str, Any]:
     schema = get_rule_schema(rule_type)
     rule = _field_defaults(schema.get("fields", []))
-    rule["roiMode"] = "none"
     rule["roiFront"] = ROI_DEFAULT
     if rule_type != "list":
         rule["roiBack"] = ROI_DEFAULT
