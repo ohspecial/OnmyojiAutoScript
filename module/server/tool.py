@@ -700,6 +700,7 @@ class AnnotatorManager:
                 {
                     "itemName": item_name,
                     "imageName": image_name,
+                    "roiMode": self._normalize_roi_mode(rule.get("roiMode", "none")),
                     "roiFront": self._parse_roi(str(rule.get("roiFront", ""))),
                     "roiBack": self._parse_roi(str(rule.get("roiBack", ""))),
                     "method": str(rule.get("method", field_default("image", "method", "Template matching"))).strip() or field_default("image", "method", "Template matching"),
@@ -721,6 +722,7 @@ class AnnotatorManager:
             normalized.append(
                 {
                     "itemName": item_name,
+                    "roiMode": self._normalize_roi_mode(rule.get("roiMode", "none")),
                     "roiFront": self._parse_roi(str(rule.get("roiFront", ""))),
                     "roiBack": self._parse_roi(str(rule.get("roiBack", ""))),
                     "mode": mode,
@@ -740,6 +742,7 @@ class AnnotatorManager:
             normalized.append(
                 {
                     "itemName": item_name,
+                    "roiMode": self._normalize_roi_mode(rule.get("roiMode", "none")),
                     "roiFront": self._parse_roi(str(rule.get("roiFront", ""))),
                     "roiBack": self._parse_roi(str(rule.get("roiBack", ""))),
                     "description": str(rule.get("description", "")).strip(),
@@ -759,6 +762,7 @@ class AnnotatorManager:
             normalized.append(
                 {
                     "itemName": item_name,
+                    "roiMode": self._normalize_roi_mode(rule.get("roiMode", "none")),
                     "roiFront": self._parse_roi(str(rule.get("roiFront", ""))),
                     "roiBack": self._parse_roi(str(rule.get("roiBack", ""))),
                     "mode": mode,
@@ -782,6 +786,7 @@ class AnnotatorManager:
             normalized.append(
                 {
                     "itemName": item_name,
+                    "roiMode": self._normalize_roi_mode(rule.get("roiMode", "none")),
                     "roiFront": self._parse_roi(str(rule.get("roiFront", ""))),
                     "roiBack": self._parse_roi(str(rule.get("roiBack", ""))),
                     "duration": duration,
@@ -816,6 +821,7 @@ class AnnotatorManager:
             normalized_items.append(
                 {
                     "itemName": item_name,
+                    "roiMode": self._normalize_roi_mode(item.get("roiMode", "none")),
                     "roiFront": self._parse_roi(str(item.get("roiFront", ""))),
                 }
             )
@@ -828,6 +834,11 @@ class AnnotatorManager:
             "description": str(list_meta.get("description", "")).strip(),
             "list": normalized_items,
         }
+
+    @staticmethod
+    def _normalize_roi_mode(value: Any) -> str:
+        mode = str(value or "").strip()
+        return mode if mode in {"none", "same", "include"} else "none"
 
     @staticmethod
     def _ensure_within_root(path: Path, root: Path) -> None:
@@ -1010,6 +1021,7 @@ class AnnotatorManager:
                 rules.append(
                     {
                         "itemName": str(item.get("itemName", "")),
+                        "roiMode": str(item.get("roiMode", "none")),
                         "roiFront": str(item.get("roiFront", "0,0,100,100")),
                     }
                 )
@@ -1022,6 +1034,7 @@ class AnnotatorManager:
                         {
                             "itemName": str(item.get("itemName", "")),
                             "imageName": str(item.get("imageName", "")),
+                            "roiMode": str(item.get("roiMode", "none")),
                             "roiFront": str(item.get("roiFront", "0,0,100,100")),
                             "roiBack": str(item.get("roiBack", "0,0,100,100")),
                             "method": str(item.get("method", "Template matching")),
@@ -1033,6 +1046,7 @@ class AnnotatorManager:
                     rules.append(
                         {
                             "itemName": str(item.get("itemName", "")),
+                            "roiMode": str(item.get("roiMode", "none")),
                             "roiFront": str(item.get("roiFront", "0,0,100,100")),
                             "roiBack": str(item.get("roiBack", "0,0,100,100")),
                             "mode": str(item.get("mode", "Single")),
@@ -1045,6 +1059,7 @@ class AnnotatorManager:
                     rules.append(
                         {
                             "itemName": str(item.get("itemName", "")),
+                            "roiMode": str(item.get("roiMode", "none")),
                             "roiFront": str(item.get("roiFront", "0,0,100,100")),
                             "roiBack": str(item.get("roiBack", "0,0,100,100")),
                             "description": str(item.get("description", "")),
@@ -1054,6 +1069,7 @@ class AnnotatorManager:
                     rules.append(
                         {
                             "itemName": str(item.get("itemName", "")),
+                            "roiMode": str(item.get("roiMode", "none")),
                             "roiFront": str(item.get("roiFront", "0,0,100,100")),
                             "roiBack": str(item.get("roiBack", "0,0,100,100")),
                             "mode": str(item.get("mode", "default")),
@@ -1064,6 +1080,7 @@ class AnnotatorManager:
                     rules.append(
                         {
                             "itemName": str(item.get("itemName", "")),
+                            "roiMode": str(item.get("roiMode", "none")),
                             "roiFront": str(item.get("roiFront", "0,0,100,100")),
                             "roiBack": str(item.get("roiBack", "0,0,100,100")),
                             "duration": int(item.get("duration", 1000)),
@@ -1439,9 +1456,6 @@ class AnnotatorManager:
 
 
 annotator_manager = AnnotatorManager()
-
-
-
 
 
 

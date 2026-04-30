@@ -676,6 +676,61 @@
     return formatRoiFromNumbers(x, y, w, h);
   }
 
+  function normalizeRoiMode(mode) {
+    return mode === "same" || mode === "include" ? mode : "none";
+  }
+
+  function inferRoiMode(frontText, backText) {
+    const front = parseRoi(frontText);
+    const back = parseRoi(backText);
+
+    const same = front.every((value, index) => Math.abs(value - back[index]) < 0.0001);
+    if (same) {
+      return "same";
+    }
+
+    const [fx, fy, fw, fh] = front;
+    const [bx, by, bw, bh] = back;
+    const include = fx >= bx
+      && fy >= by
+      && fx + fw <= bx + bw
+      && fy + fh <= by + bh;
+    if (include) {
+      return "include";
+    }
+
+    return "none";
+  }
+
+  function getRuleSavedRoiMode(rule) {
+    if (!rule) {
+      return "none";
+    }
+    if (Object.prototype.hasOwnProperty.call(rule, "roiMode")) {
+      return normalizeRoiMode(rule.roiMode);
+    }
+    const front = rule.roiFront || "0,0,100,100";
+    const back = state.ruleType === "list"
+      ? (state.listMeta.roiBack || "0,0,100,100")
+      : (rule.roiBack || "0,0,100,100");
+    return inferRoiMode(front, back);
+  }
+
+  function persistCurrentRuleRoiMode(mode, markChanged = true) {
+    const rule = getCurrentRule();
+    if (!rule) {
+      return;
+    }
+    const nextMode = normalizeRoiMode(mode);
+    if (rule.roiMode === nextMode) {
+      return;
+    }
+    rule.roiMode = nextMode;
+    if (markChanged) {
+      markDirty();
+    }
+  }
+
   function getStageSize() {
     return {
       width: Math.max(1, el.imageStage.clientWidth || 1),
@@ -887,14 +942,15 @@
     }
   }
 
-  function setRoiMode(mode, showTip = true) {
-    const nextMode = mode === "same" || mode === "include" ? mode : "none";
+  function setRoiMode(mode, showTip = true, persist = true, markChanged = true) {
+    const nextMode = normalizeRoiMode(mode);
     state.roiMode = nextMode;
     if (el.roiMode) {
       el.roiMode.value = nextMode;
     }
-    applyRoiModeConstraints(el.roiBack);
-    syncRoiToRule();
+    if (persist) {
+      persistCurrentRuleRoiMode(nextMode, markChanged);
+    }
     if (!showTip) {
       return;
     }
@@ -1264,6 +1320,7 @@
     const back = boxToRoi(el.roiBack);
 
     rule.roiFront = front;
+    rule.roiMode = normalizeRoiMode(state.roiMode);
     if (state.ruleType === "list") {
       state.listMeta.roiBack = back;
     } else {
@@ -1285,7 +1342,6 @@
 
     clampBox(el.roiFront);
     clampBox(el.roiBack);
-    applyRoiModeConstraints(el.roiBack);
 
     return {
       front: boxToRoi(el.roiFront),
@@ -1349,10 +1405,6 @@
       applyBoxFromRoi(el.roiBack, "0,0,100,100");
       clampBox(el.roiFront);
       clampBox(el.roiBack);
-      applyRoiModeConstraints(el.roiBack);
-      if (state.roiMode !== "none") {
-        syncRoiToRule(false);
-      }
       renderTestOverlay();
       return;
     }
@@ -1362,10 +1414,6 @@
     applyBoxFromRoi(el.roiBack, back);
     clampBox(el.roiFront);
     clampBox(el.roiBack);
-    applyRoiModeConstraints(el.roiBack);
-    if (state.roiMode !== "none") {
-      syncRoiToRule(false);
-    }
     renderTestOverlay();
   }
 
@@ -1497,6 +1545,7 @@
       rule[field.key] = field.default ?? "";
     }
     rule.itemName = String(rule.itemName || "new");
+    rule.roiMode = "none";
     rule.roiFront = "0,0,100,100";
     if (type !== "list") {
       rule.roiBack = "0,0,100,100";
@@ -1820,6 +1869,7 @@
     }
     el.roiFrontValue.value = "";
     el.roiBackValue.value = "";
+    setRoiMode("none", false, false, false);
     refreshRoiLayoutFromRule();
     clearTestOverlay();
     updateFieldVisibility();
@@ -1857,6 +1907,7 @@
     const back = state.ruleType === "list" ? (state.listMeta.roiBack || "0,0,100,100") : (rule.roiBack || "0,0,100,100");
     el.roiFrontValue.value = front;
     el.roiBackValue.value = back;
+    setRoiMode(getRuleSavedRoiMode(rule), false, false, false);
 
     refreshRoiLayoutFromRule();
 
@@ -2813,7 +2864,7 @@
     const applyBackInput = () => applyRoiInputToRule("back");
 
     if (el.roiMode) {
-      el.roiMode.addEventListener("change", () => setRoiMode(el.roiMode.value));
+      el.roiMode.addEventListener("change", () => setRoiMode(el.roiMode.value, true, true, true));
     }
 
     el.roiFrontValue.addEventListener("change", applyFrontInput);
@@ -2907,7 +2958,7 @@
     setupRoiBox(el.roiBack);
     await loadRuleSchemas();
     bindEvents();
-    setRoiMode(el.roiMode ? el.roiMode.value : "none", false);
+    setRoiMode(el.roiMode ? el.roiMode.value : "none", false, false, false);
 
     resetListMeta();
     state.rules = [defaultRuleByType(state.ruleType)];
