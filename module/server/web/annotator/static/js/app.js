@@ -1349,22 +1349,6 @@
     };
   }
 
-  function createRuleFromCurrentCanvas(type) {
-    const rule = defaultRuleByType(type);
-    const roi = captureCurrentCanvasRois();
-    if (!roi) {
-      return rule;
-    }
-
-    rule.roiFront = roi.front;
-    if (type !== "list") {
-      rule.roiBack = roi.back;
-    } else {
-      state.listMeta.roiBack = roi.back;
-    }
-    return rule;
-  }
-
   function applyRoiInputToRule(target) {
     const rule = getCurrentRule();
     if (!rule) {
@@ -2910,7 +2894,7 @@
     });
 
     el.addRuleBtn.addEventListener("click", () => {
-      const rule = createRuleFromCurrentCanvas(state.ruleType);
+      const rule = defaultRuleByType(state.ruleType);
       rule.itemName = `item_${state.rules.length + 1}`;
       if (state.ruleType === "image") {
         rule.imageName = defaultImageNameForItem(rule.itemName);
