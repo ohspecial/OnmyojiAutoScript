@@ -21,6 +21,7 @@ from module.base.timer import Timer
 from module.exception import (GameNotRunningError, GamePageUnknownError)
 from module.logger import logger
 from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
+from tasks.Component.RightActivity.assets import RightActivityAssets
 from tasks.GameUi.assets import GameUiAssets
 from tasks.GameUi.page import Page, PageRegistry, page_main, random_click
 from tasks.Restart.assets import RestartAssets
@@ -36,7 +37,7 @@ class GameUi(BaseTask, GameUiAssets):
                 GameUiAssets.I_BACK_FRIENDS, GameUiAssets.I_BACK_DAILY,
                 GameUiAssets.I_REALM_RAID_GOTO_EXPLORATION,
                 GameUiAssets.I_SIX_GATES_GOTO_EXPLORATION, SixRealmsAssets.I_EXIT_SIXREALMS,
-                ActivityShikigamiAssets.I_SKIP_BUTTON, ActivityShikigamiAssets.I_RED_EXIT, BaseTask.I_UI_BACK_BLUE]
+                ActivityShikigamiAssets.I_SKIP_BUTTON, BaseTask.I_UI_BACK_BLUE]
 
     def __init__(self, config, device):
         super().__init__(config, device)
@@ -326,12 +327,24 @@ class GameUi(BaseTask, GameUiAssets):
                 continue
             # 跳转页面
             max_wait_timer = Timer(6).start()
+            switch_retry_timer = Timer(1.5).start()
             logger.info(f'Wait appear and operate {button} on {current_page}')
             while not max_wait_timer.reached():
                 if timeout_timer.reached():
                     return False
                 if self.appear_then_operate(button, interval=0.8, skip_first_screenshot=False):
                     break
+                if (
+                    current_page == page_main
+                    and button is ActivityShikigamiAssets.I_MAIN_GOTO_ACT
+                    and switch_retry_timer.reached_and_reset()
+                    and self.appear_then_operate(
+                        RightActivityAssets.I_TOGGLE_BUTTON,
+                        interval=0.8,
+                        skip_first_screenshot=False,
+                    )
+                ):
+                    logger.info('AS_MAIN_GOTO_ACT not visible, clicked as_toggle_button and retrying')
             else:
                 logger.warning(f'Failed recognize {button} on {current_page}')
                 self.ui_get_current_page(skip_first_screenshot=False)
