@@ -29,6 +29,7 @@ from tasks.SixRealms.assets import SixRealmsAssets
 from tasks.base_task import BaseTask
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.Component.GeneralInvite.assets import GeneralInviteAssets as GIA
+import tasks.ActivityShikigami.page as activity_shikigami_pages
 
 class GameUi(BaseTask, GameUiAssets):
     ui_current: Page = None
@@ -334,6 +335,19 @@ class GameUi(BaseTask, GameUiAssets):
                     return False
                 if self.appear_then_operate(button, interval=0.8, skip_first_screenshot=False):
                     break
+                if (
+                    current_page is activity_shikigami_pages.page_act_dark
+                    and next_page is activity_shikigami_pages.page_act_pass
+                    and button is ActivityShikigamiAssets.I_AS_TO_PASS
+                    and switch_retry_timer.reached_and_reset()
+                    and self.appear_then_operate(
+                        ActivityShikigamiAssets.I_LOCATION,
+                        interval=0.8,
+                        skip_first_screenshot=False,
+                    )
+                ):
+                    logger.info('I_AS_TO_PASS not visible, clicked I_LOCATION and retrying')
+                    continue
                 if (
                     current_page == page_main
                     and button is ActivityShikigamiAssets.I_MAIN_GOTO_ACT
