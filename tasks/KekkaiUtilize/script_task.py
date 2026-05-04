@@ -14,7 +14,7 @@ from module.exception import TaskEnd
 from tasks.GameUi.game_ui import GameUi
 from tasks.Utils.config_enum import ShikigamiClass
 from tasks.KekkaiUtilize.assets import KekkaiUtilizeAssets
-from tasks.KekkaiUtilize.config import UtilizeRule, SelectFriendList
+from tasks.KekkaiUtilize.config import UtilizeRule, SelectFriendList, ValueCalculationRule
 from tasks.KekkaiUtilize.utils import CardClass, target_to_card_class
 from tasks.Component.ReplaceShikigami.replace_shikigami import ReplaceShikigami
 from tasks.GameUi.page import page_main, page_guild
@@ -30,6 +30,11 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
     ap_max_num = 0
     jade_max_num = 0
     first_utilize = True
+    resource_presets = {
+        '斗鱼': [151, 143, 134, 126, 101, 84],
+        '太鼓': [76, 76, 67, 67, 59, 50]
+    }
+    resource_max_index = 99
 
     def run(self):
         con = self.config.kekkai_utilize.utilize_config
@@ -510,22 +515,6 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
     def _select_optimal_resource_card(self):
         """整合后的智能选卡主逻辑（无嵌套函数版）"""
-        # 类常量声明（需在类中定义）
-        RESOURCE_PRESETS = {
-            '斗鱼': [151, 143, 134, 126, 101, 84],
-            '太鼓': [76,  76,  67,  67,  59,  50]
-        }
-        MAX_INDEX = 99
-
-        def get_resource_index(resource_name, current_value, preset_values):
-            """获取资源匹配的档位索引"""
-            for idx, val in enumerate(preset_values):
-                if current_value >= val:
-                    logger.info(f'📊 {resource_name}区间匹配: {current_value} ≥ {val} (档位{idx})')
-                    return idx
-            logger.warning(f'⚠️ {resource_name}值[{current_value}]低于所有预设')
-            return MAX_INDEX
-
         while True:
             self.screenshot()
 
@@ -541,17 +530,17 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
             logger.hr('第二阶段：资源优先级判断', 2)
             # 获取双资源档位
-            ap_index = get_resource_index('斗鱼', self.ap_max_num, RESOURCE_PRESETS['斗鱼'])
-            jade_index = get_resource_index('太鼓', self.jade_max_num, RESOURCE_PRESETS['太鼓'])
+            ap_index = self.get_resource_index('斗鱼', self.ap_max_num)
+            jade_index = self.get_resource_index('太鼓', self.jade_max_num)
 
             # 双资源超限处理
-            if ap_index == MAX_INDEX and jade_index == MAX_INDEX:
+            if ap_index == self.resource_max_index and jade_index == self.resource_max_index:
                 logger.warning('🔄 斗鱼和太鼓均低于预设，重置初始记录')
                 self.ap_max_num, self.jade_max_num = 0, 0
                 return False
 
             # 决策优先级
-            res_type, target = ('斗鱼', self.ap_max_num) if ap_index <= jade_index else ('太鼓', self.jade_max_num)
+            res_type, target = self.pick_resource_target(self.ap_max_num, self.jade_max_num, ap_index, jade_index)
             logger.info(f'⚖️ 选择{res_type}卡 | 目标: {target}')
 
             # 第三阶段：执行选卡操作
@@ -567,18 +556,6 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
 
     def _select_optimal_resource_card_both(self):
         """BOTH 模式：先扫描同区，再扫描跨区，对比后选择最优卡"""
-        RESOURCE_PRESETS = {
-            '斗鱼': [151, 143, 134, 126, 101, 84],
-            '太鼓': [76,  76,  67,  67,  59,  50]
-        }
-        MAX_INDEX = 99
-
-        def get_resource_index(resource_name, current_value, preset_values):
-            for idx, val in enumerate(preset_values):
-                if current_value >= val:
-                    return idx
-            return MAX_INDEX
-
         # ====== 阶段1: 扫描同区好友列表 ======
         logger.hr('BOTH模式 - 阶段1: 扫描同区好友列表', 2)
         self.ap_max_num, self.jade_max_num = 0, 0
@@ -623,23 +600,21 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             (diff_ap, diff_jade, SelectFriendList.DIFFERENT_SERVER),
         ]:
             if ap_val > 0:
-                idx = get_resource_index('斗鱼', ap_val, RESOURCE_PRESETS['斗鱼'])
+                idx = self.get_resource_index('斗鱼', ap_val, log_details=False)
                 candidates.append((idx, '斗鱼', ap_val, region))
             if jade_val > 0:
-                idx = get_resource_index('太鼓', jade_val, RESOURCE_PRESETS['太鼓'])
+                idx = self.get_resource_index('太鼓', jade_val, log_details=False)
                 candidates.append((idx, '太鼓', jade_val, region))
 
         # 过滤掉低于所有预设的候选
-        candidates = [(idx, ctype, cval, reg) for idx, ctype, cval, reg in candidates if idx < MAX_INDEX]
+        candidates = [(idx, ctype, cval, reg) for idx, ctype, cval, reg in candidates if idx < self.resource_max_index]
 
         if not candidates:
             logger.warning('🔄 BOTH模式: 同区和跨区均无合适卡，放弃本次')
             self.ap_max_num, self.jade_max_num = 0, 0
             return False
 
-        # 按 resource_index 升序排列（越小越优），相同 index 取 value 更大的
-        candidates.sort(key=lambda x: (x[0], -x[2]))
-        best_idx, best_type, best_value, best_region = candidates[0]
+        best_idx, best_type, best_value, best_region = self.pick_best_candidate(candidates)
         region_name = '同区' if best_region == SelectFriendList.SAME_SERVER else '跨区'
         logger.info(f'⚖️ BOTH模式决策: 选择{region_name}的{best_type}卡 | 值:{best_value} 档位:{best_idx}')
 
@@ -758,6 +733,47 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         # ============== 终止处理 ==============#
         logger.warning(f'⚠️ 已达到最大滑动次数{MAX_SWIPES}, 终止流程')
         return None
+
+    def get_resource_index(self, resource_name: str, current_value: int, log_details: bool = True) -> int:
+        for idx, val in enumerate(self.resource_presets[resource_name]):
+            if current_value >= val:
+                if log_details:
+                    logger.info(f'📊 {resource_name}区间匹配: {current_value} ≥ {val} (档位{idx})')
+                return idx
+        if log_details:
+            logger.warning(f'⚠️ {resource_name}值[{current_value}]低于所有预设')
+        return self.resource_max_index
+
+    def pick_resource_target(self, ap_value: int, jade_value: int, ap_index: int, jade_index: int) -> tuple[str, int]:
+        value_rule = self.config.kekkai_utilize.utilize_config.value_calculation_rule
+        if value_rule == ValueCalculationRule.TAIKO_PRIORITY:
+            return ('斗鱼', ap_value) if ap_value >= jade_value * 2.2 else ('太鼓', jade_value)
+        if value_rule == ValueCalculationRule.FISH_PRIORITY:
+            return ('斗鱼', ap_value) if ap_value >= jade_value * 1.8 else ('太鼓', jade_value)
+        return ('斗鱼', ap_value) if ap_index <= jade_index else ('太鼓', jade_value)
+
+    def pick_best_candidate(self, candidates: list[tuple[int, str, int, SelectFriendList]]) -> tuple[int, str, int, SelectFriendList]:
+        value_rule = self.config.kekkai_utilize.utilize_config.value_calculation_rule
+        if value_rule == ValueCalculationRule.DEFAULT:
+            candidates.sort(key=lambda x: (x[0], -x[2]))
+            return candidates[0]
+
+        fish_candidates = [candidate for candidate in candidates if candidate[1] == '斗鱼']
+        taiko_candidates = [candidate for candidate in candidates if candidate[1] == '太鼓']
+        if not fish_candidates:
+            return min(taiko_candidates, key=lambda x: (x[0], -x[2]))
+        if not taiko_candidates:
+            return min(fish_candidates, key=lambda x: (x[0], -x[2]))
+
+        best_fish = min(fish_candidates, key=lambda x: (x[0], -x[2]))
+        best_taiko = min(taiko_candidates, key=lambda x: (x[0], -x[2]))
+        target_type, _ = self.pick_resource_target(
+            best_fish[2],
+            best_taiko[2],
+            best_fish[0],
+            best_taiko[0]
+        )
+        return best_fish if target_type == '斗鱼' else best_taiko
 
     def perform_swipe_action(self):
         """统一滑动操作"""
