@@ -177,6 +177,14 @@ class ScriptTask(BaseTask):
             self._adb_shell(['su -c "killall frida-server"'])
         except Exception:
             pass
+        self._restore_onmyoji_foreground()
+
+    def _restore_onmyoji_foreground(self):
+        try:
+            logger.info('清理：切回阴阳师游戏界面...')
+            self.device.app_start()
+        except Exception as e:
+            logger.warning(f'切回阴阳师失败: {e}')
 
     # ======================== ADB 操作 ========================
 
