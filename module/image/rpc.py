@@ -418,7 +418,15 @@ def get_image_client(address: str | None = None, refresh: bool = False) -> Image
 
     resolved_address = address or State.deploy_config.ImageClientAddress or "127.0.0.1:22269"
     if refresh or resolved_address not in _IMAGE_CLIENT_CACHE:
-        _IMAGE_CLIENT_CACHE[resolved_address] = ImageClient(resolved_address)
+        try:
+            _IMAGE_CLIENT_CACHE[resolved_address] = ImageClient(resolved_address)
+        except ScriptError:
+            # 支持直接运行单个 task 脚本时的懒启动兜底：
+            # 若配置允许自动拉起图像服务，则在首次连接失败后补启动一次并重试。
+            if not State.deploy_config.StartImageServer:
+                raise
+            ensure_image_server_started()
+            _IMAGE_CLIENT_CACHE[resolved_address] = ImageClient(resolved_address)
     return _IMAGE_CLIENT_CACHE[resolved_address]
 
 

@@ -396,7 +396,15 @@ def get_ocr_client(address: str | None = None, refresh: bool = False) -> ModelPr
 
     resolved_address = address or State.deploy_config.OcrClientAddress or "127.0.0.1:22268"
     if refresh or resolved_address not in _OCR_CLIENT_CACHE:
-        _OCR_CLIENT_CACHE[resolved_address] = ModelProxy(resolved_address)
+        try:
+            _OCR_CLIENT_CACHE[resolved_address] = ModelProxy(resolved_address)
+        except ScriptError:
+            # 支持直接运行单个 task 脚本时的懒启动兜底：
+            # 若配置允许自动拉起 OCR 服务，则在首次连接失败后补启动一次并重试。
+            if not State.deploy_config.StartOcrServer:
+                raise
+            ensure_ocr_server_started()
+            _OCR_CLIENT_CACHE[resolved_address] = ModelProxy(resolved_address)
     return _OCR_CLIENT_CACHE[resolved_address]
 
 
