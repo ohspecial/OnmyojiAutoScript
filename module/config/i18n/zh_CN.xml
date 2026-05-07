@@ -682,6 +682,9 @@ Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退�
 	<message><source>PetsConfig</source><translation>宠物</translation></message>
 	<message><source>Pets Happy</source><translation>其乐融融</translation></message>
 	<message><source>Pets Feast</source><translation>饕餮大餐</translation></message>
+	<message><source>GoToOrochiConfig</source><translation>额外御魂</translation></message>
+	<message><source>Go To Orochi</source><translation>小猫咪后攻打1次御魂</translation></message>
+	<message><source>go_to_orochi_help</source><translation>开启后，小猫咪完成后会额外复用原有御魂配置并攻打1次御魂十层</translation></message>
 	<message><source>GoldYoukaiConfig</source><translation>金币妖怪</translation></message>
 </context>	
 <context>

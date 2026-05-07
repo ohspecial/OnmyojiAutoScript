@@ -6,6 +6,8 @@ from module.exception import TaskEnd
 
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_main
+from tasks.Orochi.config import Layer
+from tasks.Orochi.script_task import ScriptTask as OrochiTask
 from tasks.Pets.assets import PetsAssets
 from tasks.Pets.config import PetsConfig
 
@@ -29,9 +31,32 @@ class ScriptTask(GameUi, PetsAssets):
         if con.pets_feast:
             self._feed()
         self.ui_click(self.I_PET_EXIT, self.I_CHECK_MAIN)
+        if self.config.pets.go_to_orochi_config.go_to_orochi:
+            self._run_orochi_ten_once()
 
         self.set_next_run(task='Pets', success=True, finish=True)
         raise TaskEnd('Pets')
+
+    def _run_orochi_ten_once(self):
+        """
+        小猫咪结束后，复用原有御魂任务配置，额外打一把御魂十层。
+        仅临时覆盖层数和次数，不落盘修改用户配置。
+        """
+        logger.hr('Run Orochi ten once after pets', 2)
+        orochi_config = self.config.orochi.orochi_config
+        old_layer = orochi_config.layer
+        old_limit_count = orochi_config.limit_count
+
+        try:
+            orochi_config.layer = Layer.TEN
+            orochi_config.limit_count = 1
+            try:
+                OrochiTask(self.config, self.device).run()
+            except TaskEnd:
+                pass
+        finally:
+            orochi_config.layer = old_layer
+            orochi_config.limit_count = old_limit_count
 
     def _feed(self):
         """
@@ -85,4 +110,3 @@ if __name__ == '__main__':
     t.screenshot()
 
     t.run()
-

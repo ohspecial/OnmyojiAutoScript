@@ -19,7 +19,6 @@ from module.exception import TaskEnd
 
 
 class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi, SwitchSoul, OrochiAssets):
-
     def _orochi_battle_key(self) -> str:
         return f"orochi_{self.config.orochi.orochi_config.layer}"
 

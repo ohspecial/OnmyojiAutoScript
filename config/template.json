@@ -453,6 +453,9 @@
     },
     "pets_config": {
       "pets_feast": true
+    },
+    "go_to_orochi_config": {
+      "go_to_orochi": false
     }
   },
   "souls_tidy": {
