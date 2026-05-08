@@ -6,7 +6,7 @@ from module.exception import TaskEnd
 
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_main
-from tasks.Orochi.config import Layer
+from tasks.Orochi.config import Layer, UserStatus
 from tasks.Orochi.script_task import ScriptTask as OrochiTask
 from tasks.Pets.assets import PetsAssets
 from tasks.Pets.config import PetsConfig
@@ -46,10 +46,14 @@ class ScriptTask(GameUi, PetsAssets):
         orochi_config = self.config.orochi.orochi_config
         old_layer = orochi_config.layer
         old_limit_count = orochi_config.limit_count
+        old_user_status = orochi_config.user_status
+        old_soul_buff_enable = orochi_config.soul_buff_enable
 
         try:
             orochi_config.layer = Layer.TEN
             orochi_config.limit_count = 1
+            orochi_config.user_status = UserStatus.ALONE
+            orochi_config.soul_buff_enable = False
             try:
                 OrochiTask(self.config, self.device).run()
             except TaskEnd:
@@ -57,6 +61,8 @@ class ScriptTask(GameUi, PetsAssets):
         finally:
             orochi_config.layer = old_layer
             orochi_config.limit_count = old_limit_count
+            orochi_config.user_status = old_user_status
+            orochi_config.soul_buff_enable = old_soul_buff_enable
 
     def _feed(self):
         """
