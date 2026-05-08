@@ -156,9 +156,34 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         # 更改循环顺序
         while 1:
             self.screenshot()
+            #看到弹窗点掉，不然会卡死
+            if self.appear(self.I_FRESH_ENSURE):
+                logger.info("Pop-up detected: Refresh Confirmation. Clicking Confirm.")
+                self.appear_then_click(self.I_FRESH_ENSURE, interval=1.5)
+                continue
             # 检查票数
             if not self.check_ticket(con.raid_config.number_base):
                 break
+            # 挑战次数
+            if self.current_count >= con.raid_config.number_attack:
+                logger.info(f'Current count {self.current_count}, max count {con.raid_config.number_attack}')
+                break
+            # 先检测是否需要刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
+            if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
+                logger.info('Three refresh')
+                # 如果勾选了退4，且第一个位置没有失败标志也没有击破标志，则先执行退4操作
+                # 如果已被击破，说明之前已经退过4并击败了这个结界，不需要再退4
+                # 也需要先检查票数是否足够
+                if con.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
+                    logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
+                    for _ in range(4):
+                        self.fire(1)
+                        self.run_general_battle_back(con.general_battle_config, exit_four=True)
+                if self.check_refresh():
+                    continue
+                else:
+                    success = False
+                    break
             # ----------------------------------------开始进攻
             medal, index = self.find_one(False)
             if not medal and not index:
@@ -172,6 +197,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                         break
                 else:
                     logger.info('No one can attack, break')
+                    # 检查是否有“刷新确认”弹窗挡路
+                    if self.appear(self.I_FRESH_ENSURE):
+                        logger.info("Closing obstructing refresh dialog (Click Ensure)...")
+                        # 点击“确定”来完成刷新（或者你可以改成点取消）
+                        self.appear_then_click(self.I_FRESH_ENSURE, interval=2)
                     success = False
                     break
             # 判断是不是左上角第一个
@@ -206,6 +236,14 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             # 刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
             if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
                 logger.info('Three refresh')
+                # 如果勾选了退4，且第一个位置没有失败标志也没有击破标志，则先执行退4操作
+                # 如果已被击破，说明之前已经退过4并击败了这个结界，不需要再退4
+                # 也需要先检查票数是否足够
+                if con.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
+                    logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
+                    for _ in range(4):
+                        self.fire(1)
+                        self.run_general_battle_back(con.general_battle_config, exit_four=True)
                 if self.check_refresh():
                     continue
                 else:
@@ -458,12 +496,28 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         while True:
             self.screenshot()
             if not self.appear(self.I_RR_PERSON):
+                logger.info(f'Click fire {order} success')
                 return True
             if self.appear_then_click(self.I_FIRE, interval=1):
                 continue
             if self.click(click, interval=2):
                 continue
-        logger.info(f'Click fire {order} success')
+
+    def check_position_failed(self, position: int) -> bool:
+        """
+        检查指定位置是否出现了失败标志
+        :param position: 位置索引（0-8，对应九宫格的9个位置）
+        :return: 如果该位置有失败标志返回True，否则返回False
+        """
+        if position < 0 or position >= len(self.false_roi):
+            logger.warning(f'Invalid position {position}')
+            return False
+        self.screenshot()
+        roi = self.false_roi[position]
+        self.false_image.roi_back = roi
+        if self.appear(self.false_image):
+            logger.info(f'Position {position + 1} has a fail sign')
+            return True
         return False
 
     @cached_property
