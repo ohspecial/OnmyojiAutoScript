@@ -178,5 +178,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
+  },
+  {
+    "itemName": "raid_success",
+    "imageName": "res_raid_success.png",
+    "roiFront": "405,169,50,46",
+    "roiBack": "405,169,50,46",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "第一个击破"
   }
 ]
