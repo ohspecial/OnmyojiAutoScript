@@ -178,7 +178,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                     logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
                     for _ in range(4):
                         self.fire(1)
-                        self.run_general_battle(config=self.build_quick_exit_config(config.general_battle_config))
+                        self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
                 if self.check_refresh():
                     continue
                 else:
