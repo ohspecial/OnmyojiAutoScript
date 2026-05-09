@@ -336,28 +336,18 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                     shikigami_order: int = 7):
         """
         执行寄养
-        :param shikigami_order:
-        :param shikigami_class:
+        - SAME_SERVER / DIFFERENT_SERVER：仅扫描对应单区，发现完美卡即选卡
+        - BOTH：同时扫描同区与跨区，对比最优记录后切回最优区选卡
         :param friend:
-        :param rule:
-        :return:
+        :param shikigami_class:
+        :param shikigami_order:
         """
-        logger.hr('Start utilize')
-        # 不管什么时候进来都要切换刷新列表(同区与跨区保持一致先切换滑动再切换)
-        if friend == SelectFriendList.SAME_SERVER:
-            self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            self.swipe(self.S_U_END, interval=3)
-            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-            self.switch_friend_list(SelectFriendList.SAME_SERVER)
-        else:  # 跨区必须切换两次, 否则结界卡不刷新到头部
-            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-            self.swipe(self.S_U_END, interval=3)
-            self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-
-        # --------------- 结界卡选择 ---------------
-        if not self._select_optimal_resource_card():
-            return False
+        if friend == SelectFriendList.BOTH:
+            if not self._run_utilize_both(prefer=SelectFriendList.SAME_SERVER):
+                return False
+        else:
+            if not self._run_utilize_single(friend):
+                return False
 
         # 找到卡,重置次数
         self.utilize_add_count = 0
@@ -393,6 +383,188 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         # 上式神
         self.set_shikigami(shikigami_order, stop_image)
         return True
+
+    def _run_utilize_single(self, friend: SelectFriendList) -> bool:
+        """单区流程：原有逻辑，刷新列表到头部后在当前区选卡"""
+        logger.hr(f'Start utilize (单区: {friend.value})')
+        # 不管什么时候进来都要切换刷新列表(同区与跨区保持一致先切换滑动再切换)
+        if friend == SelectFriendList.SAME_SERVER:
+            self.switch_friend_list(SelectFriendList.SAME_SERVER)
+            self.swipe(self.S_U_END, interval=3)
+            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+            self.switch_friend_list(SelectFriendList.SAME_SERVER)
+        else:  # 跨区必须切换两次, 否则结界卡不刷新到头部
+            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+            self.swipe(self.S_U_END, interval=3)
+            self.switch_friend_list(SelectFriendList.SAME_SERVER)
+            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+
+        return bool(self._select_optimal_resource_card())
+
+    def _run_utilize_both(self, prefer: SelectFriendList = SelectFriendList.SAME_SERVER) -> bool:
+        """
+        双区流程：
+          1. 依次扫描同区 / 跨区，只记录最优值，不选卡
+          2. 对比两区档位，选出最优区（同档优先太鼓，总档位相同时按 prefer 打破平局）
+          3. 切回最优区，按记录值确认选卡
+        """
+        logger.hr('Start utilize (同区+跨区对比)')
+
+        # 最后扫描偏好区，扫完刚好停在该区，若其为最优区可省一次切换
+        if prefer == SelectFriendList.SAME_SERVER:
+            scan_order = [SelectFriendList.DIFFERENT_SERVER, SelectFriendList.SAME_SERVER]
+        else:
+            scan_order = [SelectFriendList.SAME_SERVER, SelectFriendList.DIFFERENT_SERVER]
+
+        # 阶段一：两区探索，只记录不选卡
+        server_records: dict[SelectFriendList, dict] = {}
+        for server in scan_order:
+            logger.hr(f'探索 [{server.value}]', 2)
+            self._refresh_friend_list(server)
+            ap, jade = self._explore_record()
+            server_records[server] = {'ap': ap, 'jade': jade}
+            logger.info(f'[{server.value}] 探索记录 | 斗鱼:{ap} 太鼓:{jade}')
+
+        # 阶段二：对比两区记录
+        best = self._select_best_server(server_records, prefer=prefer)
+        if best is None:
+            logger.warning('同区与跨区均无合适结界卡')
+            return False
+
+        logger.hr(
+            f'最优区 [{best["server"].value}] | 档位{best["best_idx"]} '
+            f'{best["res_type"]}:{best["res_val"]} (斗鱼:{best["ap"]} 太鼓:{best["jade"]})',
+            2,
+        )
+
+        # 阶段三：切到最优区，按记录值确认选卡
+        self._refresh_friend_list(best['server'])
+        self.ap_max_num = best['ap']
+        self.jade_max_num = best['jade']
+        try:
+            if not self._select_by_record():
+                logger.warning('最优区未找到符合条件的卡（可能被其他人抢走）')
+                return False
+        finally:
+            self.ap_max_num, self.jade_max_num = 0, 0
+
+        return True
+
+    def _refresh_friend_list(self, target: SelectFriendList):
+        """
+        切换到目标区，并把列表刷新到头部（保持原有双切换的刷新套路）
+        同区：先滑到底 -> 切跨区 -> 切回同区
+        跨区：先滑到底 -> 切同区 -> 切回跨区
+        """
+        other = (SelectFriendList.DIFFERENT_SERVER
+                 if target == SelectFriendList.SAME_SERVER
+                 else SelectFriendList.SAME_SERVER)
+        self.switch_friend_list(target)
+        self.swipe(self.S_U_END, interval=3)
+        self.switch_friend_list(other)
+        self.switch_friend_list(target)
+
+    def _explore_record(self) -> tuple[int, int]:
+        """
+        仅探索当前区的结界卡最优值，不触发完美卡返回（记录满也继续）
+        :return: (斗鱼最大值, 太鼓最大值)
+        """
+        self.ap_max_num, self.jade_max_num = 0, 0
+        try:
+            self._current_select_best(explore_only=True)
+        finally:
+            ap, jade = self.ap_max_num, self.jade_max_num
+        # 归零避免污染下一轮
+        self.ap_max_num, self.jade_max_num = 0, 0
+        return ap, jade
+
+    def _select_best_server(self, records: dict, prefer: SelectFriendList) -> dict | None:
+        """
+        根据两区记录的斗鱼/太鼓档位，挑选最优区
+        档位小代表值更高/更优（0 是最优档，99 是低于所有预设）
+        比较规则：取每区 min(ap_idx, jade_idx) 作为该区最佳档位，档位低的胜出；
+                 相同则按偏好区 prefer；仍相同则默认同区
+        :return: {'server', 'res_type', 'res_val', 'ap', 'jade', 'best_idx'} 或 None
+        """
+        RESOURCE_PRESETS = {
+            '斗鱼': [151, 143, 134, 126, 101, 84],
+            '太鼓': [76, 76, 67, 67, 59, 50],
+        }
+        MAX_INDEX = 99
+
+        def get_idx(name, value):
+            presets = RESOURCE_PRESETS[name]
+            for idx, val in enumerate(presets):
+                if value >= val:
+                    return idx
+            return MAX_INDEX
+
+        summaries = {}
+        for server, rec in records.items():
+            ap_idx = get_idx('斗鱼', rec['ap'])
+            jade_idx = get_idx('太鼓', rec['jade'])
+            if ap_idx == MAX_INDEX and jade_idx == MAX_INDEX:
+                logger.info(f'[{server.value}] 斗鱼与太鼓均低于预设')
+                continue
+            # 同档位优先太鼓
+            if jade_idx <= ap_idx:
+                res_type, res_val, best_idx = '太鼓', rec['jade'], jade_idx
+            else:
+                res_type, res_val, best_idx = '斗鱼', rec['ap'], ap_idx
+            summaries[server] = {
+                'server': server,
+                'res_type': res_type,
+                'res_val': res_val,
+                'best_idx': best_idx,
+                'ap': rec['ap'],
+                'jade': rec['jade'],
+            }
+            logger.info(
+                f'[{server.value}] 综合档位 {best_idx} | 选 {res_type}@{res_val} '
+                f'(斗鱼 idx={ap_idx}, 太鼓 idx={jade_idx})'
+            )
+
+        if not summaries:
+            return None
+
+        # 先按档位升序，档位相同时偏好区优先，再相同则同区优先
+        def sort_key(item):
+            server, info = item
+            prefer_penalty = 0 if server == prefer else 1
+            same_penalty = 0 if server == SelectFriendList.SAME_SERVER else 1
+            return (info['best_idx'], prefer_penalty, same_penalty)
+
+        best_server, best_info = sorted(summaries.items(), key=sort_key)[0]
+        return best_info
+
+    def _select_by_record(self) -> bool:
+        """
+        基于已记录的最优值，在当前区按 _current_select_best 的确认模式选卡
+        """
+        RESOURCE_PRESETS = {
+            '斗鱼': [151, 143, 134, 126, 101, 84],
+            '太鼓': [76, 76, 67, 67, 59, 50],
+        }
+        MAX_INDEX = 99
+
+        def get_idx(name, value):
+            presets = RESOURCE_PRESETS[name]
+            for idx, val in enumerate(presets):
+                if value >= val:
+                    return idx
+            return MAX_INDEX
+
+        ap_idx = get_idx('斗鱼', self.ap_max_num)
+        jade_idx = get_idx('太鼓', self.jade_max_num)
+        if ap_idx == MAX_INDEX and jade_idx == MAX_INDEX:
+            return False
+        # 同档位优先太鼓
+        if jade_idx <= ap_idx:
+            res_type, target = '太鼓', self.jade_max_num
+        else:
+            res_type, target = '斗鱼', self.ap_max_num
+        logger.info(f'⚖️ 按记录确认选卡: {res_type} @ {target}')
+        return bool(self._current_select_best(res_type, target, selected_card=True))
 
     def _select_optimal_resource_card(self):
         """整合后的智能选卡主逻辑（无嵌套函数版）"""
@@ -451,15 +623,18 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 self.ap_max_num, self.jade_max_num = 0, 0
                 return False
 
-    def _current_select_best(self, best_card_type=None, best_card_num=0, selected_card=False):
+    def _current_select_best(self, best_card_type=None, best_card_num=0, selected_card=False,
+                              explore_only=False):
         """结界卡选择核心逻辑（集成版）
-        功能：滑动屏幕寻找最优资源卡，支持两种模式：
-        - 探索模式：记录当前遇到的最佳结界卡数值
-        - 确认模式：根据给定条件选择指定类型结界卡
+        功能：滑动屏幕寻找最优资源卡，支持三种模式：
+        - 探索模式(默认)：记录当前遇到的最佳结界卡数值，发现完美卡直接返回
+        - 确认模式(selected_card=True)：根据给定条件选择指定类型结界卡
+        - 纯记录模式(explore_only=True)：只记录最大值，不因发现完美卡提前返回，始终遍历到结束
 
         :param best_card_type: 目标卡类型('太鼓'/'斗鱼')
         :param best_card_num:  要求的最低数值
         :param selected_card:  是否处于确认选择模式
+        :param explore_only:   是否为纯记录模式
         :return: 找到符合条件返回True，否则None
         """
         # ============== 配置常量 ==============#
@@ -538,8 +713,8 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                         self.save_image(push_flag=False, wait_time=0, content=f'🎉 确认蹭卡（{card_type}: {card_value}）')
                         return True
                 else:  # 探索记录模式
-                    # 发现完美卡直接返回
-                    if card_value >= current_max:
+                    # 发现完美卡直接返回（纯记录模式不提前返回，继续遍历全部记录）
+                    if card_value >= current_max and not explore_only:
                         message = f'🎉 完美蹭卡 | {card_type}: {card_value}'
                         logger.info(message)
                         self.save_image(push_flag=False, wait_time=0, content=message)

@@ -81,6 +81,7 @@
   "battle_timeout_help": "单位秒,-1表示按照全局战斗配置,超时则自动退出对局",
   "same_server": "同区",
   "different_server": "跨区",
+  "both": "同区+跨区",
   "green_mark_type": "绿标类型",
   "choose": "选择",
   "name": "名称",
