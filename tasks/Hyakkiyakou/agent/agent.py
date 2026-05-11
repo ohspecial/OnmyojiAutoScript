@@ -4,11 +4,9 @@ from datetime import datetime
 from cached_property import cached_property
 
 from oashya.tracker import Tracker
-from oashya.labels import CLASSINDEX as CI
-from oashya.labels import id2label, id2name
 from module.logger import logger
 from module.hyakkiyakou import Debugger
-from tasks.Hyakkiyakou.agent.focus import Focus
+from tasks.Hyakkiyakou.agent.focus import Focus, _registry, _FORBIDDEN_IDS
 
 
 def generate_gaussian_patch(size=(300, 300), mean=0, std_dev=60):
@@ -87,18 +85,21 @@ class Agent:
         for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
             weight = 1.
             mu = 0.8 + (_cx * 0.2) / 1280
-            match _class:
-                case _ if CI.MIN_G <= _class <= CI.MAX_G: weight = weights[5]
-                case _ if CI.MIN_N <= _class <= CI.MAX_N: weight = weights[4]
-                case _ if _class != CI.R_008 and _class != CI.R_007 and (CI.MIN_R <= _class <= CI.MAX_R):
-                    weight = weights[3]  # 不要童男童女
-                case _ if CI.MIN_SR <= _class <= CI.MAX_SR: weight = weights[2]
-                case _ if CI.MIN_SSR <= _class <= CI.MAX_SSR: weight = 1.5 * weights[1]
-                case _ if CI.MIN_SP <= _class <= CI.MAX_SP: weight = 1.5 * weights[0]
-                # case CI.BUFF_005:  # freeze
-                #     weight = -1.
-                #     _cy += 100
-                case _: continue
+            # 通过 registry 查 tier，支持非连续 id
+            _info = _registry.classes.get(_class)
+            if _info is None:
+                continue
+            match _info.tier:
+                case "g": weight = weights[5]
+                case "n": weight = weights[4]
+                case "r":
+                    if _class in _FORBIDDEN_IDS:
+                        continue  # 不要童男童女
+                    weight = weights[3]
+                case "sr": weight = weights[2]
+                case "ssr": weight = 1.5 * weights[1]
+                case "sp": weight = 1.5 * weights[0]
+                case _: continue  # buff 等不参与
             for priority in priorities:  # 我的代码在你之上
                 if priority == _class:
                     weight = 1.7
@@ -149,7 +150,7 @@ class Agent:
             self.focus = None
             return
         if self.focus is None or self.focus != focus:
-            logger.info(f'Focus changed, now: {id2name(focus._class)}')
+            logger.info(f'Focus changed, now: {_registry.classes[focus._class].name}')
             self.focus = focus
             self.focus.set_omega(omega)
         elif self.focus == focus:

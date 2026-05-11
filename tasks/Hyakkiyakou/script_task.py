@@ -9,7 +9,7 @@ from cached_property import cached_property
 # Use cmd to install: ./toolkit/python.exe -m pip install -i https://pypi.org/simple/ oashya --trusted-host pypi.org
 # update oashya:  ./toolkit/python.exe -m pip install --upgrade oashya
 from oashya.tracker import Tracker
-from oashya.labels import label2id, CLASSINDEX as CI, id2name
+from tasks.Hyakkiyakou.agent.focus import _registry, _FORBIDDEN_IDS
 from oashya.utils import draw_tracks
 
 from module.exception import TaskEnd
@@ -70,7 +70,7 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
         else:
             str_priorities = str_priorities.replace(' ', '').replace('，', ',')
             try:
-                priorities = [label2id(s) for s in str_priorities.split(',')]
+                priorities = [_registry.by_label[s].id for s in str_priorities.split(',')]
             except Exception as e:
                 logger.error(f'Priority error: {str_priorities}')
                 logger.error(e)
@@ -136,26 +136,21 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
         SP > SSR > SR > R > N > G
         没有匹配到的返回 -1
         """
-        # G（呱太）
-        if CI.MIN_G <= class_id <= CI.MAX_G:
-            return 0
-        # N
-        if CI.MIN_N <= class_id <= CI.MAX_N:
-            return 1
-        # R（排除童男/童女）
-        if (CI.MIN_R <= class_id <= CI.MAX_R) and class_id not in (CI.R_007, CI.R_008):
-            return 2
-        # SR
-        if CI.MIN_SR <= class_id <= CI.MAX_SR:
-            return 3
-        # SSR
-        if CI.MIN_SSR <= class_id <= CI.MAX_SSR:
-            return 4
-        # SP
-        if CI.MIN_SP <= class_id <= CI.MAX_SP:
-            return 5
-        # 其他（buff/未收录 等）不参与排序
-        return -1
+        info = _registry.classes.get(class_id)
+        if info is None:
+            return -1
+        match info.tier:
+            case "g": return 0
+            case "n": return 1
+            case "r":
+                # 排除童男/童女（forbidden tag）
+                if class_id in _FORBIDDEN_IDS:
+                    return -1
+                return 2
+            case "sr": return 3
+            case "ssr": return 4
+            case "sp": return 5
+            case _: return -1  # buff 等不参与排序
 
     def _detect_current_rarity(self) -> tuple[int, int]:
         """
@@ -176,7 +171,7 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
                 best_class = _class
         if best_class != -1:
             logger.info(
-                f'Hyakki select: detect {id2name(_class)} '
+                f'Hyakki select: detect {_registry.classes[_class].name} '
                 f'with rarity score {score}'
             )
         else:

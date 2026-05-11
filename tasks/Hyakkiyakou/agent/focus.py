@@ -6,11 +6,24 @@ from cached_property import cached_property
 
 from module.logger import logger
 
-from oashya.labels import id2label, id2name
-from oashya.labels import CLASSINDEX as CI
+from hya.labels.registry import Registry
 
 # get buff status
 from tasks.Hyakkiyakou.slave.hya_slave import HyaBuff
+
+# ---------------------------------------------------------------------------
+# Module-level registry instance (single source of truth)
+# ---------------------------------------------------------------------------
+from pathlib import Path as _Path
+
+_LABELS_YAML = _Path(__file__).resolve().parents[3] / "hya" / "labels" / "labels.yaml"
+_registry = Registry.from_yaml(_LABELS_YAML)
+_registry.validate()
+
+# Pre-compute forbidden ids
+_FORBIDDEN_IDS: frozenset[int] = frozenset(
+    e.id for e in _registry.by_tag.get("forbidden", [])
+)
 
 
 class Focus:
@@ -34,8 +47,8 @@ class Focus:
         return f"""
 id: {self._id}
 class: {self._class}
-label: {id2label(self._class)}
-name: {id2name(self._class)}
+label: {_registry.classes[self._class].label}
+name: {_registry.classes[self._class].name}
 conf: {self._conf}
 xywh: ({self._cx}, {self._cy}, {self._w}, {self._h})
 velocity: {self._v}"""
@@ -56,8 +69,8 @@ velocity: {self._v}"""
         table.add_column("Value", style="green")
         table.add_row('id', str(self._id), 'conf', str(self._conf))
         table.add_row('class', str(self._class), 'xywh', f'({self._cx}, {self._cy}, {self._w}, {self._h})')
-        table.add_row('label', id2label(self._class), 'velocity', str(self._v))
-        table.add_row('name', f'{id2name(self._class)}', 'omega', str(self._omega))
+        table.add_row('label', _registry.classes[self._class].label, 'velocity', str(self._v))
+        table.add_row('name', _registry.classes[self._class].name, 'omega', str(self._omega))
         logger.print(table, justify='center')
 
     def update(self, focus):
@@ -88,9 +101,8 @@ velocity: {self._v}"""
 
         # ========= 新增：利用和 gamma() 一样的区间判断当前“打的对象”是不是 SSR/SP =========
         is_rare_ssr_sp = False
-        if CI.MIN_SSR <= target_class <= CI.MAX_SSR and self._omega > buff_omega:
-            is_rare_ssr_sp = True
-        elif CI.MIN_SP <= target_class <= CI.MAX_SP and self._omega > buff_omega:
+        target_tier = _registry.classes[target_class].tier if target_class in _registry.classes else ""
+        if (not buffed) and target_tier in ("ssr", "sp"):
             is_rare_ssr_sp = True
         _r = self.r(vector=state, omega=self._omega, omega_buff=self._omega_buff, is_rare_ssr_sp=is_rare_ssr_sp, freeze=freeze, is_buff=buffed)
         throw = True if _r > 0 else False
@@ -104,18 +116,26 @@ velocity: {self._v}"""
         max_v = 0
         max_class = 0
 
-        focus_is_ssr_sp = (CI.MIN_SSR <= self._class <= CI.MAX_SSR or CI.MIN_SP <= self._class <= CI.MAX_SP)
+        _focus_info = _registry.classes.get(self._class)
+        focus_is_ssr_sp = (_focus_info is not None and _focus_info.tier in ("ssr", "sp"))
 
         for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
             _current_omega = 0.
-            match _class:
-                case CI.BUFF_004: _current_omega = 2.2
-                case CI.BUFF_006: _current_omega = 2.0
-                case CI.BUFF_007: _current_omega = 2.0 if invite_friend and _cx <= 1000 else 0
-                case CI.BUFF_002: _current_omega = 2.0 if self._omega >= 1.5 else 0
-                case CI.BUFF_003: _current_omega = 2.0 if self._omega >= 1.5 and _cx <= 640 else 0
-                # case CI.BUFF_005: _current_omega = max(self._omega + 0.1, 3.0) if focus_is_ssr_sp and has_prob_up else 0 # 冻住，不许跑
-                case _: pass
+            _info = _registry.classes.get(_class)
+            if _info is None:
+                continue
+            _tags = _info.tags
+            if "buff_bean_gain" in _tags:
+                _current_omega = 2.2
+            elif "buff_prob_up" in _tags:
+                _current_omega = 2.0
+            elif "buff_friend_up" in _tags:
+                _current_omega = 2.0 if invite_friend and _cx <= 1000 else 0
+            elif "buff_slow" in _tags:
+                _current_omega = 2.0 if self._omega >= 1.5 else 0
+            elif "buff_throw_speed" in _tags:
+                _current_omega = 2.0 if self._omega >= 1.5 and _cx <= 640 else 0
+            # buff_freeze: currently not dispatched (parity with legacy commented-out case)
             if _current_omega > max_omega:
                 max_omega = _current_omega
                 max_cx = _cx

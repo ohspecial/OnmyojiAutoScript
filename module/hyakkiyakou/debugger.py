@@ -10,13 +10,12 @@ from pathlib import Path
 from numpy import uint8, fromfile
 from rich.table import Table
 from threading import Event, Lock, Thread
-from oashya.labels import id2label, CLASSIFY, CLASSINDEX, id2name
 from oashya.utils import draw_tracks
 from oashya.tracker import Tracker
 
 from tasks.base_task import BaseTask
 from module.logger import logger
-from tasks.Hyakkiyakou.agent.focus import Focus
+from tasks.Hyakkiyakou.agent.focus import Focus, _registry
 
 
 def test_track(show: bool = False):
@@ -100,15 +99,15 @@ class Debugger:
             self.hya_save_result_folder.mkdir(parents=True, exist_ok=True)
 
     @cached_property
-    def save_class(self) -> list[int]:
+    def save_class(self) -> frozenset[int]:
         """
-        需要保存的类别
+        需要保存的类别：SP + SSR + G，排除 forbidden（支持非连续 id）
         @return:
         """
-        sp = [i for i in range(CLASSINDEX.MIN_SP, CLASSINDEX.MAX_SP + 1)]
-        ssr = [i for i in range(CLASSINDEX.MIN_SSR, CLASSINDEX.MAX_SSR + 1)]
-        g = [i for i in range(CLASSINDEX.MIN_G, CLASSINDEX.MAX_G + 1)]
-        return sp + ssr + g
+        return frozenset(
+            info.id for info in _registry.classes.values()
+            if info.tier in ("sp", "ssr", "g") and "forbidden" not in info.tags
+        )
 
     def _reset_thread_env(self):
         logger.info('Reset Debugger Thread Environment')
@@ -182,8 +181,8 @@ class Debugger:
             try:
                 table.add_row('id', str(f._id), 'conf', f'{f._conf:.2f}')
                 table.add_row('class', str(f._class), 'xywh', f'({f._cx}, {f._cy}, {f._w}, {f._h})')
-                table.add_row('label', id2label(f._class), 'velocity', f'{f._v:.2f}')
-                table.add_row('name', f'{id2name(f._class)}', 'omega', str(f._omega))
+                table.add_row('label', _registry.classes[f._class].label, 'velocity', f'{f._v:.2f}')
+                table.add_row('name', _registry.classes[f._class].name, 'omega', str(f._omega))
             except Exception as e:
                 pass
         table.add_row('detect cost', f'{(tracker.detect_time.total_seconds() * 1000):.2f}ms',
