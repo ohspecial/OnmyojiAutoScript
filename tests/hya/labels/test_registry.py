@@ -22,7 +22,7 @@ from module.hyakkiyakou.class_info import ClassInfo, CANONICAL_TAGS
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LABELS_YAML = PROJECT_ROOT / "hya" / "labels" / "labels.yaml"
 
-VALID_PREFIXES = ("buff", "n", "g", "r", "sr", "ssr", "sp")
+VALID_PREFIXES = ("buff", "n", "g", "r", "sr", "ssr", "sp", "ur")
 
 
 def _make_entry(

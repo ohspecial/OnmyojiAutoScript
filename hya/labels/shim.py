@@ -27,6 +27,9 @@ _registry.validate()
 # Tier dicts: dict[str, str] mapping {label: name} filtered by tier
 # ---------------------------------------------------------------------------
 
+ur: dict[str, str] = {
+    e.label: e.name for e in _registry.entries if e.tier == "ur"
+}
 sp: dict[str, str] = {
     e.label: e.name for e in _registry.entries if e.tier == "sp"
 }
@@ -47,6 +50,9 @@ g: dict[str, str] = {
 }
 buff: dict[str, str] = {
     e.label: e.name for e in _registry.entries if e.tier == "buff"
+}
+ur: dict[str, str] = {
+    e.label: e.name for e in _registry.entries if e.tier == "ur"
 }
 
 # ---------------------------------------------------------------------------
@@ -118,7 +124,7 @@ class _ClassIndexMeta(type):
             tier_upper = name[4:]  # e.g. "SP", "SSR", "BUFF", etc.
             tier = tier_upper.lower()
             # Validate it's a known tier
-            valid_tiers = {"buff", "n", "g", "r", "sr", "ssr", "sp"}
+            valid_tiers = {"buff", "n", "g", "r", "sr", "ssr", "sp", "ur"}
             if tier not in valid_tiers:
                 raise AttributeError(
                     f"'CLASSINDEX' has no attribute '{name}'"

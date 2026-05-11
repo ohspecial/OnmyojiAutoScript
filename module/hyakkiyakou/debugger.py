@@ -106,7 +106,7 @@ class Debugger:
         """
         return frozenset(
             info.id for info in _registry.classes.values()
-            if info.tier in ("sp", "ssr", "g") and "forbidden" not in info.tags
+            if info.tier in ("ur", "sp", "ssr", "g") and "forbidden" not in info.tags
         )
 
     def _reset_thread_env(self):

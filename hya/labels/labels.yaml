@@ -219,3 +219,34 @@ entries:
   - {id: 216, label: sp_033, name: "本真三尾狐", tier: sp, tags: [], since_version: v0.0}
   - {id: 217, label: sp_034, name: "鲸汐千姬", tier: sp, tags: [], since_version: v0.0}
   - {id: 218, label: sp_035, name: "福悦座敷童子", tier: sp, tags: [], since_version: v0.0}
+  - {id: 219, label: n_013, name: "生剥鬼", tier: n, tags: [], since_version: v0.0}
+  - {id: 220, label: sr_066, name: "湍津姬", tier: sr, tags: [], since_version: v0.0}
+  - {id: 221, label: ssr_047, name: "猫川", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 222, label: ssr_048, name: "祸津神", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 223, label: ssr_049, name: "龙珏", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 224, label: ssr_050, name: "封阳君", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 225, label: ssr_051, name: "鬼金羊", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 226, label: ssr_052, name: "歌留多", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 227, label: ssr_053, name: "卑弥呼", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 228, label: ssr_054, name: "荒骷髅", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 229, label: ssr_055, name: "雪御前", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 230, label: ssr_056, name: "平将门", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 231, label: ssr_057, name: "神无月", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 232, label: ssr_058, name: "葛叶", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 233, label: ssr_059, name: "市加美", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 234, label: ssr_060, name: "思金神", tier: ssr, tags: [], since_version: v0.0}
+  - {id: 235, label: sp_036, name: "晨晖惠比寿", tier: sp, tags: [], since_version: v0.0}
+  - {id: 236, label: sp_037, name: "龙吟铃鹿御前", tier: sp, tags: [], since_version: v0.0}
+  - {id: 237, label: sp_038, name: "遥念烟烟罗", tier: sp, tags: [], since_version: v0.0}
+  - {id: 238, label: sp_039, name: "心友犬神", tier: sp, tags: [], since_version: v0.0}
+  - {id: 239, label: sp_040, name: "神酿星熊童子", tier: sp, tags: [], since_version: v0.0}
+  - {id: 240, label: sp_041, name: "瑶音紧那罗", tier: sp, tags: [], since_version: v0.0}
+  - {id: 241, label: sp_042, name: "晴思日和坊", tier: sp, tags: [], since_version: v0.0}
+  - {id: 242, label: sp_043, name: "时曜泷夜叉姬", tier: sp, tags: [], since_version: v0.0}
+  - {id: 243, label: sp_044, name: "云间不见岳", tier: sp, tags: [], since_version: v0.0}
+  - {id: 244, label: sp_045, name: "妙主九命猫", tier: sp, tags: [], since_version: v0.0}
+  - {id: 245, label: sp_046, name: "梦引蝴蝶精", tier: sp, tags: [], since_version: v0.0}
+  - {id: 246, label: sp_047, name: "梦山白藏主", tier: sp, tags: [], since_version: v0.0}
+  - {id: 247, label: sp_048, name: "灼华桃花妖", tier: sp, tags: [], since_version: v0.0}
+  - {id: 248, label: sp_049, name: "蚀月吸血姬", tier: sp, tags: [], since_version: v0.0}
+  - {id: 249, label: ur_001, name: "妖刀姬·绯夜猎刃", tier: ur, tags: [], since_version: v0.0}

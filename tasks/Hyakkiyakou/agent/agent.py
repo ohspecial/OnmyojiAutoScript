@@ -77,7 +77,7 @@ class Agent:
               priorities: list[int] = []) -> np.ndarray:
         """
         @param tracks:
-        @param weights: sp, ssr, sr, r, n, g
+        @param weights: ur, sp, ssr, sr, r, n, g
         @param priorities:
         @return:
         """
@@ -90,15 +90,16 @@ class Agent:
             if _info is None:
                 continue
             match _info.tier:
-                case "g": weight = weights[5]
-                case "n": weight = weights[4]
+                case "g": weight = weights[6]
+                case "n": weight = weights[5]
                 case "r":
                     if _class in _FORBIDDEN_IDS:
                         continue  # 不要童男童女
-                    weight = weights[3]
-                case "sr": weight = weights[2]
-                case "ssr": weight = 1.5 * weights[1]
-                case "sp": weight = 1.5 * weights[0]
+                    weight = weights[4]
+                case "sr": weight = weights[3]
+                case "ssr": weight = 1.5 * weights[2]
+                case "sp": weight = 1.5 * weights[1]
+                case "ur": weight = weights[0]
                 case _: continue  # buff 等不参与
             for priority in priorities:  # 我的代码在你之上
                 if priority == _class:

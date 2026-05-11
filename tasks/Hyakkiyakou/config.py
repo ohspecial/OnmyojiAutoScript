@@ -31,6 +31,7 @@ class HyakkiyakouConfig(ConfigBase):
     # 自动调整豆子数量
     hya_auto_bean: bool = Field(default=False, description='hya_auto_bean_help')
     hya_priorities: str = Field(default='', description='hya_priorities_help')
+    hya_ur: float = Field(default=1., description='hya_ur_help')
     hya_sp: float = Field(default=1., description='hya_sp_help')
     hya_ssr: float = Field(default=1., description='hya_ssr_help')
     hya_sr: float = Field(default=0.7, description='hya_sr_help')

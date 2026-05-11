@@ -57,13 +57,14 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
     @cached_property
     def agent(self) -> Agent:
         hya_config = self._config.hyakkiyakou_config
+        ur = hya_config.hya_ur
         sp = hya_config.hya_sp
         ssr = hya_config.hya_ssr
         sr = hya_config.hya_sr
         r = hya_config.hya_r
         n = hya_config.hya_n
         g = hya_config.hya_g
-        weights: list = [sp, ssr, sr, r, n, g]
+        weights: list = [ur, sp, ssr, sr, r, n, g]
         str_priorities: str = hya_config.hya_priorities
         if str_priorities == '':
             priorities = []
@@ -150,6 +151,7 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
             case "sr": return 3
             case "ssr": return 4
             case "sp": return 5
+            case "ur": return 6
             case _: return -1  # buff 等不参与排序
 
     def _detect_current_rarity(self) -> tuple[int, int]:

@@ -102,7 +102,7 @@ velocity: {self._v}"""
         # ========= 新增：利用和 gamma() 一样的区间判断当前“打的对象”是不是 SSR/SP =========
         is_rare_ssr_sp = False
         target_tier = _registry.classes[target_class].tier if target_class in _registry.classes else ""
-        if (not buffed) and target_tier in ("ssr", "sp"):
+        if (not buffed) and target_tier in ("ssr", "sp", "ur"):
             is_rare_ssr_sp = True
         _r = self.r(vector=state, omega=self._omega, omega_buff=self._omega_buff, is_rare_ssr_sp=is_rare_ssr_sp, freeze=freeze, is_buff=buffed)
         throw = True if _r > 0 else False
@@ -117,7 +117,7 @@ velocity: {self._v}"""
         max_class = 0
 
         _focus_info = _registry.classes.get(self._class)
-        focus_is_ssr_sp = (_focus_info is not None and _focus_info.tier in ("ssr", "sp"))
+        focus_is_ssr_sp = (_focus_info is not None and _focus_info.tier in ("ssr", "sp", "ur"))
 
         for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
             _current_omega = 0.

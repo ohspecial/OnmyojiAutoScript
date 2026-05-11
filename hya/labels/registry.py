@@ -13,11 +13,11 @@ from typing import Union
 
 import yaml
 
-from module.hyakkiyakou.class_info import CANONICAL_TAGS, ClassInfo, Tier
+from hya.labels.class_info import CANONICAL_TAGS, ClassInfo, Tier
 from hya.labels.legacy_snapshot import LEGACY_SNAPSHOT
 
 # Regex that every label must satisfy.
-_LABEL_RE = re.compile(r"^(buff|n|g|r|sr|ssr|sp)_\d{3,4}$")
+_LABEL_RE = re.compile(r"^(buff|n|g|r|sr|ssr|sp|ur)_\d{3,4}$")
 
 
 @dataclass
@@ -133,13 +133,13 @@ class Registry:
                 )
 
     def _validate_label_regex(self) -> None:
-        """Every label must match ^(buff|n|g|r|sr|ssr|sp)_\\d{{3,4}}$."""
+        """Every label must match ^(buff|n|g|r|sr|ssr|sp|ur)_\\d{{3,4}}$."""
         for entry in self.entries:
             if not _LABEL_RE.match(entry.label):
                 raise ValueError(
                     f"Label format violation: entry id={entry.id} has "
                     f"label={entry.label!r} which does not match "
-                    f"'^(buff|n|g|r|sr|ssr|sp)_\\d{{3,4}}$'"
+                    f"'^(buff|n|g|r|sr|ssr|sp|ur)_\\d{{3,4}}$'"
                 )
 
     def _validate_tier_prefix(self) -> None:
