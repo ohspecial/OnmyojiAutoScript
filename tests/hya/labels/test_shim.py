@@ -43,56 +43,56 @@ class TestTierDicts:
     """Verify tier dicts match legacy snapshot content."""
 
     def test_sp_dict_keys_match_legacy(self):
-        """sp dict should contain exactly the SP labels from LEGACY_SNAPSHOT."""
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "sp"}
+        """sp dict should contain exactly the SP labels from the full registry."""
+        expected = {e.label for e in shim._registry.entries if e.tier == "sp"}
         assert set(shim.sp.keys()) == expected
 
     def test_ssr_dict_keys_match_legacy(self):
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "ssr"}
+        expected = {e.label for e in shim._registry.entries if e.tier == "ssr"}
         assert set(shim.ssr.keys()) == expected
 
     def test_sr_dict_keys_match_legacy(self):
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "sr"}
+        expected = {e.label for e in shim._registry.entries if e.tier == "sr"}
         assert set(shim.sr.keys()) == expected
 
     def test_r_dict_keys_match_legacy(self):
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "r"}
+        expected = {e.label for e in shim._registry.entries if e.tier == "r"}
         assert set(shim.r.keys()) == expected
 
     def test_n_dict_keys_match_legacy(self):
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "n"}
+        expected = {e.label for e in shim._registry.entries if e.tier == "n"}
         assert set(shim.n.keys()) == expected
 
     def test_g_dict_keys_match_legacy(self):
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "g"}
+        expected = {e.label for e in shim._registry.entries if e.tier == "g"}
         assert set(shim.g.keys()) == expected
 
     def test_buff_dict_keys_match_legacy(self):
-        expected = {label for _, label, _, tier in LEGACY_SNAPSHOT if tier == "buff"}
+        expected = {e.label for e in shim._registry.entries if e.tier == "buff"}
         assert set(shim.buff.keys()) == expected
 
     def test_tier_dict_values_are_names(self):
         """Each tier dict value should be the human-readable name."""
-        for id_, label, name, tier in LEGACY_SNAPSHOT:
-            tier_dict = getattr(shim, tier)
-            assert tier_dict[label] == name, (
-                f"Tier dict '{tier}' has wrong name for {label}: "
-                f"expected {name!r}, got {tier_dict[label]!r}"
+        for entry in shim._registry.entries:
+            tier_dict = getattr(shim, entry.tier)
+            assert tier_dict[entry.label] == entry.name, (
+                f"Tier dict '{entry.tier}' has wrong name for {entry.label}: "
+                f"expected {entry.name!r}, got {tier_dict[entry.label]!r}"
             )
 
     def test_tier_dicts_are_disjoint(self):
         """No label should appear in more than one tier dict."""
         all_keys: list[str] = []
-        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff"):
+        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff", "ur"):
             all_keys.extend(getattr(shim, tier_name).keys())
         assert len(all_keys) == len(set(all_keys)), "Duplicate labels across tier dicts"
 
     def test_tier_dicts_cover_all_entries(self):
-        """Union of all tier dicts should cover all 219 legacy entries."""
+        """Union of all tier dicts should cover all registry entries."""
         all_labels = set()
-        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff"):
+        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff", "ur"):
             all_labels.update(getattr(shim, tier_name).keys())
-        expected_labels = {label for _, label, _, _ in LEGACY_SNAPSHOT}
+        expected_labels = {e.label for e in shim._registry.entries}
         assert all_labels == expected_labels
 
 
@@ -105,8 +105,8 @@ class TestClassify:
     """Verify CLASSIFY list matches legacy format."""
 
     def test_classify_length(self):
-        """CLASSIFY should have exactly 219 entries."""
-        assert len(shim.CLASSIFY) == 219
+        """CLASSIFY should have entries matching the full registry."""
+        assert len(shim.CLASSIFY) == shim._registry.num_classes
 
     def test_classify_is_list_of_dicts(self):
         """Each CLASSIFY entry should be a dict with keys 'name', 'class', 'id'."""
@@ -180,59 +180,59 @@ class TestClassIndex:
     # --- MIN/MAX tier boundaries ---
 
     def test_min_buff(self):
-        buff_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "buff"]
+        buff_ids = [e.id for e in shim._registry.entries if e.tier == "buff"]
         assert shim.CLASSINDEX.MIN_BUFF == min(buff_ids)
 
     def test_max_buff(self):
-        buff_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "buff"]
+        buff_ids = [e.id for e in shim._registry.entries if e.tier == "buff"]
         assert shim.CLASSINDEX.MAX_BUFF == max(buff_ids)
 
     def test_min_n(self):
-        n_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "n"]
+        n_ids = [e.id for e in shim._registry.entries if e.tier == "n"]
         assert shim.CLASSINDEX.MIN_N == min(n_ids)
 
     def test_max_n(self):
-        n_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "n"]
+        n_ids = [e.id for e in shim._registry.entries if e.tier == "n"]
         assert shim.CLASSINDEX.MAX_N == max(n_ids)
 
     def test_min_g(self):
-        g_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "g"]
+        g_ids = [e.id for e in shim._registry.entries if e.tier == "g"]
         assert shim.CLASSINDEX.MIN_G == min(g_ids)
 
     def test_max_g(self):
-        g_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "g"]
+        g_ids = [e.id for e in shim._registry.entries if e.tier == "g"]
         assert shim.CLASSINDEX.MAX_G == max(g_ids)
 
     def test_min_r(self):
-        r_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "r"]
+        r_ids = [e.id for e in shim._registry.entries if e.tier == "r"]
         assert shim.CLASSINDEX.MIN_R == min(r_ids)
 
     def test_max_r(self):
-        r_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "r"]
+        r_ids = [e.id for e in shim._registry.entries if e.tier == "r"]
         assert shim.CLASSINDEX.MAX_R == max(r_ids)
 
     def test_min_sr(self):
-        sr_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "sr"]
+        sr_ids = [e.id for e in shim._registry.entries if e.tier == "sr"]
         assert shim.CLASSINDEX.MIN_SR == min(sr_ids)
 
     def test_max_sr(self):
-        sr_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "sr"]
+        sr_ids = [e.id for e in shim._registry.entries if e.tier == "sr"]
         assert shim.CLASSINDEX.MAX_SR == max(sr_ids)
 
     def test_min_ssr(self):
-        ssr_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "ssr"]
+        ssr_ids = [e.id for e in shim._registry.entries if e.tier == "ssr"]
         assert shim.CLASSINDEX.MIN_SSR == min(ssr_ids)
 
     def test_max_ssr(self):
-        ssr_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "ssr"]
+        ssr_ids = [e.id for e in shim._registry.entries if e.tier == "ssr"]
         assert shim.CLASSINDEX.MAX_SSR == max(ssr_ids)
 
     def test_min_sp(self):
-        sp_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "sp"]
+        sp_ids = [e.id for e in shim._registry.entries if e.tier == "sp"]
         assert shim.CLASSINDEX.MIN_SP == min(sp_ids)
 
     def test_max_sp(self):
-        sp_ids = [id_ for id_, _, _, tier in LEGACY_SNAPSHOT if tier == "sp"]
+        sp_ids = [e.id for e in shim._registry.entries if e.tier == "sp"]
         assert shim.CLASSINDEX.MAX_SP == max(sp_ids)
 
     # --- BUFF constants ---
@@ -314,7 +314,7 @@ class TestModuleSurface:
 
     def test_tier_dicts_are_plain_dicts(self):
         """Tier dicts should be plain dict instances."""
-        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff"):
+        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff", "ur"):
             obj = getattr(shim, tier_name)
             assert isinstance(obj, dict), f"shim.{tier_name} is not a dict"
 

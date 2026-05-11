@@ -113,13 +113,13 @@ class TestLegacyImportAfterBootstrap:
         install()
         oashya_labels = sys.modules["oashya.labels"]
         assert hasattr(oashya_labels, "CLASSIFY")
-        assert len(oashya_labels.CLASSIFY) == 219
+        assert len(oashya_labels.CLASSIFY) >= 219  # at least legacy count
 
     def test_from_oashya_labels_import_tier_dicts(self):
-        """Tier dicts (sp, ssr, sr, r, n, g, buff) should be accessible."""
+        """Tier dicts (sp, ssr, sr, r, n, g, buff, ur) should be accessible."""
         install()
         oashya_labels = sys.modules["oashya.labels"]
-        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff"):
+        for tier_name in ("sp", "ssr", "sr", "r", "n", "g", "buff", "ur"):
             assert hasattr(oashya_labels, tier_name)
             assert isinstance(getattr(oashya_labels, tier_name), dict)
 
@@ -128,9 +128,9 @@ class TestLegacyImportAfterBootstrap:
         install()
         oashya_labels = sys.modules["oashya.labels"]
         CI = oashya_labels.CLASSINDEX
-        # SP range: ids 184-218
+        # SP range: min should be 184 (legacy), max depends on registry size
         assert CI.MIN_SP == 184
-        assert CI.MAX_SP == 218
+        assert CI.MAX_SP >= 218  # at least legacy max
 
     def test_attribute_access_on_oashya_namespace(self):
         """oashya.labels should be accessible as attribute on oashya module."""

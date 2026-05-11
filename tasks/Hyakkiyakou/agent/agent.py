@@ -62,7 +62,7 @@ class Agent:
             'auto_bean': False
         }
         self.strategy = strategy
-        self.weights: list[float] = strategy.get('weights', [1., 1., 0.7, 0.3, 0., 0.])
+        self.weights: list[float] = strategy.get('weights', [1., 1., 1., 0.7, 0.3, 0., 0.])
         self.priorities: list[int] = strategy.get('priorities', [])
         self.invite_friend: bool = strategy.get('invite_friend', False)
         self.auto_bean: bool = strategy.get('auto_bean', False)

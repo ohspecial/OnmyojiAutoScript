@@ -51,9 +51,6 @@ g: dict[str, str] = {
 buff: dict[str, str] = {
     e.label: e.name for e in _registry.entries if e.tier == "buff"
 }
-ur: dict[str, str] = {
-    e.label: e.name for e in _registry.entries if e.tier == "ur"
-}
 
 # ---------------------------------------------------------------------------
 # CLASSIFY: list[dict] in id order — each dict has keys "name", "class", "id"
