@@ -3,11 +3,7 @@
 # github https://github.com/runhey
 import time
 
-import cv2
-import numpy as np
-
 from datetime import datetime, timedelta
-from numpy import uint8, fromfile
 from random import choice
 from cached_property import cached_property
 # Use cmd to install: ./toolkit/python.exe -m pip install -i https://pypi.org/simple/ oashya --trusted-host pypi.org
@@ -19,35 +15,16 @@ from oashya.utils import draw_tracks
 from module.exception import TaskEnd
 from module.logger import logger
 from module.exception import RequestHumanTakeover
+from tasks.Component.SwitchOnmyoji.switch_onmyoji import SwitchOnmyoji
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_hyakkiyakou
-from tasks.Hyakkiyakou.config import Hyakkiyakou as HyakkiyakouConfig
+from tasks.GameUi.page import page_hyakkiyakou, page_main, page_onmyodo
 from tasks.Hyakkiyakou.config import InferenceEngine, ModelPrecision
-from tasks.Hyakkiyakou.assets import HyakkiyakouAssets
 from tasks.Hyakkiyakou.agent.agent import Agent
 from tasks.Hyakkiyakou.slave.hya_slave import HyaSlave
-from tasks.Hyakkiyakou.debugger import Debugger
+from module.hyakkiyakou import Debugger
 
 
-def plot_save(image, boxes):
-    color_palette = np.random.uniform(0, 255, size=(226, 3))
-    for box in boxes:
-        _cls = box[0]
-        _scores = box[1]
-        _x, _y, _w, _h = box[2]
-        x1 = int(_x - _w / 2)
-        y1 = int(_y - _h / 2)
-        x2 = int(_x + _w / 2)
-        y2 = int(_y + _h / 2)
-        cv2.rectangle(image, (x1, y1), (x2, y2), color_palette[_cls], 2)
-        #
-        cv2.putText(image, f'{_cls} {_scores:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_palette[_cls],
-                    2)
-    save_file = './tasks/Hyakkiyakou/temp/image.png'
-    cv2.imwrite(save_file, image)
-
-
-class ScriptTask(GameUi, HyaSlave):
+class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
 
     @property
     def _config(self):
@@ -124,9 +101,9 @@ class ScriptTask(GameUi, HyaSlave):
         limit_time = self._config.hyakkiyakou_config.hya_limit_time
         self.limit_time: timedelta = timedelta(hours=limit_time.hour, minutes=limit_time.minute,
                                                seconds=limit_time.second)
-        self.ui_get_current_page()
-        self.ui_goto(page_hyakkiyakou)
-
+        self.goto_page(page_onmyodo)
+        self.switch_onmyoji(self._config.hyakkiyakou_config.hya_onmyoji)
+        self.goto_page(page_hyakkiyakou)
 
         while 1:
             if hya_count >= self.limit_count:
@@ -138,8 +115,8 @@ class ScriptTask(GameUi, HyaSlave):
 
             self.one()
             hya_count += 1
-            logger.info(f'Hyakkiyakou count: {hya_count}')
-
+            logger.info(f'count: {hya_count}/{self.limit_count}')
+            logger.info(f'time: {(datetime.now() - self.start_time).total_seconds():.1f}s/{self.limit_time.total_seconds()}s')
 
         while 1:
             self.screenshot()
@@ -256,7 +233,7 @@ class ScriptTask(GameUi, HyaSlave):
             if self.appear_then_click(self.I_HSTART, interval=2):
                 continue
             if not self.appear(self.I_HSELECTED) and getattr(self, '_best_boss_button', None) is not None:
-                self.click(self._best_boss_button, interval=2) # 保险：如果因为某些原因还没处于“已选中”状态，就再点一次最佳按钮
+                self.click(self._best_boss_button, interval=2)  # 保险：如果因为某些原因还没处于“已选中”状态，就再点一次最佳按钮
                 continue
         self.device.stuck_record_add('BATTLE_STATUS_S')
         # 正式开始
@@ -335,4 +312,3 @@ if __name__ == '__main__':
     # from debugger import test_track
     # test_track(show=False)
     pass
-

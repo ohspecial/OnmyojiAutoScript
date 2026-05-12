@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from enum import Enum
+from tasks.Component.SwitchOnmyoji.config import Onmyoji
 
 from tasks.Component.config_scheduler import Scheduler
 from tasks.Component.config_base import ConfigBase, Time, dynamic_hide
@@ -9,16 +10,13 @@ class ModelPrecision(str, Enum):
     FP32 = 'FP32'
     INT8 = 'INT8'
 
-
 class InferenceEngine(str, Enum):
     ONNXRUNTIME = 'Onnxruntime'
     TENSORRT = 'TensorRT'
 
-
 class ScreenshotMethod(str, Enum):
     WINDOW_BACKGROUND = 'window_background'
     NEMU_IPC = 'nemu_ipc'
-
 
 class ControlMethod(str, Enum):
     MINITOUCH = 'minitouch'
@@ -29,6 +27,7 @@ class HyakkiyakouConfig(ConfigBase):
     hya_limit_time: Time = Field(default=Time(minute=20), description='hya_limit_time_help')
     hya_limit_count: int = Field(default=10, description='hya_limit_count_help')
     hya_invite_friend: bool = Field(default=False, description='hya_invite_friend_help')
+    hya_onmyoji: Onmyoji = Field(default=Onmyoji.KAGURA, description='切换阴阳师')
     # 自动调整豆子数量
     hya_auto_bean: bool = Field(default=False, description='hya_auto_bean_help')
     hya_priorities: str = Field(default='', description='hya_priorities_help')
@@ -58,7 +57,7 @@ class DebugConfig(ConfigBase):
     # 输出更多调试信息， 给使用者显示的
     hya_info: bool = Field(default=False, description='hya_info_help')
     # 保存图片，拿去回喂给模型
-    continuous_learning: bool = Field(default=True, description='continuous_learning_help')
+    continuous_learning: bool = Field(default=False, description='continuous_learning_help')
     # 保存每一张票的结果
     hya_save_result: bool = Field(default=False, description='hya_save_result_help')
     # 单独的设定截屏间隔, 单位ms
@@ -73,9 +72,18 @@ class DebugConfig(ConfigBase):
     hide_fields = dynamic_hide('continuous_learning')
 
 
+    @field_validator('continuous_learning', mode='after')
+    @classmethod
+    def false_continuous_learning(cls, v):
+        if v:
+            return False
+        return False
+
 
 class Hyakkiyakou(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
     hyakkiyakou_config: HyakkiyakouConfig = Field(default_factory=HyakkiyakouConfig)
     hyakkiyakou_models: HyakkiyakouModels = Field(default_factory=HyakkiyakouModels)
     debug_config: DebugConfig = Field(default_factory=DebugConfig)
+
+
