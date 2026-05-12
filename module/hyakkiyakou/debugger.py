@@ -144,12 +144,7 @@ class Debugger:
         return _class in self.save_class
 
     def deal_learning(self, image, tracks: list):
-        save_flag: bool = False
-        for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
-            if self.check_class(_class):
-                save_flag = True
-                break
-        if not save_flag:
+        if not tracks:
             return
         time_now_image_name = f'hya_{int(time.time() * 1000)}'
         self.images_cache[time_now_image_name] = image
