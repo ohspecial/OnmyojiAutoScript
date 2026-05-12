@@ -69,15 +69,15 @@ class DebugConfig(ConfigBase):
     hya_control_method: ControlMethod = Field(default=ControlMethod.WINDOW_MESSAGE,
                                               description='hya_control_method')
 
-    hide_fields = dynamic_hide('continuous_learning')
+    # hide_fields = dynamic_hide('continuous_learning')
 
 
-    @field_validator('continuous_learning', mode='after')
-    @classmethod
-    def false_continuous_learning(cls, v):
-        if v:
-            return False
-        return False
+    # @field_validator('continuous_learning', mode='after')
+    # @classmethod
+    # def false_continuous_learning(cls, v):
+    #     if v:
+    #         return False
+    #     return False
 
 
 class Hyakkiyakou(ConfigBase):
