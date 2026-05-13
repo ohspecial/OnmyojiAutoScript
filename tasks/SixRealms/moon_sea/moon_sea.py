@@ -1,5 +1,6 @@
 import re
 from module.logger import logger
+from tasks.GameUi.default_pages import random_click
 
 from tasks.SixRealms.moon_sea.map import MoonSeaMap
 from tasks.SixRealms.moon_sea.l101 import MoonSeaL101
@@ -26,6 +27,9 @@ class MoonSea(MoonSeaMap, MoonSeaL101, MoonSeaL102, MoonSeaL103, MoonSeaL104, Mo
                 self.boss_team_lock()
                 if self.boss_battle():
                     break
+                continue
+            if self.appear(self.I_EXIT_SIXREALMS):  # 可能多点到退出了, 补救一下
+                self.click(random_click(ltrb=(True, False, False, False)), interval=1.2)
                 continue
             remain_turns = self.O_REMAIN_TURNS.ocr_single(self.device.image)
             match = re.search(r'\d{1,2}', remain_turns)
@@ -161,8 +165,7 @@ class MoonSea(MoonSeaMap, MoonSeaL101, MoonSeaL102, MoonSeaL103, MoonSeaL104, Mo
                 self.device.stuck_record_add('BATTLE_STATUS_S')
                 continue
         logger.info('Boss battle end')
-        if self.wait_until_appear(self.I_BOSS_SHUTU, wait_time=20):
-            self.ui_click(self.I_BOSS_SHUTU, stop=self.I_MSTART)
+        self.ui_click_until_appear_or_timeout(random_click(ltrb=(True, True, False, True)), self.I_MSTART, timeout=10)
         return True
 
 

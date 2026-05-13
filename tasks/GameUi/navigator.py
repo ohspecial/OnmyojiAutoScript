@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from module.base.decorator import run_once
 from tasks.GlobalGame.assets import GlobalGameAssets
 
@@ -744,16 +745,13 @@ class GameUi(BaseTask, GameUiAssets):
             skip_first_screenshot = False
 
             if current is None:
-                logger.warning(
-                    "Current page detect miss after scoped/full fallback, "
-                    f"try close unknown pages: scoped={sorted(self._navigation_detect_categories(destination))}, "
-                    f"target={destination.key}"
-                )
                 if self.close_unknown_pages(skip_first_screenshot=False):
                     progress_timer.reset()
                     last_progress_signature = ("close_unknown", destination.key)
                     last_detected_page_key = None
                     reset_repeated_transition_failures()
+                    # 关掉未知界面后等待页面变化, 防止多次识别到未知界面
+                    time.sleep(random.randrange(8, 16, 1)/10)
                 elif progress_timer.reached():
                     self._log_navigation_timeout(
                         destination,
