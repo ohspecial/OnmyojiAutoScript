@@ -55,8 +55,8 @@
   },
   {
     "itemName": "sca_res_sea",
-    "roiFront": "1152,11,80,38",
-    "roiBack": "1152,11,80,38",
+    "roiFront": "1140,11,80,38",
+    "roiBack": "1140,11,80,38",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",

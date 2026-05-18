@@ -269,7 +269,7 @@ class RichManAssets:
 
 	# Ocr Rule Assets
 	# 蛇皮剩余可买的 
-	O_SCA_NUMBER_OROCHI = RuleOcr(roi=(43,323,28,17), area=(43,323,28,17), mode="Digit", method="Default", keyword="", name="sca_number_orochi")
+	O_SCA_NUMBER_OROCHI = RuleOcr(roi=(44,322,28,18), area=(44,322,28,18), mode="Digit", method="Default", keyword="", name="sca_number_orochi")
 	# 首领御魂剩余可买的 
 	O_SCA_NUMBER_DEMON = RuleOcr(roi=(627,319,30,25), area=(627,319,30,25), mode="Quantity", method="Default", keyword="", name="sca_number_demon")
 	# 永生之海 
@@ -281,7 +281,7 @@ class RichManAssets:
 	# 首领御魂数量 
 	O_SCA_RES_DEMON = RuleOcr(roi=(969,10,86,35), area=(969,10,86,35), mode="Digit", method="Default", keyword="", name="sca_res_demon")
 	# 永生之海 
-	O_SCA_RES_SEA = RuleOcr(roi=(1152,11,80,38), area=(1152,11,80,38), mode="Digit", method="Default", keyword="", name="sca_res_sea")
+	O_SCA_RES_SEA = RuleOcr(roi=(1140,11,80,38), area=(1140,11,80,38), mode="Digit", method="Default", keyword="", name="sca_res_sea")
 
 
 	# Image Rule Assets
@@ -303,6 +303,35 @@ class RichManAssets:
 	# Swipe Rule Assets
 	# 向下滑动 
 	S_SP_DOWN = RuleSwipe(roi_front=(249,419,486,22), roi_back=(339,300,301,22), mode="default", name="sp_down")
+
+
+	# Image Rule Assets
+	# 片叶 
+	I_PIAN_YE = RuleImage(roi_front=(964,239,93,93), roi_back=(151,166,983,218), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/pian_ye.png")
+	# 隐念 
+	I_YIN_NIAN = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/yin_nian.png")
+	# 海月火玉 
+	I_HAI_YUE = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/hai_yue.png")
+	# 狂骨 
+	I_KUANG_GU = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/kuang_gu.png")
+	# 网切 
+	I_WANG_QIE = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/wang_qie.png")
+	# 蚌精 
+	I_BANG_JING = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/bang_jing.png")
+	# 火灵 
+	I_HUO_LING = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/huo_ling.png")
+	# 元兴寺 
+	I_YUAN_XING_SI = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/yuan_xing_si.png")
+	# 遗念火 
+	I_YI_NIAN_HUO = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/yi_nian_huo.png")
+	# 吊瓶火 
+	I_DIAO_PING_HUO = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/diao_ping_huo.png")
+	# 恶楼 
+	I_E_LOU = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/e_lou.png")
+	# 心眼 
+	I_XIN_YAN = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/xin_yan.png")
+	# 破势 
+	I_PO_SHI = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/po_shi.png")
 
 
 	# Image Rule Assets
