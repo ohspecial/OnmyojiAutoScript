@@ -48,7 +48,9 @@ CLAUDE.md
 .codex/
 .claude/
 openspec/
-.kiro
+.agents/
+skills-lock.json
+
 
 # Created by .ignore support plugin (hsz.mobi)
 
