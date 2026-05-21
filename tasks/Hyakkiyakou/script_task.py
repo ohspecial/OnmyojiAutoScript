@@ -255,9 +255,9 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
                 time.sleep(0.5)
             #修改：在这里不再区分freeze，而是将状态传到decision用于执行冻结策略
             #目前被禁用了 因为冰冻状态下检测正确率约等于0 全是蝉冰雪女 =.=
-            if not self.appear(self.I_HFREEZE):
+            freeze = self.appear(self.I_HFREEZE)
+            if not freeze:
                 # -------------------------------------------------------
-                freeze = self.appear(self.I_HFREEZE)
                 self.slave_state = self.update_state()
                 tracks = self.tracker(image=self.device.image, response=last_action)
                 last_action = self.agent.decision(tracks=tracks, state=self.slave_state, freeze=freeze)
@@ -271,7 +271,7 @@ class ScriptTask(GameUi, HyaSlave, SwitchOnmyoji):
                 draw_image = draw_tracks(self.device.image, tracks=tracks)
                 self.debugger.show_sync(image=draw_image)
             if self._config.debug_config.continuous_learning:
-                self.debugger.deal_learning(image=self.device.image, tracks=tracks)
+                self.debugger.deal_learning(image=self.device.image, tracks=tracks, freeze=freeze)
             if self._config.debug_config.hya_info:
                 self.debugger.show_info(tracker=self.tracker, f=self.agent.focus)
 

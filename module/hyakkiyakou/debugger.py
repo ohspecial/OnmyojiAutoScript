@@ -19,6 +19,8 @@ from tasks.base_task import BaseTask
 from module.logger import logger
 from tasks.Hyakkiyakou.agent.focus import Focus
 
+LEARNING_SAVE_INTERVAL_SECONDS = 1.0
+
 
 def test_track(show: bool = False):
     tracker = Tracker()
@@ -92,6 +94,7 @@ class Debugger:
         self.image_save_queue = None
         self.image_save_thread = None
         self.image_save_stop_event = Event()
+        self._last_learning_save_at = 0.0
         if continuous_learning:
             logger.info('Continuous Learning Mode Enabled')
             save_time = datetime.now().strftime('%Y%m%dT%H')
@@ -172,9 +175,14 @@ class Debugger:
             finally:
                 image_save_queue.task_done()
 
-    def deal_learning(self, image, tracks: list):
+    def deal_learning(self, image, tracks: list, freeze: bool = False):
         # Continuous learning is used to collect training data, including
         # missed/low-confidence targets. Save every sampled battle frame.
+        if freeze:
+            return
+        now = time.time()
+        if now - self._last_learning_save_at < LEARNING_SAVE_INTERVAL_SECONDS:
+            return
         if self.image_save_queue is None or self.image_save_stop_event.is_set():
             return
         if self.image_save_queue.full():
@@ -183,6 +191,7 @@ class Debugger:
         time_now_image_name = f'hya_{int(time.time() * 1000)}'
         try:
             self.image_save_queue.put_nowait((time_now_image_name, image.copy()))
+            self._last_learning_save_at = now
         except Full:
             logger.warning('Hyakkiyakou learning save queue full, drop frame')
 
