@@ -170,16 +170,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 break
             # 先检测是否需要刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
             if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
-                logger.info('Three refresh')
-                # 如果勾选了退4，且第一个位置没有失败标志也没有击破标志，则先执行退4操作
-                # 如果已被击破，说明之前已经退过4并击败了这个结界，不需要再退4
-                # 也需要先检查票数是否足够
-                if con.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
-                    logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
-                    for _ in range(4):
-                        self.fire(1)
-                        self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
-                if self.check_refresh():
+                if self.three_refresh(con):
                     continue
                 else:
                     success = False
@@ -233,22 +224,6 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             if self.reward_detect_click(False):
                 logger.info('Rewards of three wins')
                 continue
-            # 刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
-            if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
-                logger.info('Three refresh')
-                # 如果勾选了退4，且第一个位置没有失败标志也没有击破标志，则先执行退4操作
-                # 如果已被击破，说明之前已经退过4并击败了这个结界，不需要再退4
-                # 也需要先检查票数是否足够
-                if con.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
-                    logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
-                    for _ in range(4):
-                        self.fire(1)
-                        self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
-                if self.check_refresh():
-                    continue
-                else:
-                    success = False
-                    break
             # 刷新 >> 如果上一轮的失败并且勾选了失败刷新，就刷新
             if not last_battle and con.raid_config.when_attack_fail == WhenAttackFail.REFRESH:
                 logger.info('Battle lost and then refresh')
@@ -437,6 +412,16 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             logger.info(f'Find frog medal [{target}]')
             return True
         return False
+
+    def three_refresh(self, config: RealmRaid) -> bool:
+        logger.info('Three refresh')
+        # 开启退四时，刷新前先补完第一个结界的退四流程。
+        if config.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
+            logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
+            for _ in range(4):
+                self.fire(1)
+                self.run_general_battle(config=self.build_quick_exit_config(config.general_battle_config))
+        return self.check_refresh()
 
     def reward_detect_click(self, screenshot: bool=True) -> bool:
         """

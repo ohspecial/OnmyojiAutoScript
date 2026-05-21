@@ -8,6 +8,7 @@ from datetime import datetime
 from cached_property import cached_property
 from pathlib import Path
 from numpy import uint8, fromfile
+from queue import Empty, Full, Queue
 from rich.table import Table
 from threading import Event, Lock, Thread
 from oashya.labels import id2label, CLASSIFY, CLASSINDEX, id2name
@@ -88,11 +89,21 @@ class Debugger:
         self.images_cache: dict = {}
         self.continuous_learning = continuous_learning
         self.hya_save_result = hya_save_result
+        self.image_save_queue = None
+        self.image_save_thread = None
+        self.image_save_stop_event = Event()
         if continuous_learning:
             logger.info('Continuous Learning Mode Enabled')
             save_time = datetime.now().strftime('%Y%m%dT%H')
             self.hya_save_folder: Path = Path(f'./log/hya/{save_time}')
             self.hya_save_folder.mkdir(parents=True, exist_ok=True)
+            self.image_save_queue = Queue(maxsize=32)
+            self.image_save_thread = Thread(
+                target=self._save_learning_worker,
+                daemon=True,
+                name='OAS Hyakkiyakou Learning Saver',
+            )
+            self.image_save_thread.start()
         if hya_save_result:
             logger.info('Hyakkiyakou Save Result Mode Enabled')
             save_time = datetime.now().strftime('%Y%m%dT%H')
@@ -143,26 +154,47 @@ class Debugger:
     def check_class(self, _class: int) -> bool:
         return _class in self.save_class
 
+    def _save_learning_worker(self):
+        image_save_queue = self.image_save_queue
+        while not self.image_save_stop_event.is_set() or not image_save_queue.empty():
+            try:
+                image_name, image = image_save_queue.get(timeout=0.5)
+            except Empty:
+                continue
+
+            try:
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                ok = cv2.imwrite(str(self.hya_save_folder / f'{image_name}.png'), image)
+                if not ok:
+                    logger.warning(f'Hyakkiyakou learning image save failed: {image_name}')
+            except Exception as e:
+                logger.warning(f'Hyakkiyakou learning image save failed: {e}')
+            finally:
+                image_save_queue.task_done()
+
     def deal_learning(self, image, tracks: list):
-        save_flag: bool = False
-        for _id, _class, _conf, _cx, _cy, _w, _h, _v in tracks:
-            if self.check_class(_class):
-                save_flag = True
-                break
-        if not save_flag:
+        # Continuous learning is used to collect training data, including
+        # missed/low-confidence targets. Save every sampled battle frame.
+        if self.image_save_queue is None or self.image_save_stop_event.is_set():
+            return
+        if self.image_save_queue.full():
+            logger.warning('Hyakkiyakou learning save queue full, drop frame')
             return
         time_now_image_name = f'hya_{int(time.time() * 1000)}'
-        self.images_cache[time_now_image_name] = image
+        try:
+            self.image_save_queue.put_nowait((time_now_image_name, image.copy()))
+        except Full:
+            logger.warning('Hyakkiyakou learning save queue full, drop frame')
 
     def save_images(self):
-        if not self.images_cache:
-            self.images_cache: dict = {}
+        if not self.continuous_learning or self.image_save_queue is None:
             return
-        logger.info('OAS Track Debugger save images to train model')
-        for image_name, image in self.images_cache.items():
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            cv2.imwrite(str(self.hya_save_folder / f'{image_name}.png'), image)
-        self.images_cache.clear()
+        logger.info('OAS Track Debugger wait learning images saved')
+        self.image_save_stop_event.set()
+        self.image_save_queue.join()
+        if self.image_save_thread is not None and self.image_save_thread.is_alive():
+            self.image_save_thread.join(timeout=5)
+        self.image_save_queue = None
 
     def save_result(self, image):
         if not self.hya_save_result:
