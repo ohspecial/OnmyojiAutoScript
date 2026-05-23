@@ -4,6 +4,7 @@
 from datetime import timedelta, time, datetime
 from time import sleep
 
+from tasks.GameUi.default_pages import page_battle_prepare, page_battle
 from tasks.GameUi.matcher import any_of
 from typing import List, Callable, Optional
 
@@ -67,9 +68,9 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 logger.info("get reward")
                 self.ui_get_reward(self.I_WQ_BOX)
                 continue
-            if self.appear(self.I_TREASURE_BOX_CLICK):
+            if self.appear(self.I_E_REWARD_BOX_BIG):
                 logger.info("get treasure")
-                self.ui_get_reward(self.I_TREASURE_BOX_CLICK)
+                self.ui_get_reward(self.I_E_REWARD_BOX_BIG)
                 continue
             if error_count > 3:
                 logger.warning('failed too many times, exit')
@@ -82,13 +83,22 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 sleep(1)
                 continue
             error_count = 0
-            # 打开悬赏界面
-            self.ui_click(self.O_WQ_TEXT_ALL, self.I_TRACE_TRUE, interval=1.2)
+            if not self.open_wq_info():
+                continue
             self.execute_mission(total - cu)
             sleep(1.5)
-
         self.next_run()
         raise TaskEnd('WantedQuests')
+
+    def open_wq_info(self) -> bool:
+        """打开对应怪物悬赏详情界面"""
+        timeout_timer = Timer(5).start()
+        while not timeout_timer.reached():
+            self.screenshot()
+            if self.appear(self.I_TRACE_TRUE):
+                return True
+            self.click(self.O_WQ_TEXT_ALL, interval=1.2)
+        return False
 
     def next_run(self):
         before_end: time = self.get_config().before_end
@@ -338,7 +348,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             # 若是当周特殊秘闻则禁止连续进攻, 战斗结束之后直接退到探索页面重新进入挑战(避免当周秘闻没打结果跳转到第一层)
             if self.appear(self.I_WQSE_SPECIAL_FIRE):
                 logger.warning('Current is special secret, exit and retry')
-                break
+                return 
             # 又臭又长的对话针的是服了这个网易
             click_count = 0
             while 1:
@@ -355,7 +365,9 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                         click_count = 0
                         self.device.click_record_clear()
                     continue
-            self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
+            if self.get_current_page() in [page_battle_prepare, page_battle]:
+                self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED,
+                                                                                self.I_WQSE_SPECIAL_FIRE))
         logger.info('Secret mission finished')
 
     def invite_random(self, add_button: RuleImage):
@@ -597,7 +609,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
 
         res_list = self.O_WQ_TEXT_ALL.detect_and_ocr(img)
         import re
-        reg_time = re.compile(r'^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):?([0-5]?[0-9])?$')
+        reg_time = re.compile(r'^D?([01]?[0-9]|2[0-3]):([0-5]?[0-9]):?([0-5]?[0-9])?$')
         reg_fengyin = re.compile(r'.*[封|野]印.*')
         # 由于斜杠'/'经常被误识别为'7',且悬赏封印悬赏怪物总数没有与‘7’相关的数字
         reg_progress = re.compile(r'^(\d+)([7/])(\d+)$')
@@ -626,6 +638,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 if cu == total:
                     # 该任务已完成，一般是悬赏任务，邀请人没有做导致的
                     continue
+                logger.info(f'find wq {res.ocr_text} @ {xywh}')
                 return cu, re, total, xywh
             # 例如：1414 66 1212
             if reg_XX.match(res.ocr_text):
