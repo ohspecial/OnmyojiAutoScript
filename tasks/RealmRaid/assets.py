@@ -54,6 +54,7 @@ class RealmRaidAssets:
 	# 第一个击破 
 	I_RAID_SUCCESS = RuleImage(roi_front=(405,169,50,46), roi_back=(405,169,50,46), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_raid_success.png")
 
+
 	# Image Rule Assets
 	# 出现呱太勋章 
 	I_FROG_MEDAL = RuleImage(roi_front=(912,12,32,35), roi_back=(912,12,32,35), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_frog_medal.png")
