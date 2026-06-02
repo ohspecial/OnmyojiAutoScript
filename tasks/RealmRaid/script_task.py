@@ -4,7 +4,7 @@
 import time
 import re
 from cached_property import cached_property
-from tasks.GameUi.default_pages import page_exploration
+from tasks.GameUi.default_pages import page_exploration, random_click
 
 from tasks.base_task import BaseTask
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
@@ -408,6 +408,9 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             for _ in range(4):
                 self.fire(1)
                 self.run_general_battle(config=self.build_quick_exit_config(config.general_battle_config))
+                if not self.ui_click_until_appear_or_timeout(random_click(), self.I_RR_PERSON, interval=0.8, timeout=10):
+                    logger.warning('Retreat four failed to return to realm raid page')
+                    return False
         return self.check_refresh()
 
     def reward_detect_click(self, screenshot: bool=True) -> bool:
