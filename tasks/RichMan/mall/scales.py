@@ -29,23 +29,19 @@ class Scales(Buy, MallNavbar):
         self._scales_sea(con.picture_book_scrap, con.picture_book_rule)
 
     def _scales_buy_confirm(self, start_click, number: int = None):
-        try_click_count = 0
         while 1:
             self.screenshot()
             if self.appear(self.I_BUY_PLUS):
                 break
             if self.appear(self.I_SCA_SELECT_1) and self.appear(self.I_SCA_SELECT_2):
-                return True
-            if try_click_count >= 5:
-                logger.warning(f'Scales buy confirm failed, try_click_count: {try_click_count}')
-                return False
+                return
             if self.appear_then_click(start_click, interval=1):
-                try_click_count += 1
                 continue
         # 设置购买的数量
         if number is None:
             self.appear_then_click(self.I_BUY_PLUS, interval=0.4)
             time.sleep(0.5)
+            self.appear_then_click(self.I_BUY_PLUS, interval=0.4)
         else:
             # 四次截图数字都一样，就可以退出了
             number_record = []
@@ -57,20 +53,15 @@ class Scales(Buy, MallNavbar):
                 number_record.append(current)
                 if len(number_record) >= 4:
                     if number_record[0] == number_record[1] == number_record[2] == number_record[3]:
-                        if current == 0:
-                            logger.warning('Buy number OCR keeps returning 0, stop buying')
-                            return False
                         break
                     number_record.pop(0)
 
                 if self.appear_then_click(self.I_BUY_ADD, interval=0.6):
                     continue
-        return True
 
     def _scales_buy_more(self, start_click, number: int = None):
         # 重写
-        if not self._scales_buy_confirm(start_click, number):
-            return
+        self._scales_buy_confirm(start_click, number)
 
         # 购买确认
         while 1:
@@ -80,7 +71,7 @@ class Scales(Buy, MallNavbar):
                 time.sleep(1)
                 while 1:
                     self.screenshot()
-                    if not self.appear(self.I_SCA_SIX_STAR) and not self.appear(self.I_SCA_REWARD):
+                    if not self.appear(self.I_SCA_SIX_STAR):
                         break
                     if self.click(self.C_SCA_SOULS_GET, interval=1):
                         continue
@@ -92,30 +83,23 @@ class Scales(Buy, MallNavbar):
                 continue
 
     def _scales_buy_sea_more(self, start_click, number: int = None):
-        if not self._scales_buy_confirm(start_click, number):
-            return
+        self._scales_buy_confirm(start_click, number)
         while 1:
             self.screenshot()
-            if self.appear(self.I_SCA_SELECT_1) and self.appear(self.I_SCA_SELECT_2):
+            if self.appear(self.I_SCA_SELECT_1):
                 break
-            if self.appear(self.I_SCA_SIX_STAR) or self.appear(self.I_SCA_REWARD):
-                break
-            if self.click(self.C_BUY_MORE, interval=2):
+            if self.click(self.C_BUY_MORE, interval=3):
                 continue
-
         logger.info('Scales start select souls')
-
-        sea_list = [self.I_PIAN_YE, self.I_YIN_NIAN,  self.I_HAI_YUE, self.I_KUANG_GU, self.I_WANG_QIE, self.I_BANG_JING, self.I_HUO_LING,
-                    self.I_YUAN_XING_SI, self.I_YI_NIAN_HUO, self.I_DIAO_PING_HUO, self.I_E_LOU, self.I_XIN_YAN, self.I_PO_SHI]
         # 选择魂
         while 1:
             self.screenshot()
-            if self.appear(self.I_SCA_SIX_STAR) or self.appear(self.I_SCA_REWARD):
+            if self.appear(self.I_SCA_SIX_STAR):
                 logger.info('Scales buy success')
-                time.sleep(2)
+                time.sleep(1.8)
                 while 1:
                     self.screenshot()
-                    if not self.appear(self.I_SCA_SIX_STAR) and not self.appear(self.I_SCA_REWARD):
+                    if not self.appear(self.I_SCA_SIX_STAR):
                         break
                     if self.click(self.C_SCA_SOULS_GET, interval=1.6):
                         continue
@@ -123,32 +107,8 @@ class Scales(Buy, MallNavbar):
                 logger.info('Scales get success')
                 break
 
-            result = False
-            for targe in sea_list:
-                result = targe.test_match(self.device.image)
-                # logger.info(f'[{targe.name}]: {result}')
-                if result:
-                    front0 = targe.roi_front[0]
-                    # 962 595 229
-                    if front0 < 300:
-                        logger.info(f'[{targe.name}]: {result}')
-                        self.device.click(*self.I_SCA_SELECT_1.coord(), control_name=self.I_SCA_SELECT_1.name)
-                        time.sleep(1.6)
-                        break
-                    elif 300 <= front0 <= 700:
-                        logger.info(f'[{targe.name}]: {result}')
-                        self.device.click(*self.I_SCA_SELECT_2.coord(), control_name=self.I_SCA_SELECT_2.name)
-                        time.sleep(1.6)
-                        break
-                    elif front0 > 700:
-                        logger.info(f'[{targe.name}]: {result}')
-                        self.device.click(*self.I_SCA_SELECT_3.coord(), control_name=self.I_SCA_SELECT_3.name)
-                        time.sleep(1.6)
-                        break
-            if not result:
-                # 如果御魂都没找到选第一个
-                self.device.click(*self.I_SCA_SELECT_1.coord(), control_name=self.I_SCA_SELECT_1.name)
-                time.sleep(1.6)
+            if self.appear_then_click(self.I_SCA_SELECT_1, interval=1.6):
+                continue
 
     def _scales_orochi_new(self, buy_number: int):
         """
@@ -183,6 +143,7 @@ class Scales(Buy, MallNavbar):
             # 购买
             self._scales_buy_more(self.I_SCA_OROCHI_SCALES)
             time.sleep(0.5)
+
     def _scales_orochi(self, buy_number: int):
         """
         要求必须是在御魂礼盒界面
@@ -379,12 +340,6 @@ class Scales(Buy, MallNavbar):
                 self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK)
                 time.sleep(0.5)
         if buy_res_number and buy_res_number >= 2:
-            # 购买剩余数量前也检查一次，防止之前手动买过
-            self.screenshot()
-            remain_check = self.O_SCA_NUMBER_SEA.ocr(self.device.image)
-            if remain_check == 0:
-                logger.info('Scales sea remain is 0, stop buying')
-                return
             self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK, buy_res_number)
             time.sleep(0.5)
 
@@ -393,8 +348,8 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('zhu-mine')
+    c = Config('日常1')
     d = Device(c)
     t = Scales(c, d)
 
-    t.execute_scales()
+    t._scales_orochi_new(10)
