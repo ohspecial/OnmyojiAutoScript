@@ -9,7 +9,7 @@ from module.base.timer import Timer
 from datetime import timedelta, datetime
 
 from tasks.GameUi.game_ui import GameUi
-from tasks.GameUi.page import page_main, page_summon
+from tasks.GameUi.page import page_summon, page_main
 from tasks.MemoryScrolls.assets import MemoryScrollsAssets
 from tasks.MemoryScrolls.config import ScrollNumber
 
@@ -20,7 +20,8 @@ class ScriptTask(GameUi, MemoryScrollsAssets):
         self.goto_page(page_summon)
         con = self.config.memory_scrolls.memory_scrolls_config
         # 进入绘卷主界面
-        self.goto_memoryscrolls_main(con) 
+        self.goto_memoryscrolls_main(con)
+        # 返回主界面
         self.goto_page(page_main)
         raise TaskEnd
     
@@ -62,7 +63,9 @@ class ScriptTask(GameUi, MemoryScrollsAssets):
                 # 安排下次探索
                 self.custom_next_run(task='Exploration', custom_time=self.config.memory_scrolls.memory_scrolls_finish.next_exploration_time, time_delta=1)
             else:
-                logger.info('Small Memory Scrolls fragments not reached 50, continue contributing')
+                logger.warning('Small Memory Scrolls fragments not reached 50, task failed')
+                self.set_next_run(task='MemoryScrolls', success=False)
+                raise TaskEnd
             self.ui_click_until_smt_disappear(self.I_MS_FRAGMENT_S, stop=self.I_MS_FRAGMENT_S_VERIFICATION, interval=1.5)
         # 进入指定分卷
         self.goto_scroll(con)
@@ -162,7 +165,6 @@ if __name__ == '__main__':
     t.screenshot()
 
     t.run()
-
 
 
 
