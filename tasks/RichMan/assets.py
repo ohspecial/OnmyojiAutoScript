@@ -304,36 +304,6 @@ class RichManAssets:
 	# 向下滑动 
 	S_SP_DOWN = RuleSwipe(roi_front=(249,419,486,22), roi_back=(339,300,301,22), mode="default", name="sp_down")
 
-
-	# Image Rule Assets
-	# 片叶 
-	I_PIAN_YE = RuleImage(roi_front=(964,239,93,93), roi_back=(151,166,983,218), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/pian_ye.png")
-	# 隐念 
-	I_YIN_NIAN = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/yin_nian.png")
-	# 海月火玉 
-	I_HAI_YUE = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/hai_yue.png")
-	# 狂骨 
-	I_KUANG_GU = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/kuang_gu.png")
-	# 网切 
-	I_WANG_QIE = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/wang_qie.png")
-	# 蚌精 
-	I_BANG_JING = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/bang_jing.png")
-	# 火灵 
-	I_HUO_LING = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/huo_ling.png")
-	# 元兴寺 
-	I_YUAN_XING_SI = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/yuan_xing_si.png")
-	# 遗念火 
-	I_YI_NIAN_HUO = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/yi_nian_huo.png")
-	# 吊瓶火 
-	I_DIAO_PING_HUO = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/diao_ping_huo.png")
-	# 恶楼 
-	I_E_LOU = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/e_lou.png")
-	# 心眼 
-	I_XIN_YAN = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/xin_yan.png")
-	# 破势 
-	I_PO_SHI = RuleImage(roi_front=(962,240,95,95), roi_back=(151,165,984,220), threshold=0.8, method="Template matching", file="./tasks/RichMan/sea/po_shi.png")
-
-
 	# Image Rule Assets
 	# 下期预览 
 	I_S_NEXT_PERIOD = RuleImage(roi_front=(1083,574,90,86), roi_back=(1083,574,90,86), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_next_period.png")
