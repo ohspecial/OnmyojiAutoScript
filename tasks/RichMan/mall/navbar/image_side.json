@@ -20,11 +20,11 @@
   {
     "itemName": "side_suer_honor",
     "imageName": "navbar_side_suer_honor.png",
-    "roiFront": "1181,202,59,60",
+    "roiFront": "1180,191,59,60",
     "roiBack": "1150,159,103,132",
     "method": "Template matching",
     "threshold": 0.7,
-    "description": "斗技"
+    "description": "荣誉"
   },
   {
     "itemName": "side_check_honor",
@@ -39,7 +39,7 @@
     "itemName": "side_sure_friends",
     "imageName": "navbar_side_sure_friends.png",
     "roiFront": "1190,287,43,52",
-    "roiBack": "1163,258,97,290",
+    "roiBack": "1163,258,93,126",
     "method": "Template matching",
     "threshold": 0.7,
     "description": "友情点"

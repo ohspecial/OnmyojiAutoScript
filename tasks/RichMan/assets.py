@@ -180,12 +180,12 @@ class RichManAssets:
 	I_SIDE_SURE_SPECIAL = RuleImage(roi_front=(1172,91,70,74), roi_back=(1172,91,70,74), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_sure_special.png")
 	# 特殊 
 	I_SIDE_CHECK_SPECIAL = RuleImage(roi_front=(218,7,42,42), roi_back=(140,0,659,74), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_check_special.png")
-	# 斗技 
-	I_SIDE_SUER_HONOR = RuleImage(roi_front=(1181,202,59,60), roi_back=(1150,159,103,132), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_suer_honor.png")
+	# 荣誉 
+	I_SIDE_SUER_HONOR = RuleImage(roi_front=(1180,191,59,60), roi_back=(1150,159,103,132), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_suer_honor.png")
 	# 荣誉 
 	I_SIDE_CHECK_HONOR = RuleImage(roi_front=(751,8,41,42), roi_back=(358,0,733,67), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_check_honor.png")
 	# 友情点 
-	I_SIDE_SURE_FRIENDS = RuleImage(roi_front=(1190,287,43,52), roi_back=(1163,258,97,290), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_sure_friends.png")
+	I_SIDE_SURE_FRIENDS = RuleImage(roi_front=(1190,287,43,52), roi_back=(1163,258,93,126), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_sure_friends.png")
 	# 友情点 
 	I_SIDE_CHECK_FRIENDS = RuleImage(roi_front=(924,8,39,43), roi_back=(602,0,543,67), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_check_friends.png")
 	# 勋章 
@@ -303,6 +303,7 @@ class RichManAssets:
 	# Swipe Rule Assets
 	# 向下滑动 
 	S_SP_DOWN = RuleSwipe(roi_front=(249,419,486,22), roi_back=(339,300,301,22), mode="default", name="sp_down")
+
 
 	# Image Rule Assets
 	# 下期预览 
