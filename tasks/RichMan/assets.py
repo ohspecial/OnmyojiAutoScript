@@ -237,7 +237,7 @@ class RichManAssets:
 	I_SCA_OROCHI_SCALES = RuleImage(roi_front=(110,261,100,100), roi_back=(77,184,175,216), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_orochi_scales.png")
 	# 首领御魂 
 	I_SCA_DEMON_SOULS = RuleImage(roi_front=(707,260,100,100), roi_back=(659,190,182,218), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_demon_souls.png")
-	# 永生之海 
+	# 潮汐御魂
 	I_SCA_PICTURE_BOOK = RuleImage(roi_front=(995,258,100,100), roi_back=(954,177,185,240), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_picture_book.png")
 	# 土蜘蛛 
 	I_SCA_DEMON_BOSS_1 = RuleImage(roi_front=(246,224,112,126), roi_back=(168,142,346,290), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_demon_boss_1.png")
@@ -251,12 +251,6 @@ class RichManAssets:
 	I_SCA_DEMON_BOSS_5 = RuleImage(roi_front=(345,469,136,160), roi_back=(241,414,504,242), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_demon_boss_5.png")
 	# 歌姬 
 	I_SCA_DEMON_BOSS_6 = RuleImage(roi_front=(561,480,141,141), roi_back=(437,402,555,236), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_demon_boss_6.png")
-	# 永生之海第一个选择 
-	I_SCA_SELECT_1 = RuleImage(roi_front=(189,519,113,51), roi_back=(189,519,113,51), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_select_1.png")
-	# description 
-	I_SCA_SELECT_2 = RuleImage(roi_front=(583,519,116,54), roi_back=(583,519,116,54), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_select_2.png")
-	# description 
-	I_SCA_SELECT_3 = RuleImage(roi_front=(972,517,123,50), roi_back=(972,517,123,50), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_select_3.png")
 	# 获得的六星 
 	I_SCA_SIX_STAR = RuleImage(roi_front=(120,216,97,22), roi_back=(113,102,1057,157), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/scales/scales_sca_six_star.png")
 	# 点击屏幕继续 
@@ -272,7 +266,7 @@ class RichManAssets:
 	O_SCA_NUMBER_OROCHI = RuleOcr(roi=(43,323,28,17), area=(43,323,28,17), mode="Digit", method="Default", keyword="", name="sca_number_orochi")
 	# 首领御魂剩余可买的 
 	O_SCA_NUMBER_DEMON = RuleOcr(roi=(625,320,30,22), area=(625,320,30,22), mode="Quantity", method="Default", keyword="", name="sca_number_demon")
-	# 永生之海 
+	# 潮汐御魂剩余可买的
 	O_SCA_NUMBER_SEA = RuleOcr(roi=(923,321,29,21), area=(923,321,29,21), mode="Quantity", method="Default", keyword="", name="sca_number_sea")
 	# 多少号位 
 	O_SCA_DEMON_POSTION = RuleOcr(roi=(960,244,88,41), area=(960,244,88,41), mode="Single", method="Default", keyword="", name="sca_demon_postion")
@@ -280,7 +274,7 @@ class RichManAssets:
 	O_SCA_RES_OROCHI = RuleOcr(roi=(547,11,127,37), area=(547,11,127,37), mode="DigitCounter", method="Default", keyword="", name="sca_res_orochi")
 	# 首领御魂数量 
 	O_SCA_RES_DEMON = RuleOcr(roi=(948,10,95,35), area=(948,10,95,35), mode="Digit", method="Default", keyword="", name="sca_res_demon")
-	# 永生之海 
+	# 潮汐御魂数量
 	O_SCA_RES_SEA = RuleOcr(roi=(1134,11,100,38), area=(1134,11,100,38), mode="Digit", method="Default", keyword="", name="sca_res_sea")
 
 
@@ -380,5 +374,3 @@ class RichManAssets:
 	O_TT_BUY = RuleOcr(roi=(602,509,104,61), area=(602,509,104,61), mode="Full", method="Default", keyword="", name="tt_buy")
 	# Ocr-description 
 	O_TT_NUMBER = RuleOcr(roi=(576,415,58,49), area=(576,415,58,49), mode="Digit", method="Default", keyword="", name="tt_number")
-
-

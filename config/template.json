@@ -1537,8 +1537,7 @@
       "demon_souls": 50,
       "demon_class": "土蜘蛛",
       "demon_position": 1,
-      "picture_book_scrap": 30,
-      "picture_book_rule": "auto"
+      "picture_book_scrap": 30
     },
     "bondlings": {
       "enable": false,

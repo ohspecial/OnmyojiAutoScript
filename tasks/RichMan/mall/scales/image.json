@@ -24,7 +24,7 @@
     "roiBack": "954,177,185,240",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "永生之海"
+    "description": "潮汐御魂"
   },
   {
     "itemName": "sca_demon_boss_1",
@@ -79,33 +79,6 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "歌姬"
-  },
-  {
-    "itemName": "sca_select_1",
-    "imageName": "scales_sca_select_1.png",
-    "roiFront": "189,519,113,51",
-    "roiBack": "189,519,113,51",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "永生之海第一个选择"
-  },
-  {
-    "itemName": "sca_select_2",
-    "imageName": "scales_sca_select_2.png",
-    "roiFront": "583,519,116,54",
-    "roiBack": "583,519,116,54",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
-    "itemName": "sca_select_3",
-    "imageName": "scales_sca_select_3.png",
-    "roiFront": "972,517,123,50",
-    "roiBack": "972,517,123,50",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
   },
   {
     "itemName": "sca_six_star",
