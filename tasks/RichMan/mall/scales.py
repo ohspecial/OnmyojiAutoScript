@@ -25,16 +25,14 @@ class Scales(Buy, MallNavbar):
         self._scales_orochi_new(con.orochi_scales)
         # 首领御魂
         self._scales_demon(con.demon_souls, con.demon_class, con.demon_position)
-        # 海国御魂
-        self._scales_sea(con.picture_book_scrap, con.picture_book_rule)
+        # 潮汐御魂
+        self._scales_sea(con.picture_book_scrap)
 
     def _scales_buy_confirm(self, start_click, number: int = None):
         while 1:
             self.screenshot()
             if self.appear(self.I_BUY_PLUS):
                 break
-            if self.appear(self.I_SCA_SELECT_1) and self.appear(self.I_SCA_SELECT_2):
-                return
             if self.appear_then_click(start_click, interval=1):
                 continue
         # 设置购买的数量
@@ -80,34 +78,6 @@ class Scales(Buy, MallNavbar):
                 break
 
             if self.click(self.C_BUY_MORE, interval=5):
-                continue
-
-    def _scales_buy_sea_more(self, start_click, number: int = None):
-        self._scales_buy_confirm(start_click, number)
-        while 1:
-            self.screenshot()
-            if self.appear(self.I_SCA_SELECT_1):
-                break
-            if self.click(self.C_BUY_MORE, interval=3):
-                continue
-        logger.info('Scales start select souls')
-        # 选择魂
-        while 1:
-            self.screenshot()
-            if self.appear(self.I_SCA_SIX_STAR):
-                logger.info('Scales buy success')
-                time.sleep(1.8)
-                while 1:
-                    self.screenshot()
-                    if not self.appear(self.I_SCA_SIX_STAR):
-                        break
-                    if self.click(self.C_SCA_SOULS_GET, interval=1.6):
-                        continue
-                # 收获购买的东西
-                logger.info('Scales get success')
-                break
-
-            if self.appear_then_click(self.I_SCA_SELECT_1, interval=1.6):
                 continue
 
     def _scales_orochi_new(self, buy_number: int):
@@ -290,13 +260,7 @@ class Scales(Buy, MallNavbar):
             if self.click(self.C_SCA_SOULS_BACK, interval=1):
                 continue
 
-    def _scales_sea(self, buy_number: int, buy_rule: str='auto'):
-        """
-
-        :param buy_number:
-        :param buy_rule:
-        :return:
-        """
+    def _scales_sea(self, buy_number: int):
         logger.hr('Scales sea', 3)
         if buy_number == 0:
             logger.info('The purchase quantity of Scales sea is 0')
@@ -311,38 +275,23 @@ class Scales(Buy, MallNavbar):
         if remain_number == 0:
             logger.warning(f'The remaining purchase quantity of xx is {remain_number}')
             return
-        if remain_number < buy_number:
-            buy_number = remain_number
-            logger.warning(f'Remaining purchase quantity is {remain_number}, buy_number is {buy_number}')
+        buy_number = min(buy_number, remain_number)
         # 检查钱是否够
         current_money = self.O_SCA_RES_SEA.ocr(self.device.image)
         if not isinstance(current_money, int):
             logger.warning('OCR error')
             return
-        money_enough = current_money >= 200*buy_number
-        if not money_enough:
+        buy_number = min(buy_number, current_money // 200)
+        if buy_number == 0:
             logger.warning('Scales sea money is not enough')
-            # 判断够不够买2个
-            if current_money < 400:
-                logger.warning('Scales sea money can not buy two')
-                return
-            buy_number = current_money // 200
-        # 购买# 一次最多可以买10个所以要分开来
+            return
+        # 一次最多可以买 10 个；兑换后直接按通用领奖流程处理，无需选择御魂。
         logger.info(f'Scales sea buy {buy_number}')
-        if buy_number >= 10:
-            buy_cycles_number = buy_number // 10
-            buy_res_number = buy_number % 10
-        else:
-            buy_cycles_number = None
-            buy_res_number = buy_number
-        if buy_cycles_number:
-            for i in range(buy_cycles_number):
-                self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK)
-                time.sleep(0.5)
-        if buy_res_number and buy_res_number >= 2:
-            self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK, buy_res_number)
+        while buy_number:
+            current_buy_number = min(buy_number, 10)
+            self._scales_buy_more(self.I_SCA_PICTURE_BOOK, current_buy_number)
+            buy_number -= current_buy_number
             time.sleep(0.5)
-
 
 if __name__ == '__main__':
     from module.config.config import Config

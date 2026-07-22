@@ -31,7 +31,6 @@ class Scales(BaseModel):
     demon_class: DemonClass = Field(title='DemonClass', default=DemonClass.TSUCHIGUMO, description='demon_class_help')
     demon_position: int = Field(title='Demon Position', default=1, description='demon_position_help')
     picture_book_scrap: int = Field(title='Picture Book Scrap', default=30, description='picture_book_scrap_help')
-    picture_book_rule: str = Field(title='Picture Book Rule', default='auto', description='picture_book_rule_help')
 
 
 class SpecialRoom(BaseModel):

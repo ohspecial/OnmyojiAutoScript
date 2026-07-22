@@ -617,10 +617,8 @@ Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退�
 	<message><source>demon_class_help</source><translation>不支持多个首领</translation></message>
 	<message><source>Demon Position</source><translation>首领御魂号位</translation></message>
 	<message><source>demon_position_help</source><translation>不支持多号位</translation></message>
-	<message><source>Picture Book Scrap</source><translation>海汐御魂</translation></message>
+	<message><source>Picture Book Scrap</source><translation>潮汐御魂</translation></message>
 	<message><source>picture_book_scrap_help</source><translation>可选[0~30]</translation></message>
-	<message><source>Picture Book Rule</source><translation>选择御魂优先级</translation></message>
-	<message><source>picture_book_rule_help</source><translation>使用auto即可</translation></message>
 	<message><source>SpecialRoom</source><translation>[杂货铺]特殊购买</translation></message>
 	<message><source>Totem Pass</source><translation>御灵券(40张)</translation></message>
 	<message><source>Low Bondling Discs</source><translation>百物式盘</translation></message>

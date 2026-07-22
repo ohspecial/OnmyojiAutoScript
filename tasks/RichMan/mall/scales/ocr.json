@@ -24,7 +24,7 @@
     "mode": "Quantity",
     "method": "Default",
     "keyword": "",
-    "description": "永生之海"
+    "description": "潮汐御魂剩余可买的"
   },
   {
     "itemName": "sca_demon_postion",
@@ -60,6 +60,6 @@
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
-    "description": "永生之海"
+    "description": "潮汐御魂数量"
   }
 ]
