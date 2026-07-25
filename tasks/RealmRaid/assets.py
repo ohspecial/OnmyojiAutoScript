@@ -51,10 +51,6 @@ class RealmRaidAssets:
 	I_MEDAL_3_2 = RuleImage(roi_front=(575,489,188,32), roi_back=(575,489,188,32), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_medal_3_2.png")
 	# description 
 	I_MEDAL_3_3 = RuleImage(roi_front=(902,479,201,50), roi_back=(902,479,201,50), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_medal_3_3.png")
-	# 失败再次挑战 
-	I_FIRE_AGAIN = RuleImage(roi_front=(830,506,61,36), roi_back=(256,384,773,231), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_fire_again.png")
-	# 不再提示 
-	I_SHOW_AGAIN = RuleImage(roi_front=(539,344,32,36), roi_back=(397,218,485,275), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_show_again.png")
 	# 第一个击破 
 	I_RAID_SUCCESS = RuleImage(roi_front=(405,169,50,46), roi_back=(405,169,50,46), threshold=0.7, method="Template matching", file="./tasks/RealmRaid/res/res_raid_success.png")
 
@@ -62,7 +58,7 @@ class RealmRaidAssets:
 	# Image Rule Assets
 	# 出现呱太勋章 
 	I_FROG_MEDAL = RuleImage(roi_front=(912,12,32,35), roi_back=(912,12,32,35), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_frog_medal.png")
-	# 已经进攻三次了 
+	# 本轮已经成功挑战三次
 	I_RR_THREE = RuleImage(roi_front=(427,579,42,44), roi_back=(427,579,42,44), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_rr_three.png")
 	# 呱太入侵， 第一次进入结界时候出现 
 	I_FROG_RAID = RuleImage(roi_front=(511,301,282,100), roi_back=(511,301,282,100), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_frog_raid.png")
@@ -116,5 +112,4 @@ class RealmRaidAssets:
 	C_PARTITION_8 = RuleClick(roi_front=(567,413,230,124), roi_back=(567,413,230,124), name="partition_8")
 	# 用来分割不同的挑战位置 
 	C_PARTITION_9 = RuleClick(roi_front=(900,418,222,116), roi_back=(900,418,222,116), name="partition_9")
-
 

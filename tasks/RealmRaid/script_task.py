@@ -1,18 +1,17 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-import time
 import re
 from cached_property import cached_property
+
 from tasks.GameUi.default_pages import page_exploration, random_click
 
-from tasks.base_task import BaseTask
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralBattle.general_battle import BattleAction, BattleContext, ExitMatcher, GeneralBattle
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_realm_raid
 from tasks.RealmRaid.assets import RealmRaidAssets
-from tasks.RealmRaid.config import RealmRaid, AttackNumber, WhenAttackFail
+from tasks.RealmRaid.config import RealmRaid
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.RealmRaid.page import page_shikigami_records
 
@@ -25,8 +24,7 @@ from module.atom.click import RuleClick
 
 
 class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
-    medal_grid: ImageGrid = None
-    init_tickets: int = -1
+    round_retreat_done: bool = False
 
     def _handle_result(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
         if config.quick_exit:
@@ -43,7 +41,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         # 直接进入个人突破页面
         self.goto_page(page_realm_raid)
 
-        # 在突破页面内先判断票数，如果没有票了或者已经达到攻击次数上限，就直接结束任务
+        # 先检查突破券，避免没有可挑战次数时仍然切换御魂。
         if not self.check_ticket(con.raid_config.number_base):
             self.goto_page(page_exploration)
             self.set_next_run(task='RealmRaid', success=False, finish=True)
@@ -78,156 +76,76 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         if frog:
             logger.info(f'Frog raid')
 
-        # 开始循环
+        # 真实挑战次数不包含退四；通用战斗的 current_count 会统计快速退出，不能用于本任务的挑战上限。
         success = True
-        last_battle = True  # 记录上一次战斗的结果
-        # 更改循环顺序
+        real_attack_count = 0
+        self.round_retreat_done = self.is_first_position_finished()
+
         while 1:
             self.screenshot()
-            #看到弹窗点掉，不然会卡死
+            # 刷新确认弹窗可能因页面响应延迟残留，先关闭后再识别盘面。
             if self.appear(self.I_FRESH_ENSURE):
                 logger.info("Pop-up detected: Refresh Confirmation. Clicking Confirm.")
                 self.appear_then_click(self.I_FRESH_ENSURE, interval=1.5)
                 continue
-            # 检查票数
+
             if not self.check_ticket(con.raid_config.number_base):
                 break
-            # 挑战次数
-            if self.current_count >= con.raid_config.number_attack:
-                logger.info(f'Current count {self.current_count}, max count {con.raid_config.number_attack}')
+
+            if real_attack_count >= con.raid_config.number_attack:
+                logger.info(f'Real attack count {real_attack_count}, max count {con.raid_config.number_attack}')
                 break
-            # 先检测是否需要刷新 >> 如果勾选了三次刷新并且到达了三次，就刷新
-            if con.raid_config.three_refresh and self.appear(self.I_RR_THREE, threshold=0.8):
-                if self.three_refresh(con):
+
+            # 阶段只以游戏盘面的三胜标记为准；任务从中途盘面启动时也会立即刷新已三胜的一轮。
+            if self.has_three_wins(False):
+                logger.info('Three wins detected, ensure retreat four and refresh current round')
+                if self.refresh_round(con):
                     continue
-                else:
-                    success = False
-                    break
-            # ----------------------------------------开始进攻
-            medal, index = self.find_one(False)
+                success = False
+                break
+
+            # 三胜前允许失败，屏蔽失败格后继续按勋章优先级寻找其他目标。
+            failed_positions = self.get_failed_positions(False)
+            if failed_positions:
+                logger.info(f'Ignore failed positions before three wins: {failed_positions}')
+
+            medal, index = self.find_one(False, exclude_positions=set(failed_positions))
             if not medal and not index:
-                # 已经没有可以挑战的了，只能刷新
-                if con.raid_config.when_attack_fail == WhenAttackFail.CONTINUE:
-                    logger.info('No one can attack and then refresh')
-                    if self.check_refresh():
-                        continue
-                    else:
-                        success = False
-                        break
-                else:
-                    logger.info('No one can attack, break')
-                    # 检查是否有“刷新确认”弹窗挡路
-                    if self.appear(self.I_FRESH_ENSURE):
-                        logger.info("Closing obstructing refresh dialog (Click Ensure)...")
-                        # 点击“确定”来完成刷新（或者你可以改成点取消）
-                        self.appear_then_click(self.I_FRESH_ENSURE, interval=2)
-                    success = False
-                    break
-            # 判断是不是左上角第一个
-            lock_before = con.general_battle_config.lock_team_enable
-            handled_first_target = False
-            if index == 1:
-                logger.info('Now is the first one')
-                if con.raid_config.exit_four:
-                    logger.info('Exit four enable')
-                    if not self.fire(index):
-                        # 没有成功进入战斗则重新检查票数和其他条件
-                        continue
-                    self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
-                    self.fire_again()
-                    self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
-                    self.fire_again()
-                    self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
-                    self.fire_again()
-                    self.run_general_battle(config=self.build_quick_exit_config(con.general_battle_config))
-                    self.fire_again()
-                    last_battle = self.run_general_battle(con.general_battle_config)
-                    handled_first_target = True
-            elif self.check_medal_is_frog(frog, medal, index):
-                # 如果挑战的这只是呱太的话，就要把锁定改为不锁定
-                con.general_battle_config.lock_team_enable = False
-            if not handled_first_target:
-                if not self.fire(index):
-                    # 没有成功进入战斗则重新检查票数和其他条件
+                logger.info('No target can be attacked, refresh current round')
+                if self.refresh_round(con):
                     continue
-                last_battle = self.run_general_battle(con.general_battle_config)
+                success = False
+                break
+
+            lock_before = con.general_battle_config.lock_team_enable
+
+            if index == 1 and not self.ensure_retreat_four(con):
+                success = False
+                break
+
+            if index != 1 and self.check_medal_is_frog(frog, medal, index):
+                # 呱太需要临时取消阵容锁定，战斗结束后恢复用户原配置。
+                con.general_battle_config.lock_team_enable = False
+
+            if not self.fire(index):
+                # 没有成功进入战斗则重新检查票数和盘面。
+                continue
+
+            last_battle = self.run_general_battle(con.general_battle_config)
+            real_attack_count += 1
+
             if lock_before:
                 con.general_battle_config.lock_team_enable = lock_before
-            # 检查是否每三次领一个奖励
+
             if self.reward_detect_click(False):
                 logger.info('Rewards of three wins')
-                continue
-            # 刷新 >> 如果上一轮的失败并且勾选了失败刷新，就刷新
-            if not last_battle and con.raid_config.when_attack_fail == WhenAttackFail.REFRESH:
-                logger.info('Battle lost and then refresh')
-                if self.check_refresh():
-                    continue
-                else:
-                    success = False
-                    break
-            # 如果上一轮失败 -> 退出
-            if not last_battle and con.raid_config.when_attack_fail == WhenAttackFail.EXIT:
-                logger.info('Battle lost and exit')
-                break
+
+            if not last_battle:
+                logger.info('Battle lost before three wins, continue with other targets')
 
         self.goto_page(page_exploration)
         self.set_next_run(task='RealmRaid', success=success, finish=True)
         raise TaskEnd
-
-    def is_ticket(self) -> bool:
-        """
-        如果没有票了，那么就返回False
-        :return:
-        """
-        self.wait_until_appear(self.I_BACK_RED)
-        self.screenshot()
-        cu, res, total = self.O_NUMBER.ocr(self.device.image)
-        if cu == 0 and cu + res == total:
-            logger.warning(f'Execute round failed, no ticket')
-            return False
-        return True
-
-    def medal_fire(self) -> bool:
-        """
-        点击勋章
-        :return:
-        """
-        # 点击勋章的挑战 和挑战
-        time.sleep(0.2)
-        is_click = False
-        while 1:
-            self.screenshot()
-
-            if self.appear(self.I_FIRE, threshold=0.8):
-                break
-
-            if self.appear_then_click(self.I_SOUL_RAID, interval=1.5):
-                while 1:
-                    self.screenshot()
-                    if self.appear_then_click(self.I_SOUL_RAID, interval=1.5):
-                        continue
-                    if not self.appear(self.I_SOUL_RAID, threshold=0.6):
-                        break
-                continue
-
-            target = self.medal_grid.find_anyone(self.device.image, frame_id=self.device.image_frame_id)
-            if target:
-                self.appear_then_click(target, interval=2)  # 点击勋章,但是设置为两秒的间隔，适应不同的模拟器速度
-                is_click = not is_click
-
-            if is_click:
-                continue
-        logger.info(f'Click Medal')
-
-        # 点击挑战
-        self.wait_until_appear(self.I_FIRE)
-        while 1:
-            self.screenshot()
-            if self.appear_then_click(self.I_FIRE, interval=2):
-                continue
-            if not self.appear(self.I_FIRE, threshold=0.8):
-                break
-        logger.info(f'Click {self.I_FIRE.name}')
 
     # ----------------------------------------------------------------------------------------------------------------------
     # 2023.7.21 改版个人突破
@@ -296,11 +214,6 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         elif cu + res == total and cu < base:
             logger.warning(f'Execute raid failed, ticket is not enough')
             return False
-        self.init_tickets = cu if self.init_tickets == -1 else self.init_tickets
-        if self.init_tickets - cu >= self.config.realm_raid.raid_config.number_attack:  # 检查挑战次数
-            logger.info(f'Current count {self.init_tickets - cu}, '
-                        f'max count {self.config.realm_raid.raid_config.number_attack}')
-            return False
         return True
 
     @cached_property
@@ -330,12 +243,12 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         return [self.C_PARTITION_1, self.C_PARTITION_2, self.C_PARTITION_3, self.C_PARTITION_4, self.C_PARTITION_5,
                 self.C_PARTITION_6, self.C_PARTITION_7, self.C_PARTITION_8, self.C_PARTITION_9]
 
-    def find_one(self, screenshot: bool=True) -> tuple:
+    def find_one(self, screenshot: bool=True, exclude_positions: set[int] | None=None) -> tuple:
         """
         找到一个可以打的，并且检查一下是不是这一个的是第几个的
         我们约定次序是：从左到右 上到下
         1 2 3
-        4 5 9
+        4 5 6
         7 8 9
         :return: 返回的第一个参数是一个RuleImage, 第二个参数是位置信息
         如果没有找到，返回None, None
@@ -343,17 +256,14 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         if screenshot:
             self.screenshot()
         image = self.device.image
-        # https://github.com/runhey/OnmyojiAutoScript/issues/71
-        # 如果开始失败后继挑战剩下的
-        if self.config.realm_raid.raid_config.when_attack_fail == WhenAttackFail.CONTINUE:
-            for i, roi in enumerate(self.false_roi):
-                self.false_image.roi_back = roi
-                if not self.appear(self.false_image):
+        if exclude_positions:
+            image = image.copy()
+            for position in exclude_positions:
+                if position < 1 or position > len(self.partition):
                     continue
-                logger.info(f'Position {i+1} is a failed')
-                x, y, w, h = self.partition[i].roi_back
-                image[y:y+h, x:x+w, ...] = 0
-        # -----------------------------------------------------
+                x, y, width, height = self.partition[position - 1].roi_back
+                image[y:y + height, x:x + width, ...] = 0
+
         target = self.order_medal.find_anyone(image)
         if target:
             center = target.front_center()
@@ -400,18 +310,103 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             return True
         return False
 
-    def three_refresh(self, config: RealmRaid) -> bool:
-        logger.info('Three refresh')
-        # 开启退四时，刷新前先补完第一个结界的退四流程。
-        if config.raid_config.exit_four and not self.check_position_failed(0) and not self.appear(self.I_RAID_SUCCESS) and self.check_ticket():
-            logger.info('Three refresh with exit_four: position 1 has no fail/finished sign, executing retreat four')
-            for _ in range(4):
-                self.fire(1)
-                self.run_general_battle(config=self.build_quick_exit_config(config.general_battle_config))
-                if not self.ui_click_until_appear_or_timeout(random_click(), self.I_RR_PERSON, interval=0.8, timeout=10):
-                    logger.warning('Retreat four failed to return to realm raid page')
-                    return False
-        return self.check_refresh()
+    def get_failed_positions(self, screenshot: bool=True) -> list[int]:
+        """
+        识别当前九宫格中带失败标记的位置。
+        :return: 位置编号列表，范围为1到9
+        """
+        if screenshot:
+            self.screenshot()
+
+        positions = []
+        for index, roi in enumerate(self.false_roi, start=1):
+            self.false_image.roi_back = roi
+            if self.appear(self.false_image):
+                positions.append(index)
+        return positions
+
+    def has_three_wins(self, screenshot: bool=True) -> bool:
+        """
+        通过游戏界面的三胜标记判断本轮是否进入全清阶段。
+
+        不能使用本次任务的战斗计数，因为脚本可能从已经有胜场的盘面开始执行。
+        """
+        if screenshot:
+            self.screenshot()
+        return self.appear(self.I_RR_THREE, threshold=0.8)
+
+    def is_first_position_finished(self, screenshot: bool=True) -> bool:
+        """
+        判断左上角第一个目标是否已经成功或失败。
+
+        位置1只要完成过正式挑战，就视为本轮已经执行过退四；任务运行期间不存在
+        “退四后中断”的状态，因此不需要额外持久化退四进度。
+        """
+        if screenshot:
+            self.screenshot()
+        if self.appear(self.I_RAID_SUCCESS):
+            return True
+
+        self.false_image.roi_back = self.false_roi[0]
+        return self.appear(self.false_image)
+
+    def retreat_four_at_first(self, config: RealmRaid) -> bool:
+        """
+        固定在左上角第一个目标主动退出四次，不把这些退出计入真实挑战次数。
+        """
+        logger.info('Execute retreat four at position 1')
+        quick_exit_config = self.build_quick_exit_config(config.general_battle_config)
+
+        for count in range(1, 5):
+            if not self.fire(1):
+                logger.warning(f'Retreat four failed to enter battle, count={count}')
+                return False
+
+            self.run_general_battle(config=quick_exit_config)
+
+            # 快速退出后关闭结果界面，确认重新回到个人突破页面再执行下一次。
+            if not self.ui_click_until_appear_or_timeout(
+                    random_click(), self.I_RR_PERSON, interval=0.8, timeout=10):
+                logger.warning(f'Retreat four failed to return to realm raid page, count={count}')
+                return False
+
+        logger.info('Retreat four completed')
+        return True
+
+    def ensure_retreat_four(self, config: RealmRaid) -> bool:
+        """
+        开启退四时，确保当前这一轮在刷新或正式挑战位置1前已经完成退四。
+        """
+        if not config.raid_config.exit_four or self.round_retreat_done:
+            return True
+
+        self.screenshot()
+        if self.is_first_position_finished(False):
+            logger.info('Position 1 is finished, treat retreat four as completed')
+            self.round_retreat_done = True
+            return True
+
+        # 主动退出不消耗突破券，但进入战斗仍要求账号当前至少持有一张券。
+        if not self.check_ticket():
+            logger.warning('Retreat four cannot start without a realm raid pass')
+            return False
+        if not self.retreat_four_at_first(config):
+            return False
+
+        self.round_retreat_done = True
+        return True
+
+    def refresh_round(self, config: RealmRaid) -> bool:
+        """
+        结束当前轮：三胜或无其他目标时先确保完成退四，再刷新盘面。
+        """
+        if not self.ensure_retreat_four(config):
+            return False
+        if not self.check_refresh():
+            return False
+
+        self.round_retreat_done = False
+        return True
 
     def reward_detect_click(self, screenshot: bool=True) -> bool:
         """
@@ -480,42 +475,6 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             if self.click(click, interval=2):
                 continue
 
-    def check_position_failed(self, position: int) -> bool:
-        """
-        检查指定位置是否出现了失败标志
-        :param position: 位置索引（0-8，对应九宫格的9个位置）
-        :return: 如果该位置有失败标志返回True，否则返回False
-        """
-        if position < 0 or position >= len(self.false_roi):
-            logger.warning(f'Invalid position {position}')
-            return False
-        self.screenshot()
-        roi = self.false_roi[position]
-        self.false_image.roi_back = roi
-        if self.appear(self.false_image):
-            logger.info(f'Position {position + 1} has a fail sign')
-            return True
-        return False
-
-    def fire_again(self) -> bool:
-        """
-        失败界面再次挑战
-        :return: 是否再战成功
-        """
-        self.wait_until_appear(self.I_FIRE_AGAIN)
-        while True:
-            self.screenshot()
-            if not self.appear(self.I_FIRE_AGAIN):
-                logger.info(f'Click fire again success')
-                return True
-            if self.appear_then_click(self.I_SHOW_AGAIN, interval=2):
-                continue
-            if self.appear_then_click(self.I_FRESH_ENSURE, interval=2):
-                continue
-            if self.appear_then_click(self.I_FIRE_AGAIN, interval=2):
-                continue
-        return False
-
     @cached_property
     def false_roi(self) -> list:
         width = 86
@@ -540,7 +499,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
 
     @cached_property
     def false_image(self):
-        return RuleImage(roi_front=(0 ,0, 63, 32),
+        return RuleImage(roi_front=(0, 0, 63, 32),
                          roi_back=(0, 0, 100, 100),
                          threshold=0.8,
                          method="Template matching",
@@ -550,7 +509,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
 if __name__ == "__main__":
     from module.config.config import Config
     from module.device.device import Device
-    config = Config('oas1')
+    config = Config('zhu-1-mine')
     device = Device(config)
     t = ScriptTask(config, device)
 

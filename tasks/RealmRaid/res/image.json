@@ -180,24 +180,6 @@
     "description": "description"
   },
   {
-    "itemName": "fire_again",
-    "imageName": "res_fire_again.png",
-    "roiFront": "830,506,61,36",
-    "roiBack": "256,384,773,231",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "失败再次挑战"
-  },
-  {
-    "itemName": "show_again",
-    "imageName": "res_show_again.png",
-    "roiFront": "539,344,32,36",
-    "roiBack": "397,218,485,275",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "不再提示"
-  },
-  {
     "itemName": "raid_success",
     "imageName": "res_raid_success.png",
     "roiFront": "405,169,50,46",
