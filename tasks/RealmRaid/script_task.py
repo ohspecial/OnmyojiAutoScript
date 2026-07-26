@@ -96,20 +96,28 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 logger.info(f'Real attack count {real_attack_count}, max count {con.raid_config.number_attack}')
                 break
 
-            # 阶段只以游戏盘面的三胜标记为准；任务从中途盘面启动时也会立即刷新已三胜的一轮。
-            if self.has_three_wins(False):
-                logger.info('Three wins detected, ensure retreat four and refresh current round')
-                if self.refresh_round(con):
-                    continue
-                success = False
-                break
+            force_first_attack = False
 
-            # 三胜前允许失败，屏蔽失败格后继续按勋章优先级寻找其他目标。
+            # 阶段只以游戏盘面的三胜标记为准；任务从中途盘面启动时也能正确处理已三胜的一轮。
+            if self.has_three_wins(False):
+                logger.info('Three wins detected, resolve current round after retreat four')
+                three_win_action = self.process_three_win_stage(con)
+                if three_win_action == 'refreshed':
+                    continue
+                if three_win_action == 'stop':
+                    success = False
+                    break
+                force_first_attack = three_win_action == 'attack_first'
+
+            # 屏蔽失败格后继续按勋章优先级寻找其他目标。
             failed_positions = self.get_failed_positions(False)
             if failed_positions:
-                logger.info(f'Ignore failed positions before three wins: {failed_positions}')
+                logger.info(f'Ignore failed positions: {failed_positions}')
 
-            medal, index = self.find_one(False, exclude_positions=set(failed_positions))
+            if force_first_attack:
+                medal, index = None, 1
+            else:
+                medal, index = self.find_one(False, exclude_positions=set(failed_positions))
             if not medal and not index:
                 logger.info('No target can be attacked, refresh current round')
                 if self.refresh_round(con):
@@ -407,6 +415,36 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
 
         self.round_retreat_done = False
         return True
+
+    def process_three_win_stage(self, config: RealmRaid) -> str:
+        """
+        处理三胜后的盘面。
+
+        退四后，若位置1之外没有失败目标，则正式挑战位置1并继续全清；
+        若其他位置存在失败目标，则尝试刷新，无法刷新时结束任务。
+
+        :return: attack_first、continue、refreshed 或 stop
+        """
+        if not self.ensure_retreat_four(config):
+            return 'stop'
+
+        failed_positions = self.get_failed_positions()
+        failed_positions_outside_first = [
+            position for position in failed_positions if position != 1
+        ]
+        if failed_positions_outside_first:
+            logger.info(
+                f'Failed positions outside position 1: {failed_positions_outside_first}, '
+                'try to refresh current round'
+            )
+            return 'refreshed' if self.refresh_round(config) else 'stop'
+
+        if not self.is_first_position_finished(False):
+            logger.info('No failed position outside position 1, attack position 1 and continue clearing')
+            return 'attack_first'
+
+        logger.info('No failed position outside position 1, continue clearing current round')
+        return 'continue'
 
     def reward_detect_click(self, screenshot: bool=True) -> bool:
         """

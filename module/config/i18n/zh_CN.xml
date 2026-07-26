@@ -571,7 +571,7 @@ mode_3策略是刷到五个契灵后开始结契，选择高级、中级盘来�
 	<message><source>Order Attack</source><translation>挑战顺序</translation></message>
 	<message><source>Number Base</source><translation>突破卷数量大于等于 X 时才会挑战</translation></message>
 	<message><source>number_attack_help</source><translation>默认30，可选范围[1~30]；达到挑战次数上限或没有突破卷时结束任务</translation></message>
-	<message><source>exit_four_help</source><translation>每轮按勋章顺序遇到左上角第一个目标时先退四再挑战；三胜前跳过失败目标继续挑战，达到三胜后补退四并刷新</translation></message>
+	<message><source>exit_four_help</source><translation>每轮按勋章顺序遇到左上角第一个目标时先退四再挑战；三胜后若除第一个外没有失败，则正式挑战第一个并继续全清，否则尝试刷新，无法刷新时结束任务</translation></message>
 	<message><source>order_attack_help</source><translation>使用过滤器，保持默认即可</translation></message>
 	<message><source>number_base_help</source><translation>当前突破卷数量低于这个值时结束任务</translation></message>
 </context>	
