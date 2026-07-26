@@ -10,6 +10,7 @@ from tasks.RealmRaid.script_task import ScriptTask
 def make_task() -> ScriptTask:
     task = object.__new__(ScriptTask)
     task.round_retreat_done = False
+    task.first_attack_pending_after_retreat = False
     return task
 
 
@@ -62,6 +63,7 @@ def test_ensure_retreat_four_runs_only_once_per_round():
     assert task.ensure_retreat_four(config)
     assert task.ensure_retreat_four(config)
     assert task.round_retreat_done
+    assert task.first_attack_pending_after_retreat
     task.retreat_four_at_first.assert_called_once_with(config)
 
 
@@ -70,12 +72,14 @@ def test_refresh_round_ensures_retreat_and_resets_state():
     task.ensure_retreat_four = Mock(return_value=True)
     task.check_refresh = Mock(return_value=True)
     task.round_retreat_done = True
+    task.first_attack_pending_after_retreat = True
     config = make_config()
 
     assert task.refresh_round(config)
     task.ensure_retreat_four.assert_called_once_with(config)
     task.check_refresh.assert_called_once_with()
     assert not task.round_retreat_done
+    assert not task.first_attack_pending_after_retreat
 
 
 def test_refresh_round_keeps_state_when_refresh_is_unavailable():
@@ -108,6 +112,19 @@ def test_three_wins_continues_clearing_when_only_first_position_failed():
     task.refresh_round = Mock()
 
     assert task.process_three_win_stage(make_config()) == "continue"
+    task.refresh_round.assert_not_called()
+
+
+def test_three_wins_attacks_first_when_retreat_failure_mark_is_present():
+    task = make_task()
+    task.first_attack_pending_after_retreat = True
+    task.ensure_retreat_four = Mock(return_value=True)
+    task.get_failed_positions = Mock(return_value=[1])
+    task.is_first_position_finished = Mock(return_value=True)
+    task.refresh_round = Mock()
+
+    assert task.process_three_win_stage(make_config()) == "attack_first"
+    task.is_first_position_finished.assert_not_called()
     task.refresh_round.assert_not_called()
 
 

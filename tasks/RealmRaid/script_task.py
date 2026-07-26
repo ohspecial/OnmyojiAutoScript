@@ -25,6 +25,7 @@ from module.atom.click import RuleClick
 
 class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
     round_retreat_done: bool = False
+    first_attack_pending_after_retreat: bool = False
 
     def _handle_result(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
         if config.quick_exit:
@@ -80,6 +81,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         success = True
         real_attack_count = 0
         self.round_retreat_done = self.is_first_position_finished()
+        self.first_attack_pending_after_retreat = False
 
         while 1:
             self.screenshot()
@@ -141,6 +143,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
 
             last_battle = self.run_general_battle(con.general_battle_config)
             real_attack_count += 1
+            if index == 1:
+                self.first_attack_pending_after_retreat = False
 
             if lock_before:
                 con.general_battle_config.lock_team_enable = lock_before
@@ -392,6 +396,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         if self.is_first_position_finished(False):
             logger.info('Position 1 is finished, treat retreat four as completed')
             self.round_retreat_done = True
+            self.first_attack_pending_after_retreat = False
             return True
 
         # 主动退出不消耗突破券，但进入战斗仍要求账号当前至少持有一张券。
@@ -402,6 +407,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             return False
 
         self.round_retreat_done = True
+        # 退四会在位置1留下失败标记；该标记不能代表位置1已经完成正式挑战。
+        self.first_attack_pending_after_retreat = True
         return True
 
     def refresh_round(self, config: RealmRaid) -> bool:
@@ -414,6 +421,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             return False
 
         self.round_retreat_done = False
+        self.first_attack_pending_after_retreat = False
         return True
 
     def process_three_win_stage(self, config: RealmRaid) -> str:
@@ -438,6 +446,13 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 'try to refresh current round'
             )
             return 'refreshed' if self.refresh_round(config) else 'stop'
+
+        if self.first_attack_pending_after_retreat:
+            logger.info(
+                'Position 1 is pending formal attack after retreat four, '
+                'attack position 1 and continue clearing'
+            )
+            return 'attack_first'
 
         if not self.is_first_position_finished(False):
             logger.info('No failed position outside position 1, attack position 1 and continue clearing')
