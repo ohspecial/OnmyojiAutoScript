@@ -92,6 +92,56 @@ def test_refresh_round_keeps_state_when_refresh_is_unavailable():
     assert task.round_retreat_done
 
 
+def test_check_refresh_stops_when_refresh_button_click_fails():
+    task = make_task()
+    task.screenshot = Mock()
+    task.appear = Mock(side_effect=[True, False])
+    task.appear_then_click = Mock(return_value=False)
+
+    assert not task.check_refresh()
+    task.appear_then_click.assert_called_once_with(task.I_FRESH, interval=1)
+
+
+def test_check_refresh_stops_when_refresh_confirmation_does_not_appear():
+    task = make_task()
+    task.screenshot = Mock()
+    task.appear = Mock(side_effect=[True, False])
+    task.appear_then_click = Mock(return_value=True)
+    task.wait_until_appear = Mock(return_value=False)
+
+    assert not task.check_refresh()
+    task.appear_then_click.assert_called_once_with(task.I_FRESH, interval=1)
+    task.wait_until_appear.assert_called_once_with(task.I_FRESH_ENSURE, wait_time=5)
+
+
+def test_check_refresh_stops_when_refresh_confirmation_click_fails():
+    task = make_task()
+    task.screenshot = Mock()
+    task.appear = Mock(side_effect=[True, False])
+    task.appear_then_click = Mock(side_effect=[True, False])
+    task.wait_until_appear = Mock(return_value=True)
+
+    assert not task.check_refresh()
+    assert task.appear_then_click.call_args_list == [
+        ((task.I_FRESH,), {'interval': 1}),
+        ((task.I_FRESH_ENSURE,), {}),
+    ]
+
+
+def test_check_refresh_clicks_once_and_returns_after_confirmation_disappears():
+    task = make_task()
+    task.screenshot = Mock()
+    task.appear = Mock(side_effect=[True, False, False])
+    task.appear_then_click = Mock(side_effect=[True, True])
+    task.wait_until_appear = Mock(return_value=True)
+
+    assert task.check_refresh()
+    assert task.appear_then_click.call_args_list == [
+        ((task.I_FRESH,), {'interval': 1}),
+        ((task.I_FRESH_ENSURE,), {}),
+    ]
+
+
 def test_three_wins_attacks_first_and_continues_when_other_positions_have_no_failure():
     task = make_task()
     task.ensure_retreat_four = Mock(return_value=True)

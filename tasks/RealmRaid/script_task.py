@@ -18,6 +18,7 @@ from tasks.RealmRaid.page import page_shikigami_records
 
 from module.logger import logger
 from module.exception import TaskEnd
+from module.base.timer import Timer
 from module.atom.image_grid import ImageGrid
 from module.atom.image import RuleImage
 from module.atom.click import RuleClick
@@ -495,18 +496,27 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         if not self.appear(self.I_FRESH):
             logger.info(f'No find refresh button and it is in CD')
             return False
-        while 1:
-            self.screenshot()
-            if self.appear(self.I_FRESH_ENSURE):
-                break
-            if self.appear_then_click(self.I_FRESH, interval=1):
-                continue
-        while 1:
+
+        if not self.appear(self.I_FRESH_ENSURE):
+            if not self.appear_then_click(self.I_FRESH, interval=1):
+                logger.warning('Refresh button click failed, stop realm raid')
+                return False
+
+            if not self.wait_until_appear(self.I_FRESH_ENSURE, wait_time=5):
+                logger.warning('Refresh confirmation did not appear, stop realm raid')
+                return False
+
+        if not self.appear_then_click(self.I_FRESH_ENSURE):
+            logger.warning('Refresh confirmation click failed, stop realm raid')
+            return False
+
+        timeout_timer = Timer(5).start()
+        while not timeout_timer.reached():
             self.screenshot()
             if not self.appear(self.I_FRESH_ENSURE):
                 return True
-            if self.appear_then_click(self.I_FRESH_ENSURE, interval=1):
-                continue
+
+        logger.warning('Refresh confirmation did not disappear, stop realm raid')
         return False
 
     def fire(self, order: int) -> bool:
