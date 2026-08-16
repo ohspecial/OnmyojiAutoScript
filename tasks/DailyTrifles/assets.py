@@ -19,7 +19,7 @@ class DailyTriflesAssets:
 
 	# Image Rule Assets
 	# 进入庭院事务标志 
-	I_ENTER_COURTYARD_AFFAIRS = RuleImage(roi_front=(990,372,25,30), roi_back=(696,349,343,231), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_enter_courtyard_affairs.png")
+	I_ENTER_COURTYARD_AFFAIRS = RuleImage(roi_front=(990,372,25,30), roi_back=(160,349,879,237), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_enter_courtyard_affairs.png")
 	# 庭院事务页面标志 
 	I_CHECK_COURTYARD_AFFAIRS = RuleImage(roi_front=(254,40,196,57), roi_back=(134,0,415,180), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_check_courtyard_affairs.png")
 	# 一键完成标志 
@@ -75,11 +75,11 @@ class DailyTriflesAssets:
 	I_DT_GW_INSUFFICIENT = RuleImage(roi_front=(899,401,116,35), roi_back=(834,126,245,460), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_dt_gw_insufficient.png")
 	# 已捐满 
 	I_DT_GW_FULL = RuleImage(roi_front=(915,120,94,33), roi_back=(894,89,139,492), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_dt_gw_full.png")
-	# 赠送小红点
+	# 赠送小红点 
 	I_DT_GW_DONATE_RED = RuleImage(roi_front=(1024,297,14,18), roi_back=(979,275,77,125), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_dt_gw_donate_red.png")
-	# 一键领取
+	# 一键领取 
 	I_DT_GW_ONE_COLLECT = RuleImage(roi_front=(921,605,51,48), roi_back=(866,557,164,137), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_dt_gw_one_collect.png")
-	# 赠送
+	# 赠送 
 	I_DT_GW_GIVE = RuleImage(roi_front=(979,316,44,75), roi_back=(924,160,142,276), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_dt_gw_give.png")
 
 
@@ -174,4 +174,5 @@ class DailyTriflesAssets:
 	O_SELECT_SM3 = RuleOcr(roi=(26,304,45,38), area=(26,304,45,38), mode="Single", method="Default", keyword="", name="select_sm3")
 	# description 
 	O_SELECT_SM4 = RuleOcr(roi=(26,397,45,38), area=(26,397,45,38), mode="Single", method="Default", keyword="", name="select_sm4")
+
 
