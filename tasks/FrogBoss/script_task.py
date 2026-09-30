@@ -36,12 +36,15 @@ class ScriptTask(RightActivity, FrogBossAssets, GeneralBattleAssets):
             if self.appear(self.I_FROG_BOSS_REST):
                 logger.info('Frog Boss Rest')
                 break
-            # 竞猜成功
-            if self.appear(self.I_BET_SUCCESS):
-                logger.info('You bet win')
+            # 结算文字素材可能过期，也通过页面标题和“下一局”按钮识别结算页。
+            if self.appear(self.I_BET_SUCCESS) or (
+                    self.appear(self.I_FROG_CHECK) and self.appear(self.I_NEXT_COMPETITION)):
+                logger.info('FrogBoss result page')
                 self.detect()
                 while 1:
                     self.screenshot()
+                    if self.appear(self.I_BETTED) or self.appear(self.I_FROG_BOSS_REST):
+                        break
                     if self.appear(self.I_BET_LEFT) and self.appear(self.I_BET_RIGHT):
                         break
                     if self.appear_then_click(self.I_BET_SUCCESS_BOX, interval=1):
