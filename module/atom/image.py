@@ -7,6 +7,7 @@ import numpy as np
 from numpy import float32, int32, uint8, fromfile
 from pathlib import Path
 
+from module.atom.RuleImageMallResourceMixin import RuleImageMallResourceMixin
 from module.base.decorator import cached_property
 from module.image.rpc import get_image_client
 from module.logger import logger
@@ -14,7 +15,7 @@ from module.base.utils import is_approx_rectangle
 from module.base.utils.utils import random_normal_distribution_int
 
 
-class RuleImage:
+class RuleImage(RuleImageMallResourceMixin):
     debug_mode: bool = False
     METHOD_TEMPLATE_MATCH = "Template matching"
     METHOD_MULTI_SCALE_TEMPLATE_MATCH = "Multi-scale template matching"
