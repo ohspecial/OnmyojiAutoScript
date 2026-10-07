@@ -40,13 +40,10 @@ class ThousandThings(GameUi, RichManAssets):
             time.sleep(1)
         if con.mystery_amulet:
             self.tt_buy_mystery_amulet()
-        self.device.click_record_clear()
         if con.black_daruma_fragment:
             self.tt_buy_black_daruma_scrap()
-        self.device.click_record_clear()
         if con.ap:
             self.tt_buy_ap()
-        self.device.click_record_clear()
         while 1:
             self.screenshot()
             if self.appear(self.I_TT_ENTER):
@@ -54,6 +51,7 @@ class ThousandThings(GameUi, RichManAssets):
             if self.appear_then_click(self.I_UI_BACK_RED, interval=1):
                 continue
         logger.info('Exit Thousand Things')
+
 
     def tt_buy_mystery_amulet(self) -> bool:
         """
@@ -204,7 +202,6 @@ if __name__ == '__main__':
     t = ThousandThings(c, d)
 
     t.execute_tt(t.config.rich_man.thousand_things)
-
 
 
 

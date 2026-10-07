@@ -25,7 +25,7 @@ class Honor(Special):
         
         # 向下滑找到购买的物品
         mystery_bought, black_bought = False, False
-        max_swipes = 5
+        max_swipes = 3
         swipe_count = 0
         
         while 1:
@@ -70,6 +70,7 @@ class Honor(Special):
         if not self.mall_check_money(4, 1500):
             logger.warning('No enough money')
             return
+        # 购买: 点商品打开购买弹窗, 点加号拉满数量后确认购买
         self.buy_more(self.I_HONOR_BLUE)
 
     def _honor_black_daruma_scrap(self, enable: bool=False):
@@ -91,6 +92,7 @@ class Honor(Special):
             return
         # 使用动态位置点击购买
         self.buy_more(self.I_HONOR_BLACK)
+        time.sleep(0.5)
 
 
 if __name__ == '__main__':
