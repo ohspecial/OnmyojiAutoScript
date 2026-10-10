@@ -5,6 +5,7 @@ import numpy as np
 
 from tasks.RealmRaid.config import RaidConfig
 from tasks.RealmRaid.script_task import ScriptTask
+from tasks.GlobalGame.assets import GlobalGameAssets
 
 
 def make_task() -> ScriptTask:
@@ -111,7 +112,7 @@ def test_check_refresh_stops_when_refresh_confirmation_does_not_appear():
 
     assert not task.check_refresh()
     task.appear_then_click.assert_called_once_with(task.I_FRESH, interval=1)
-    task.wait_until_appear.assert_called_once_with(task.I_FRESH_ENSURE, wait_time=5)
+    task.wait_until_appear.assert_called_once_with(GlobalGameAssets.I_UI_CONFIRM, wait_time=5)
 
 
 def test_check_refresh_stops_when_refresh_confirmation_click_fails():
@@ -124,7 +125,7 @@ def test_check_refresh_stops_when_refresh_confirmation_click_fails():
     assert not task.check_refresh()
     assert task.appear_then_click.call_args_list == [
         ((task.I_FRESH,), {'interval': 1}),
-        ((task.I_FRESH_ENSURE,), {}),
+        ((GlobalGameAssets.I_UI_CONFIRM,), {}),
     ]
 
 
@@ -138,7 +139,7 @@ def test_check_refresh_clicks_once_and_returns_after_confirmation_disappears():
     assert task.check_refresh()
     assert task.appear_then_click.call_args_list == [
         ((task.I_FRESH,), {'interval': 1}),
-        ((task.I_FRESH_ENSURE,), {}),
+        ((GlobalGameAssets.I_UI_CONFIRM,), {}),
     ]
 
 

@@ -21,6 +21,7 @@ from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_main
+from tasks.GlobalGame.assets import GlobalGameAssets
 
 # 单个首领/副将/精英 一次无法完成目标（一般是一次没打掉） 的情况下，最大战斗次数
 MAX_BATTLE_COUNT = 2
@@ -655,8 +656,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
         logger.info("Quitting battle")
         while True:
             self.screenshot()
-            if self.appear(self.I_EXIT_ENSURE):
-                if self.click(self.I_EXIT_ENSURE, interval=1):
+            if self.appear(GlobalGameAssets.I_UI_CONFIRM):
+                if self.click(GlobalGameAssets.I_UI_CONFIRM, interval=1):
                     self.wait_until_appear(self.I_ABYSS_NAVIGATION, wait_time=1)
                 continue
             if self.appear(self.I_ABYSS_NAVIGATION):
@@ -669,7 +670,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AbyssShadowsAssets):
                 continue
             if self.appear(self.I_EXIT):
                 if self.click(self.I_EXIT, interval=2):
-                    self.wait_until_appear(self.I_EXIT_ENSURE, wait_time=1)
+                    self.wait_until_appear(GlobalGameAssets.I_UI_CONFIRM, wait_time=1)
                 continue
         return
 

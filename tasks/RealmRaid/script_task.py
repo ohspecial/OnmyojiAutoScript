@@ -11,6 +11,7 @@ from tasks.Component.GeneralBattle.general_battle import BattleAction, BattleCon
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_realm_raid
 from tasks.RealmRaid.assets import RealmRaidAssets
+from tasks.GlobalGame.assets import GlobalGameAssets
 from tasks.RealmRaid.config import RealmRaid
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.RealmRaid.page import page_shikigami_records
@@ -87,9 +88,9 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         while 1:
             self.screenshot()
             # 刷新确认弹窗可能因页面响应延迟残留，先关闭后再识别盘面。
-            if self.appear(self.I_FRESH_ENSURE):
+            if self.appear(GlobalGameAssets.I_UI_CONFIRM):
                 logger.info("Pop-up detected: Refresh Confirmation. Clicking Confirm.")
-                self.appear_then_click(self.I_FRESH_ENSURE, interval=1.5)
+                self.appear_then_click(GlobalGameAssets.I_UI_CONFIRM, interval=1.5)
                 continue
 
             if not self.check_ticket(con.raid_config.number_base):
@@ -497,23 +498,23 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             logger.info(f'No find refresh button and it is in CD')
             return False
 
-        if not self.appear(self.I_FRESH_ENSURE):
+        if not self.appear(GlobalGameAssets.I_UI_CONFIRM):
             if not self.appear_then_click(self.I_FRESH, interval=1):
                 logger.warning('Refresh button click failed, stop realm raid')
                 return False
 
-            if not self.wait_until_appear(self.I_FRESH_ENSURE, wait_time=5):
+            if not self.wait_until_appear(GlobalGameAssets.I_UI_CONFIRM, wait_time=5):
                 logger.warning('Refresh confirmation did not appear, stop realm raid')
                 return False
 
-        if not self.appear_then_click(self.I_FRESH_ENSURE):
+        if not self.appear_then_click(GlobalGameAssets.I_UI_CONFIRM):
             logger.warning('Refresh confirmation click failed, stop realm raid')
             return False
 
         timeout_timer = Timer(5).start()
         while not timeout_timer.reached():
             self.screenshot()
-            if not self.appear(self.I_FRESH_ENSURE):
+            if not self.appear(GlobalGameAssets.I_UI_CONFIRM):
                 return True
 
         logger.warning('Refresh confirmation did not disappear, stop realm raid')
