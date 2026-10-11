@@ -47,7 +47,7 @@
   {
     "itemName": "climb_mode_ap100",
     "imageName": "as_climb_mode_ap100.png",
-    "roiFront": "1186,665,22,25",
+    "roiFront": "1200,670,22,25",
     "roiBack": "1055,495,202,219",
     "method": "Template matching",
     "threshold": 0.8,

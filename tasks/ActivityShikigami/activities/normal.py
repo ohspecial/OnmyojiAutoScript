@@ -13,28 +13,34 @@ class NormalClimbAct(BaseAct):
     """普通爬塔活动"""
 
     def _exit_matcher(self) -> ExitMatcher | None:
-        return pages.any_of(self.I_CHECK_BATTLE_MAIN, self.I_ACT_FIRE, self.I_AS_BOSS_FIRE)
+        return pages.any_of(
+            self.I_CHECK_BATTLE_MAIN, self.I_CLIMB_MODE_AP100,
+            self.I_ACT_FIRE, self.I_AS_BOSS_FIRE,
+        )
 
     def before_run(self):
         super().before_run()
         page_act = self.navigator.resolve_page(pages.page_act)
         page_act_pass = self.navigator.resolve_page(pages.page_act_pass)
         page_act_ap = self.navigator.resolve_page(pages.page_act_ap)
+        page_act_ap100 = self.navigator.resolve_page(pages.page_act_ap100)
         page_act_map = self.navigator.resolve_page(pages.page_act_map)
         self._challenge_type = None
 
-        # 本期门票和体力使用独立入口，修改当前任务的页面副本。
+        # 刹那试炼也在活动主页；只调整当前任务的页面副本。
+        page_act.recognizer = pages.any_of(self.I_TO_BATTLE_MAIN, self.O_ENTER_AP100)
         page_act.remove_transition(destination=page_act_map)
         page_act_map.clear_transitions()
         page_act_map.recognizer = None
-        for climb_type, page, enter in (
-            ("pass", page_act_pass, self._enter_pass_challenge),
-            ("ap", page_act_ap, self._enter_ap_challenge),
+        for climb_type, page, enter, recognizer in (
+            ("pass", page_act_pass, self._enter_pass_challenge, self.I_CHECK_BATTLE_MAIN),
+            ("ap", page_act_ap, self._enter_ap_challenge, self.I_CHECK_BATTLE_MAIN),
+            ("ap100", page_act_ap100, self._enter_ap100_challenge, self.I_CLIMB_MODE_AP100),
         ):
             page.clear_transitions()
             page.on_enter_failure.clear()
             page.recognizer = all_of(
-                self.I_CHECK_BATTLE_MAIN,
+                recognizer,
                 lambda task, mode=climb_type: task._challenge_type == mode,
             )
             page_act.connect(page, enter, key=f"page_act->page_act_{climb_type}")
@@ -96,11 +102,21 @@ class NormalClimbAct(BaseAct):
         self._challenge_type = "ap"
         return True
 
+    def _enter_ap100_challenge(self) -> bool:
+        # 先识别左侧“刹那试炼”，确认到达100体页面后再切换模式。
+        if not self.ui_click(
+            self.O_ENTER_AP100, stop=self.I_CLIMB_MODE_AP100,
+            interval=1, timeout=30,
+        ):
+            return False
+        self._challenge_type = "ap100"
+        return True
+
     def _return_to_activity(self) -> bool:
         timer = Timer(30).start()
         while not timer.reached():
             self.screenshot()
-            if self.appear(self.I_TO_BATTLE_MAIN):
+            if self.appear(self.I_TO_BATTLE_MAIN) or self.ocr_appear(self.O_ENTER_AP100):
                 self._challenge_type = None
                 return True
             if self.appear_then_click(self.I_UI_BACK_CIRCLE, interval=1.5):

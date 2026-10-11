@@ -18,6 +18,7 @@ def make_task():
     task.screenshot = Mock()
     task.goto_page = Mock()
     task.appear = Mock(return_value=False)
+    task.ocr_appear = Mock(return_value=False)
     task.appear_then_click = Mock(return_value=False)
     task.click = Mock(return_value=True)
     return task
@@ -42,6 +43,31 @@ def test_switching_challenge_types_returns_through_activity_home():
     task.goto_page.assert_called_once_with(pages.page_act)
 
 
+@pytest.mark.parametrize("other_mode", ["pass", "ap"])
+def test_ap100_switches_through_home_without_changing_global_pages(other_mode):
+    task = make_task()
+    original_recognizer = pages.page_act_ap100.recognizer
+    original_transitions = tuple(pages.page_act_ap100.transitions)
+    original_hooks = tuple(pages.page_act_ap100.on_enter_failure)
+    task.before_run()
+    home = task.navigator.resolve_page(pages.page_act)
+    ap100_page = task.navigator.resolve_page(pages.page_act_ap100)
+    other_page = task.navigator.resolve_page(getattr(pages, f"page_act_{other_mode}"))
+
+    path = task._build_path(other_page, ap100_page)
+    assert [edge.destination for edge in path] == [home, ap100_page]
+    assert path[0].action == task._return_to_activity
+    assert path[1].action == task._enter_ap100_challenge
+    reverse = task._build_path(ap100_page, other_page)
+    assert [edge.destination for edge in reverse] == [home, other_page]
+    assert reverse[0].action == task._return_to_activity
+    assert reverse[1].action == getattr(task, f"_enter_{other_mode}_challenge")
+    assert pages.page_act_ap100.recognizer is original_recognizer
+    assert tuple(pages.page_act_ap100.transitions) == original_transitions
+    assert tuple(pages.page_act_ap100.on_enter_failure) == original_hooks
+    assert not ap100_page.on_enter_failure
+
+
 def test_challenge_recognition_tracks_actual_entry_when_run_sequence_advances():
     task = make_task()
     task.before_run()
@@ -58,6 +84,43 @@ def test_challenge_recognition_tracks_actual_entry_when_run_sequence_advances():
     task._challenge_type = "ap"
     assert task.match_page_once(task.navigator.resolve_page(pages.page_act_ap))
     assert not task.match_page_once(task.navigator.resolve_page(pages.page_act_pass))
+
+
+def test_ap100_is_recognized_only_after_actual_entry():
+    task = make_task()
+    task.before_run()
+    task.__dict__["conf"] = SimpleNamespace(
+        general_climb=SimpleNamespace(run_sequence_v=["ap", "ap100"])
+    )
+    task.run_idx = 1
+    task._challenge_type = "ap"
+    task.appear = lambda rule: rule in (task.I_CHECK_BATTLE_MAIN, task.I_CLIMB_MODE_AP100)
+    ap100_page = task.navigator.resolve_page(pages.page_act_ap100)
+    ap_page = task.navigator.resolve_page(pages.page_act_ap)
+
+    assert task.climb_type == "ap100"
+    assert not task.match_page_once(ap100_page)
+    task._challenge_type = "ap100"
+    assert task.match_page_once(ap100_page)
+    assert not task.match_page_once(ap_page)
+    assert not task.match_page_once(task.navigator.resolve_page(pages.page_act_pass))
+
+
+def test_ap100_challenge_is_a_battle_exit():
+    task = make_task()
+    task.appear = lambda rule: rule == task.I_CLIMB_MODE_AP100
+
+    assert task._exit_matcher().evaluate(task)
+
+
+def test_activity_home_recognizes_shana_trial_entry():
+    task = make_task()
+    original_recognizer = pages.page_act.recognizer
+    task.before_run()
+    task.ocr_appear = lambda rule: rule == task.O_ENTER_AP100
+
+    assert task.match_page_once(task.navigator.resolve_page(pages.page_act))
+    assert pages.page_act.recognizer is original_recognizer
 
 
 def test_pass_entry_handles_confirmation_map_and_occupation_rewards(monkeypatch):
@@ -123,6 +186,20 @@ def test_ap_entry_updates_mode_only_after_reaching_challenge(entered):
     )
 
 
+@pytest.mark.parametrize("entered", [True, False])
+def test_ap100_entry_updates_mode_only_after_reaching_challenge(entered):
+    task = make_task()
+    task._challenge_type = "ap"
+    task.ui_click = Mock(return_value=entered)
+
+    assert task._enter_ap100_challenge() is entered
+    assert task._challenge_type == ("ap100" if entered else "ap")
+    task.ui_click.assert_called_once_with(
+        task.O_ENTER_AP100, stop=task.I_CLIMB_MODE_AP100,
+        interval=1, timeout=30,
+    )
+
+
 def test_return_handles_all_three_back_buttons():
     task = make_task()
     task._challenge_type = "ap"
@@ -150,6 +227,16 @@ def test_return_handles_all_three_back_buttons():
     assert task._return_to_activity()
     assert task._challenge_type is None
     assert clicked == [task.I_UI_BACK_CIRCLE, task.I_UI_BACK_YELLOW, task.I_UI_BACK_RED]
+
+
+def test_return_recognizes_shana_trial_entry_without_old_home_image():
+    task = make_task()
+    task._challenge_type = "ap100"
+    task.ocr_appear = lambda rule: rule == task.O_ENTER_AP100
+
+    assert task._return_to_activity()
+    assert task._challenge_type is None
+    task.appear_then_click.assert_not_called()
 
 
 @pytest.mark.parametrize("reached", [[True], [False, True]])
