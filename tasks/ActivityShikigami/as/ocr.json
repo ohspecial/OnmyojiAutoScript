@@ -10,18 +10,18 @@
   },
   {
     "itemName": "remain_ap",
-    "roiFront": "545,18,105,29",
-    "roiBack": "545,18,105,29",
-    "mode": "DigitCounter",
+    "roiFront": "777,16,63,27",
+    "roiBack": "776,15,63,30",
+    "mode": "Digit",
     "method": "Default",
     "keyword": "",
     "description": "体力的数量检测"
   },
   {
     "itemName": "remain_pass",
-    "roiFront": "756,16,88,31",
-    "roiBack": "756,16,88,31",
-    "mode": "DigitCounter",
+    "roiFront": "1153,24,50,29",
+    "roiBack": "1153,26,49,28",
+    "mode": "Digit",
     "method": "Default",
     "keyword": "",
     "description": "活动体力的剩余检测"

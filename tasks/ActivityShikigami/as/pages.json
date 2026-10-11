@@ -1,12 +1,12 @@
 [
   {
     "itemName": "main_goto_act",
-    "imageName": "as_main_goto_act.png",
-    "roiFront": "1184,211,46,32",
-    "roiBack": "1164,134,83,393",
+    "imageName": "as_shi.png",
+    "roiFront": "1187,463,39,28",
+    "roiBack": "1165,128,83,393",
     "method": "Template matching",
     "threshold": 0.7,
-    "description": "庭院进入活动"
+    "description": "进入活动"
   },
   {
     "itemName": "skip_button",
@@ -20,8 +20,8 @@
   {
     "itemName": "to_battle_main",
     "imageName": "as_to_battle_main.png",
-    "roiFront": "320,176,87,105",
-    "roiBack": "282,76,155,370",
+    "roiFront": "220,247,97,44",
+    "roiBack": "172,122,238,269",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "进入主要的战斗界面"
@@ -133,5 +133,23 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动中转界面进入战斗界面"
+  },
+  {
+    "itemName": "check_battle_main",
+    "imageName": "as_check_battle_main.png",
+    "roiFront": "50,642,62,58",
+    "roiBack": "1,510,415,203",
+    "method": "Template matching",
+    "threshold": 0.65,
+    "description": "description"
+  },
+  {
+    "itemName": "to_battle_main_2",
+    "imageName": "as_to_battle_main_2.png",
+    "roiFront": "819,458,103,33",
+    "roiBack": "799,431,142,87",
+    "method": "Template matching",
+    "threshold": 0.65,
+    "description": "description"
   }
 ]

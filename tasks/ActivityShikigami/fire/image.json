@@ -1,0 +1,38 @@
+[
+  {
+    "itemName": "pass_1",
+    "imageName": "fire_pass_1.png",
+    "roiFront": "594,330,37,58",
+    "roiBack": "462,310,337,91",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "pass_2",
+    "imageName": "fire_pass_2.png",
+    "roiFront": "625,335,31,44",
+    "roiBack": "562,326,182,66",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "pass_3",
+    "imageName": "fire_pass_3.png",
+    "roiFront": "1178,620,71,61",
+    "roiBack": "1149,606,111,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  },
+  {
+    "itemName": "pass_4",
+    "imageName": "fire_pass_4.png",
+    "roiFront": "482,499,58,54",
+    "roiBack": "448,439,126,137",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "description"
+  }
+]
