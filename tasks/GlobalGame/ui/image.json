@@ -38,7 +38,7 @@
   {
     "itemName": "ui_reward",
     "imageName": "ui_ui_reward.png",
-    "roiFront": "530,126,211,66",
+    "roiFront": "517,251,248,23",
     "roiBack": "464,69,352,303",
     "method": "Template matching",
     "threshold": 0.73,
