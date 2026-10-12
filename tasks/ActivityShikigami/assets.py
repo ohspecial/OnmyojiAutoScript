@@ -88,6 +88,8 @@ class ActivityShikigamiAssets:
 	O_REMAIN_AP100 = RuleOcr(roi=(1157,22,68,36), area=(1157,22,68,36), mode="Digit", method="Default", keyword="", name="remain_ap100")
 	# 活动主页左侧100体刹那试炼入口 
 	O_ENTER_AP100 = RuleOcr(roi=(65,238,125,40), area=(65,238,125,40), mode="Full", method="Default", keyword="刹那试炼", name="enter_ap100")
+	# 活动地图左侧体力古迹演武入口
+	O_ENTER_AP = RuleOcr(roi=(70,145,110,40), area=(70,145,110,40), mode="Single", method="Default", keyword="古迹演武", name="enter_ap")
 
 
 	# Ocr Rule Assets

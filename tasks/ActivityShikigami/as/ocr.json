@@ -70,5 +70,14 @@
     "method": "Default",
     "keyword": "刹那试炼",
     "description": "活动主页左侧100体刹那试炼入口"
+  },
+  {
+    "itemName": "enter_ap",
+    "roiFront": "70,145,110,40",
+    "roiBack": "70,145,110,40",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "古迹演武",
+    "description": "活动地图左侧体力古迹演武入口"
   }
 ]

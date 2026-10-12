@@ -6,7 +6,7 @@ from tasks.ActivityShikigami.base_act import BaseAct
 import tasks.ActivityShikigami.page as pages
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralBattle.general_battle import ExitMatcher
-from tasks.GameUi.page import all_of
+from tasks.GameUi.page import all_of, not_
 
 
 class NormalClimbAct(BaseAct):
@@ -18,6 +18,12 @@ class NormalClimbAct(BaseAct):
             self.I_ACT_FIRE, self.I_AS_BOSS_FIRE,
         )
 
+    def _activity_home_matcher(self):
+        return all_of(
+            not_(pages.any_of(self.I_CHECK_BATTLE_MAIN, self.I_CLIMB_MODE_AP100)),
+            pages.any_of(self.I_TO_BATTLE_MAIN, self.O_ENTER_AP100, self.O_ENTER_AP),
+        )
+
     def before_run(self):
         super().before_run()
         page_act = self.navigator.resolve_page(pages.page_act)
@@ -27,8 +33,8 @@ class NormalClimbAct(BaseAct):
         page_act_map = self.navigator.resolve_page(pages.page_act_map)
         self._challenge_type = None
 
-        # 刹那试炼也在活动主页；只调整当前任务的页面副本。
-        page_act.recognizer = pages.any_of(self.I_TO_BATTLE_MAIN, self.O_ENTER_AP100)
+        # 活动主页和地图都可进入挑战；只调整当前任务的页面副本。
+        page_act.recognizer = self._activity_home_matcher()
         page_act.remove_transition(destination=page_act_map)
         page_act_map.clear_transitions()
         page_act_map.recognizer = None
@@ -94,13 +100,18 @@ class NormalClimbAct(BaseAct):
         return False
 
     def _enter_ap_challenge(self) -> bool:
-        if not self.ui_click(
-            self.I_TO_BATTLE_MAIN, stop=self.I_CHECK_BATTLE_MAIN,
-            interval=1, timeout=30,
-        ):
-            return False
-        self._challenge_type = "ap"
-        return True
+        timer = Timer(30).start()
+        while not timer.reached():
+            self.screenshot()
+            if self.appear(self.I_CHECK_BATTLE_MAIN):
+                self._challenge_type = "ap"
+                return True
+            # 从门票副本返回后停在地图，入口与原活动主页的模板不同。
+            if self.ocr_appear_click(self.O_ENTER_AP, interval=1):
+                continue
+            self.appear_then_click(self.I_TO_BATTLE_MAIN, interval=1)
+        logger.warning("Enter ap challenge screen timed out")
+        return False
 
     def _enter_ap100_challenge(self) -> bool:
         # 先识别左侧“刹那试炼”，确认到达100体页面后再切换模式。
@@ -114,9 +125,10 @@ class NormalClimbAct(BaseAct):
 
     def _return_to_activity(self) -> bool:
         timer = Timer(30).start()
+        home_matcher = self._activity_home_matcher()
         while not timer.reached():
             self.screenshot()
-            if self.appear(self.I_TO_BATTLE_MAIN) or self.ocr_appear(self.O_ENTER_AP100):
+            if home_matcher.evaluate(self):
                 self._challenge_type = None
                 return True
             if self.appear_then_click(self.I_UI_BACK_CIRCLE, interval=1.5):

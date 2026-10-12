@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+import numpy as np
 
 import tasks.ActivityShikigami.activities.normal as normal
 import tasks.ActivityShikigami.page as pages
@@ -19,6 +20,7 @@ def make_task():
     task.goto_page = Mock()
     task.appear = Mock(return_value=False)
     task.ocr_appear = Mock(return_value=False)
+    task.ocr_appear_click = Mock(return_value=False)
     task.appear_then_click = Mock(return_value=False)
     task.click = Mock(return_value=True)
     return task
@@ -113,14 +115,46 @@ def test_ap100_challenge_is_a_battle_exit():
     assert task._exit_matcher().evaluate(task)
 
 
-def test_activity_home_recognizes_shana_trial_entry():
+@pytest.mark.parametrize("entry_name", ["O_ENTER_AP", "O_ENTER_AP100"])
+def test_activity_home_recognizes_trial_entries(entry_name):
     task = make_task()
     original_recognizer = pages.page_act.recognizer
     task.before_run()
-    task.ocr_appear = lambda rule: rule == task.O_ENTER_AP100
+    task.ocr_appear = lambda rule: rule == getattr(task, entry_name)
 
     assert task.match_page_once(task.navigator.resolve_page(pages.page_act))
     assert pages.page_act.recognizer is original_recognizer
+
+
+@pytest.mark.parametrize(
+    "mode, recognizer_name",
+    [("pass", "I_CHECK_BATTLE_MAIN"), ("ap", "I_CHECK_BATTLE_MAIN"),
+     ("ap100", "I_CLIMB_MODE_AP100")],
+)
+def test_challenge_is_not_home_even_when_ocr_falsely_matches(mode, recognizer_name):
+    task = make_task()
+    task.before_run()
+    task._challenge_type = mode
+    task.appear = lambda rule: rule == getattr(task, recognizer_name)
+    task.ocr_appear = Mock(return_value=True)
+
+    assert not task.match_page_once(task.navigator.resolve_page(pages.page_act))
+    assert task.match_page_once(task.navigator.resolve_page(getattr(pages, f"page_act_{mode}")))
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [("古迹演武", True), ("那伽遗迹中开人", False), ("遗迹", False), ("", False)],
+)
+def test_ap_entry_ocr_requires_complete_label(monkeypatch, text, expected):
+    task = make_task()
+    task.device = SimpleNamespace(image=np.zeros((720, 1280, 3), dtype=np.uint8))
+    model = Mock()
+    model.ocr_single_line.return_value = (text, 0.99)
+    model.detect_and_ocr.return_value = []
+    monkeypatch.setitem(task.O_ENTER_AP.__dict__, "model", model)
+
+    assert bool(normal.NormalClimbAct.ocr_appear(task, task.O_ENTER_AP)) is expected
 
 
 def test_pass_entry_handles_confirmation_map_and_occupation_rewards(monkeypatch):
@@ -173,17 +207,63 @@ def test_pass_entry_resumes_from_challenge_without_reward_clicks():
     task.appear_then_click.assert_not_called()
 
 
-@pytest.mark.parametrize("entered", [True, False])
-def test_ap_entry_updates_mode_only_after_reaching_challenge(entered):
+@pytest.mark.parametrize("start_from_home", [False, True])
+def test_ap_entry_handles_map_and_original_home(start_from_home):
     task = make_task()
-    task.ui_click = Mock(return_value=entered)
+    task._challenge_type = "pass"
+    frames = iter([
+        *([{task.I_TO_BATTLE_MAIN}] if start_from_home else []),
+        {task.O_ENTER_AP},
+        {task.I_CHECK_BATTLE_MAIN},
+    ])
+    visible = set()
+    clicked = []
 
-    assert task._enter_ap_challenge() is entered
-    assert task._challenge_type == ("ap" if entered else None)
-    task.ui_click.assert_called_once_with(
-        task.I_TO_BATTLE_MAIN, stop=task.I_CHECK_BATTLE_MAIN,
-        interval=1, timeout=30,
-    )
+    def screenshot():
+        nonlocal visible
+        assert task._challenge_type == "pass"
+        visible = next(frames)
+
+    def click_visible(rule, interval):
+        if rule not in visible:
+            return False
+        clicked.append(rule)
+        return True
+
+    task.screenshot = screenshot
+    task.appear = lambda rule: rule in visible
+    task.ocr_appear_click = click_visible
+    task.appear_then_click = click_visible
+
+    assert task._enter_ap_challenge()
+    assert task._challenge_type == "ap"
+    assert clicked == [
+        *([task.I_TO_BATTLE_MAIN] if start_from_home else []),
+        task.O_ENTER_AP,
+    ]
+
+
+def test_ap_entry_timeout_preserves_actual_mode(monkeypatch):
+    task = make_task()
+    task._challenge_type = "pass"
+    timer = Mock()
+    timer.start.return_value = timer
+    timer.reached.side_effect = [False, True]
+    monkeypatch.setattr(normal, "Timer", Mock(return_value=timer))
+
+    assert not task._enter_ap_challenge()
+    assert task._challenge_type == "pass"
+    task.screenshot.assert_called_once()
+
+
+def test_ap_entry_resumes_from_challenge_without_clicking_entry():
+    task = make_task()
+    task.appear = lambda rule: rule == task.I_CHECK_BATTLE_MAIN
+
+    assert task._enter_ap_challenge()
+    assert task._challenge_type == "ap"
+    task.ocr_appear_click.assert_not_called()
+    task.appear_then_click.assert_not_called()
 
 
 @pytest.mark.parametrize("entered", [True, False])
@@ -229,14 +309,46 @@ def test_return_handles_all_three_back_buttons():
     assert clicked == [task.I_UI_BACK_CIRCLE, task.I_UI_BACK_YELLOW, task.I_UI_BACK_RED]
 
 
-def test_return_recognizes_shana_trial_entry_without_old_home_image():
+@pytest.mark.parametrize("entry_name", ["O_ENTER_AP", "O_ENTER_AP100"])
+def test_return_recognizes_trial_entry_without_old_home_image(entry_name):
     task = make_task()
     task._challenge_type = "ap100"
-    task.ocr_appear = lambda rule: rule == task.O_ENTER_AP100
+    task.ocr_appear = lambda rule: rule == getattr(task, entry_name)
 
     assert task._return_to_activity()
     assert task._challenge_type is None
     task.appear_then_click.assert_not_called()
+
+
+@pytest.mark.parametrize("recognizer_name", ["I_CHECK_BATTLE_MAIN", "I_CLIMB_MODE_AP100"])
+def test_return_leaves_challenge_before_accepting_home_entry(recognizer_name):
+    task = make_task()
+    task._challenge_type = "ap"
+    frames = iter([
+        {getattr(task, recognizer_name), task.O_ENTER_AP, task.I_UI_BACK_YELLOW},
+        {task.O_ENTER_AP},
+    ])
+    visible = set()
+    clicked = []
+
+    def screenshot():
+        nonlocal visible
+        visible = next(frames)
+
+    def click_visible(rule, interval):
+        if rule not in visible:
+            return False
+        clicked.append(rule)
+        return True
+
+    task.screenshot = screenshot
+    task.appear = lambda rule: rule in visible
+    task.ocr_appear = lambda rule: rule in visible
+    task.appear_then_click = click_visible
+
+    assert task._return_to_activity()
+    assert task._challenge_type is None
+    assert clicked == [task.I_UI_BACK_YELLOW]
 
 
 @pytest.mark.parametrize("reached", [[True], [False, True]])
