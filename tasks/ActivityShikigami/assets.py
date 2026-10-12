@@ -153,9 +153,9 @@ class ActivityShikigamiAssets:
 
 	# Image Rule Assets
 	# description 
-	I_PASS_1 = RuleImage(roi_front=(594,330,37,58), roi_back=(462,310,337,91), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_1.png")
+	I_PASS_1 = RuleImage(roi_front=(466,254,19,38), roi_back=(308,99,872,476), threshold=0.55, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_1.png")
 	# description 
-	I_PASS_2 = RuleImage(roi_front=(625,335,31,44), roi_back=(562,326,182,66), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_2.png")
+	I_PASS_2 = RuleImage(roi_front=(625,335,31,44), roi_back=(293,100,877,412), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_2.png")
 	# description 
 	I_PASS_3 = RuleImage(roi_front=(1178,620,71,61), roi_back=(1149,606,111,92), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/fire/fire_pass_3.png")
 	# description 

@@ -2,17 +2,17 @@
   {
     "itemName": "pass_1",
     "imageName": "fire_pass_1.png",
-    "roiFront": "594,330,37,58",
-    "roiBack": "462,310,337,91",
+    "roiFront": "466,254,19,38",
+    "roiBack": "308,99,872,476",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.55,
     "description": "description"
   },
   {
     "itemName": "pass_2",
     "imageName": "fire_pass_2.png",
     "roiFront": "625,335,31,44",
-    "roiBack": "562,326,182,66",
+    "roiBack": "293,100,877,412",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
