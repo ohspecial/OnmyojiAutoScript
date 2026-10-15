@@ -64,20 +64,74 @@
   },
   {
     "itemName": "enter_ap100",
-    "roiFront": "65,238,125,40",
-    "roiBack": "65,238,125,40",
+    "roiFront": "0,80,300,600",
+    "roiBack": "0,80,300,600",
     "mode": "Full",
     "method": "Default",
     "keyword": "刹那试炼",
-    "description": "活动主页左侧100体刹那试炼入口"
+    "description": "左侧入口列表内查找刹那试炼并定位点击"
   },
   {
     "itemName": "enter_ap",
-    "roiFront": "70,145,110,40",
-    "roiBack": "70,145,110,40",
-    "mode": "Single",
+    "roiFront": "0,80,300,600",
+    "roiBack": "0,80,300,600",
+    "mode": "Full",
     "method": "Default",
     "keyword": "古迹演武",
-    "description": "活动地图左侧体力古迹演武入口"
+    "description": "左侧入口列表内查找古迹演武并定位点击"
+  },
+  {
+    "itemName": "enter_map",
+    "roiFront": "805,453,125,38",
+    "roiBack": "805,453,125,38",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "磐长故地",
+    "description": "活动主页第三个入口磐长故地"
+  },
+  {
+    "itemName": "map_title",
+    "roiFront": "585,0,155,53",
+    "roiBack": "585,0,155,53",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "磐长故地",
+    "description": "副本切换地图顶部标题"
+  },
+  {
+    "itemName": "enter_pass",
+    "roiFront": "0,80,300,600",
+    "roiBack": "0,80,300,600",
+    "mode": "Full",
+    "method": "Default",
+    "keyword": "战场攻占",
+    "description": "左侧入口列表内查找战场攻占并定位点击"
+  },
+  {
+    "itemName": "map_remain_pass",
+    "roiFront": "156,189,64,30",
+    "roiBack": "156,189,64,30",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "",
+    "description": "地图战场攻占剩余次数，保留空识别结果"
+  },
+  {
+    "itemName": "map_remain_ap",
+    "roiFront": "156,283,75,30",
+    "roiBack": "156,283,75,30",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "",
+    "description": "地图古迹演武剩余次数，保留空识别结果"
+  },
+  {
+    "itemName": "map_remain_ap100",
+    "roiFront": "156,375,64,30",
+    "roiBack": "156,375,64,30",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "",
+    "description": "地图刹那试炼剩余次数，保留空识别结果"
   }
 ]

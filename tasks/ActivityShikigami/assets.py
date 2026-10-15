@@ -86,10 +86,22 @@ class ActivityShikigamiAssets:
 	O_REMAIN_BOSS = RuleOcr(roi=(1169,668,70,30), area=(1169,668,70,30), mode="DigitCounter", method="Default", keyword="", name="remain_boss")
 	# 刹那试炼右上角剩余挑战次数（不含左侧体力） 
 	O_REMAIN_AP100 = RuleOcr(roi=(1157,22,68,36), area=(1157,22,68,36), mode="Digit", method="Default", keyword="", name="remain_ap100")
-	# 活动主页左侧100体刹那试炼入口 
-	O_ENTER_AP100 = RuleOcr(roi=(65,238,125,40), area=(65,238,125,40), mode="Full", method="Default", keyword="刹那试炼", name="enter_ap100")
-	# 活动地图左侧体力古迹演武入口
-	O_ENTER_AP = RuleOcr(roi=(70,145,110,40), area=(70,145,110,40), mode="Single", method="Default", keyword="古迹演武", name="enter_ap")
+	# 左侧入口列表内查找刹那试炼并定位点击
+	O_ENTER_AP100 = RuleOcr(roi=(0,80,300,600), area=(0,80,300,600), mode="Full", method="Default", keyword="刹那试炼", name="enter_ap100")
+	# 左侧入口列表内查找古迹演武并定位点击
+	O_ENTER_AP = RuleOcr(roi=(0,80,300,600), area=(0,80,300,600), mode="Full", method="Default", keyword="古迹演武", name="enter_ap")
+	# 活动主页第三个入口磐长故地
+	O_ENTER_MAP = RuleOcr(roi=(805,453,125,38), area=(805,453,125,38), mode="Single", method="Default", keyword="磐长故地", name="enter_map")
+	# 副本切换地图顶部标题
+	O_MAP_TITLE = RuleOcr(roi=(585,0,155,53), area=(585,0,155,53), mode="Single", method="Default", keyword="磐长故地", name="map_title")
+	# 左侧入口列表内查找战场攻占并定位点击
+	O_ENTER_PASS = RuleOcr(roi=(0,80,300,600), area=(0,80,300,600), mode="Full", method="Default", keyword="战场攻占", name="enter_pass")
+	# 地图战场攻占剩余次数，保留空识别结果
+	O_MAP_REMAIN_PASS = RuleOcr(roi=(156,189,64,30), area=(156,189,64,30), mode="Single", method="Default", keyword="", name="map_remain_pass")
+	# 地图古迹演武剩余次数，保留空识别结果
+	O_MAP_REMAIN_AP = RuleOcr(roi=(156,283,75,30), area=(156,283,75,30), mode="Single", method="Default", keyword="", name="map_remain_ap")
+	# 地图刹那试炼剩余次数，保留空识别结果
+	O_MAP_REMAIN_AP100 = RuleOcr(roi=(156,375,64,30), area=(156,375,64,30), mode="Single", method="Default", keyword="", name="map_remain_ap100")
 
 
 	# Ocr Rule Assets
