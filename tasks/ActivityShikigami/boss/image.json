@@ -1,0 +1,29 @@
+[
+  {
+    "itemName": "boss_home_entry",
+    "imageName": "boss_home_entry.png",
+    "roiFront": "1060,296,146,52",
+    "roiBack": "1020,265,230,110",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "拾光一瞬活动主页的神眸垂世首领入口"
+  },
+  {
+    "itemName": "boss_challenge",
+    "imageName": "boss_challenge.png",
+    "roiFront": "152,21,130,35",
+    "roiBack": "135,5,170,65",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "神眸垂世首领挑战页标题"
+  },
+  {
+    "itemName": "boss_damage_report",
+    "imageName": "boss_damage_report.png",
+    "roiFront": "722,243,104,31",
+    "roiBack": "695,220,160,75",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "首领结算后需手动关闭的本次伤害分享页"
+  }
+]

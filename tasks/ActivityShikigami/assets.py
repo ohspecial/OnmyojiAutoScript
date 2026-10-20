@@ -152,6 +152,20 @@ class ActivityShikigamiAssets:
 	I_TO_BATTLE_MAIN_2 = RuleImage(roi_front=(819,458,103,33), roi_back=(799,431,142,87), threshold=0.65, method="Template matching", file="./tasks/ActivityShikigami/as/as_to_battle_main_2.png")
 
 
+	# Image Rule Assets
+	# 拾光一瞬活动主页的神眸垂世首领入口
+	I_BOSS_HOME_ENTRY = RuleImage(roi_front=(1060,296,146,52), roi_back=(1020,265,230,110), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/boss/boss_home_entry.png")
+	# 神眸垂世首领挑战页标题
+	I_BOSS_CHALLENGE = RuleImage(roi_front=(152,21,130,35), roi_back=(135,5,170,65), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/boss/boss_challenge.png")
+	# 首领结算后需手动关闭的本次伤害分享页
+	I_BOSS_DAMAGE_REPORT = RuleImage(roi_front=(722,243,104,31), roi_back=(695,220,160,75), threshold=0.8, method="Template matching", file="./tasks/ActivityShikigami/boss/boss_damage_report.png")
+
+
+	# Ocr Rule Assets
+	# 首领挑战右下角已领取的额外奖励次数，如1/100
+	O_BOSS_REWARD_COUNT = RuleOcr(roi=(1190,671,76,29), area=(1190,671,76,29), mode="DigitCounter", method="Default", keyword="", name="boss_reward_count")
+
+
 	# Click Rule Assets
 	# 第一个 
 	C_PASS_5 = RuleClick(roi_front=(421,286,65,48), roi_back=(419,287,69,51), name="pass_5")

@@ -1,0 +1,11 @@
+[
+  {
+    "itemName": "boss_reward_count",
+    "roiFront": "1190,671,76,29",
+    "roiBack": "1190,671,76,29",
+    "mode": "DigitCounter",
+    "method": "Default",
+    "keyword": "",
+    "description": "首领挑战右下角已领取的额外奖励次数，如1/100"
+  }
+]

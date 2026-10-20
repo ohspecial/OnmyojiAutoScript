@@ -17,7 +17,7 @@ def make_task():
     task.navigator.bootstrap(PageRegistry.all())
     task._challenge_type = None
     task._map_ticket_counts = {}
-    task._count_map = {"pass": 0, "ap": 0, "ap100": 0}
+    task._count_map = {"pass": 0, "ap": 0, "ap100": 0, "boss": 0}
     task._capture_map_tickets = Mock()
     task.screenshot = Mock()
     task.goto_page = Mock()
@@ -615,3 +615,148 @@ def test_pass_entry_times_out_without_claiming_challenge_success(monkeypatch, re
     assert not task._enter_pass_challenge()
     assert task._challenge_type is None
     task.click.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["pass", "ap", "ap100"])
+def test_boss_switches_via_activity_home_in_both_directions(mode):
+    task = make_task()
+    original_recognizer = pages.page_act_boss.recognizer
+    original_transitions = tuple(pages.page_act_boss.transitions)
+    task.before_run()
+    home = task.navigator.resolve_page(pages.page_act)
+    map_page = task.navigator.resolve_page(pages.page_act_map)
+    boss = task.navigator.resolve_page(pages.page_act_boss)
+    other = task.navigator.resolve_page(getattr(pages, f"page_act_{mode}"))
+
+    path = task._build_path(other, boss)
+    assert [edge.destination for edge in path] == [map_page, home, boss]
+    assert path[-1].action == task._enter_boss_challenge
+    reverse = task._build_path(boss, other)
+    assert [edge.destination for edge in reverse] == [home, map_page, other]
+    assert reverse[0].action == task._return_to_activity_home
+    assert pages.page_act_boss.recognizer is original_recognizer
+    assert tuple(pages.page_act_boss.transitions) == original_transitions
+
+
+@pytest.mark.parametrize("visible_name", ["I_BOSS_CHALLENGE", "I_BOSS_DAMAGE_REPORT"])
+def test_boss_pages_cannot_be_mistaken_for_home_or_map(visible_name):
+    task = make_task()
+    task.before_run()
+    task._challenge_type = "ap"
+    # 即使旧挑战图标和 OCR 误命中，仍优先排除首领和分享页面。
+    task.appear = lambda rule: rule in (getattr(task, visible_name), task.I_CHECK_BATTLE_MAIN)
+    task.ocr_appear = Mock(return_value=True)
+
+    for page in (pages.page_act, pages.page_act_map, pages.page_act_pass,
+                 pages.page_act_ap, pages.page_act_ap100):
+        assert not task.match_page_once(task.navigator.resolve_page(page))
+    assert task.match_page_once(task.navigator.resolve_page(pages.page_act_boss)) is (
+        visible_name == "I_BOSS_CHALLENGE"
+    )
+    assert task._exit_matcher().evaluate(task) is (visible_name == "I_BOSS_CHALLENGE")
+
+
+def test_boss_entry_opens_home_entry_and_waits_for_challenge_title():
+    task = make_task()
+    frames = iter([{task.O_ENTER_MAP, task.I_BOSS_HOME_ENTRY}, {task.I_BOSS_CHALLENGE}])
+    visible = set()
+
+    def screenshot():
+        nonlocal visible
+        visible = next(frames)
+
+    task.screenshot = screenshot
+    task.appear = lambda rule: rule in visible
+    task.ocr_appear = lambda rule: rule in visible
+
+    assert task._enter_boss_challenge()
+    assert task._challenge_type == "boss"
+    task.appear_then_click.assert_called_once_with(task.I_BOSS_HOME_ENTRY, interval=1)
+
+
+@pytest.mark.parametrize("returning", [False, True])
+def test_boss_navigation_waits_for_report_to_close_before_accepting_destination(returning):
+    task = make_task()
+    task._challenge_type = "ap"
+    destination = task.O_ENTER_MAP if returning else task.I_BOSS_CHALLENGE
+    frames = iter([
+        {destination, task.I_BOSS_DAMAGE_REPORT, task.I_UI_BACK_RED},
+        {destination, task.I_BOSS_DAMAGE_REPORT, task.I_UI_BACK_RED},
+        {destination},
+    ])
+    visible = set()
+
+    def screenshot():
+        nonlocal visible
+        visible = next(frames)
+
+    task.screenshot = screenshot
+    task.appear = lambda rule: rule in visible
+    task.ocr_appear = lambda rule: rule in visible
+    # 第一次关闭仍在点击间隔内，不能把遮挡下的页面当成已到达。
+    task.appear_then_click = Mock(side_effect=[False, True])
+    navigate = task._return_to_activity_home if returning else task._enter_boss_challenge
+
+    assert navigate()
+    assert task._challenge_type == (None if returning else "boss")
+    assert [call.args[0] for call in task.appear_then_click.call_args_list] == [
+        task.I_UI_BACK_RED, task.I_UI_BACK_RED,
+    ]
+    task.click.assert_not_called()
+
+
+def test_boss_damage_report_is_a_result_page_and_skips_navigation_random_click():
+    task = make_task()
+    task.before_run()
+    task.appear = lambda rule: rule == task.I_BOSS_DAMAGE_REPORT
+    result = task.navigator.resolve_page(pages.page_battle_result)
+
+    assert task.match_page_once(result)
+    task._run_enter_success_hooks_if_needed(result)
+    task.click.assert_not_called()
+    task.appear_then_click.assert_not_called()
+
+
+@pytest.mark.parametrize("closed", [False, True])
+def test_boss_damage_report_only_clicks_close_and_keeps_battle_running(closed):
+    task = make_task()
+    task.appear = lambda rule: rule == task.I_BOSS_DAMAGE_REPORT
+    task.appear_then_click = Mock(return_value=closed)
+    context = SimpleNamespace(reward_no_battle_ts=123, is_win=True)
+
+    action = task._handle_result(context, normal.GeneralBattleConfig())
+
+    assert action == normal.BattleAction.CONTINUE
+    assert context.reward_no_battle_ts is None
+    assert context.is_win
+    task.appear_then_click.assert_called_once_with(task.I_UI_BACK_RED, interval=1.5)
+    task.click.assert_not_called()
+
+
+def test_regular_battle_results_keep_the_shared_handler(monkeypatch):
+    task = make_task()
+    context = SimpleNamespace()
+    config = normal.GeneralBattleConfig()
+    handle = Mock(return_value=normal.BattleAction.CONTINUE)
+    monkeypatch.setattr(normal.BaseAct, "_handle_result", handle)
+
+    assert task._handle_result(context, config) == normal.BattleAction.CONTINUE
+    handle.assert_called_once_with(context, config)
+
+
+@pytest.mark.parametrize(
+    "counts, enough, attempts",
+    [([(0, 100, 100)], True, 1), ([(1, 99, 100)], True, 1),
+     ([(99, 1, 100)], True, 1), ([(100, 0, 100)], False, 1),
+     ([(0, 0, 0), (1, 99, 100)], True, 2),
+     ([(0, 0, 0)] * 3, True, 3)],
+)
+def test_boss_reward_count_retries_empty_ocr_and_stops_at_reward_limit(
+    monkeypatch, counts, enough, attempts,
+):
+    task = make_ticket_task("boss")
+    read = Mock(side_effect=counts)
+    monkeypatch.setattr(task.O_BOSS_REWARD_COUNT, "ocr_digit_counter", read)
+
+    assert task.check_tickets_enough() is enough
+    assert read.call_count == attempts
