@@ -374,9 +374,10 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
         return False
 
     def quit_exp_main(self):
-        """退出探索主界面(要求当前必须处于探索主界面, 不保证任何后续结果)"""
+        """确认仍在探索副本后请求退出，等待退出确认弹窗。"""
+        if not pages.click_exp_main_back(self):
+            return
         self.need_exit = True
-        self.appear_then_click(self.I_UI_BACK_YELLOW, interval=0.8)
         self.wait_start_time = datetime.now()  # 队友等待时间重置
 
     def collect_reward(self) -> bool:

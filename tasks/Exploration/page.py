@@ -19,7 +19,24 @@ page_exp_exit.connect(page_exp_entrance, ExplorationAssets.I_E_EXIT_CONFIRM, key
 # 探索副本主界面
 page_exp_main = Page(any_of(ExplorationAssets.I_E_SETTINGS_BUTTON, ExplorationAssets.I_E_AUTO_ROTATE_ON,
                             ExplorationAssets.I_E_AUTO_ROTATE_OFF))
-page_exp_main.connect(page_exp_exit, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_exp_main->page_exp_exit")
+
+
+def click_exp_main_back(task) -> bool:
+    if not task.appear(GlobalGameAssets.I_UI_BACK_YELLOW):
+        return False
+    # 退出动画期间可能已回到章节入口，不能继续使用上一帧的返回按钮识别结果。
+    task.screenshot()
+    if not task.appear(GlobalGameAssets.I_UI_BACK_YELLOW) or task.appear(ExplorationAssets.I_E_EXPLORATION_CLICK):
+        return False
+    is_main = (
+        task.appear(ExplorationAssets.I_E_SETTINGS_BUTTON)
+        or task.appear(ExplorationAssets.I_E_AUTO_ROTATE_ON)
+        or task.appear(ExplorationAssets.I_E_AUTO_ROTATE_OFF)
+    )
+    return is_main and task.click(GlobalGameAssets.I_UI_BACK_YELLOW, interval=3.5)
+
+
+page_exp_main.connect(page_exp_exit, click_exp_main_back, key="page_exp_main->page_exp_exit")
 page_exp_entrance.connect(page_exp_main, ExplorationAssets.I_E_EXPLORATION_CLICK, key="page_exp_entrance->page_exp_main")
 page_exp_exit.connect(page_exp_main, ExplorationAssets.I_E_EXIT_CANCEL, key="page_exp_exit->page_exp_main")
 
