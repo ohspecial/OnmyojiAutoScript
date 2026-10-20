@@ -63,6 +63,31 @@ def test_activity_home_opens_map_before_entering_challenge():
     assert reverse[1].action == task.I_UI_BACK_CIRCLE
 
 
+@pytest.mark.parametrize("arrived", [True, False])
+def test_map_transition_closes_report_with_shared_button_even_if_title_is_hidden(arrived):
+    task = make_task()
+    original_hooks = (
+        tuple(pages.page_act_map.on_enter_success),
+        tuple(pages.page_act_map.on_enter_failure),
+    )
+    task.before_run()
+    task.maybe_screenshot = Mock()
+    task.ocr_appear_click = Mock(return_value=True)
+    task.appear_then_click = Mock(return_value=True)
+    task._wait_for_destination = Mock(return_value=arrived)
+    map_page = task.navigator.resolve_page(pages.page_act_map)
+    task._detect_current_page_with_fallback = Mock(return_value=map_page)
+    transition = task._build_path(
+        task.navigator.resolve_page(pages.page_act), map_page,
+    )[0]
+
+    assert task._execute_transition(transition) is arrived
+
+    task.appear_then_click.assert_called_once_with(task.I_UI_BACK_RED, interval=0.6)
+    assert tuple(pages.page_act_map.on_enter_success) == original_hooks[0]
+    assert tuple(pages.page_act_map.on_enter_failure) == original_hooks[1]
+
+
 @pytest.mark.parametrize("other_mode", ["pass", "ap"])
 def test_ap100_switches_through_map_without_changing_global_pages(other_mode):
     task = make_task()
@@ -335,17 +360,66 @@ def test_ap_entry_resumes_from_challenge_without_clicking_entry():
 
 
 @pytest.mark.parametrize("entered", [True, False])
-def test_ap100_entry_updates_mode_only_after_reaching_challenge(entered):
+def test_ap100_entry_updates_mode_only_after_reaching_challenge(monkeypatch, entered):
     task = make_task()
     task._challenge_type = "ap"
-    task.ui_click = Mock(return_value=entered)
+    task.appear = lambda rule: entered and rule == task.I_CLIMB_MODE_AP100
+    timer = Mock()
+    timer.start.return_value = timer
+    timer.reached.side_effect = [False, True]
+    monkeypatch.setattr(normal, "Timer", Mock(return_value=timer))
 
     assert task._enter_ap100_challenge() is entered
     assert task._challenge_type == ("ap100" if entered else "ap")
-    task.ui_click.assert_called_once_with(
-        task.O_ENTER_AP100, stop=task.I_CLIMB_MODE_AP100,
-        interval=1, timeout=30,
-    )
+    task.ocr_appear_click.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["pass", "ap", "ap100"])
+def test_challenge_entry_closes_report_before_reading_tickets_or_selecting_entry(mode):
+    task = make_task()
+    entry = getattr(task, f"O_ENTER_{mode.upper()}")
+    challenge = task.I_CLIMB_MODE_AP100 if mode == "ap100" else task.I_CHECK_BATTLE_MAIN
+    frames = iter([
+        {task.O_MAP_TITLE, task.I_UI_BACK_RED},
+        {task.O_MAP_TITLE, task.I_UI_BACK_RED},
+        {task.O_MAP_TITLE, entry},
+        {challenge},
+    ])
+    visible = set()
+    clicked = []
+    close_attempts = 0
+
+    def screenshot():
+        nonlocal visible
+        visible = next(frames)
+
+    def click_visible(rule, interval):
+        nonlocal close_attempts
+        if rule not in visible:
+            return False
+        if rule == task.I_UI_BACK_RED:
+            close_attempts += 1
+            if close_attempts == 1:
+                return False  # 关闭按钮仍在点击间隔内时，不能操作被遮挡的地图。
+        clicked.append(rule)
+        return True
+
+    def capture_tickets(current_mode):
+        assert task.I_UI_BACK_RED not in visible
+        assert current_mode == mode
+
+    task.screenshot = screenshot
+    task.appear = lambda rule: rule in visible
+    task.ocr_appear = lambda rule: rule in visible
+    task.appear_then_click = click_visible
+    task.ocr_appear_click = click_visible
+    task._capture_map_tickets = Mock(side_effect=capture_tickets)
+
+    assert getattr(task, f"_enter_{mode}_challenge")()
+    assert task._challenge_type == mode
+    assert close_attempts == 2
+    assert clicked == [task.I_UI_BACK_RED, entry]
+    task._capture_map_tickets.assert_called_once_with(mode)
 
 
 def test_return_handles_all_three_back_buttons():
@@ -376,6 +450,36 @@ def test_return_handles_all_three_back_buttons():
     assert task._return_to_activity_map()
     assert task._challenge_type is None
     assert clicked == [task.I_UI_BACK_CIRCLE, task.I_UI_BACK_YELLOW, task.I_UI_BACK_RED]
+
+
+def test_return_closes_report_before_accepting_map_title():
+    task = make_task()
+    task._challenge_type = "ap"
+    frames = iter([
+        {task.O_MAP_TITLE, task.I_UI_BACK_RED, task.I_UI_BACK_CIRCLE},
+        {task.O_MAP_TITLE, task.I_UI_BACK_CIRCLE},
+    ])
+    visible = set()
+    clicked = []
+
+    def screenshot():
+        nonlocal visible
+        visible = next(frames)
+
+    def click_visible(rule, interval):
+        if rule not in visible:
+            return False
+        clicked.append(rule)
+        return True
+
+    task.screenshot = screenshot
+    task.appear = lambda rule: rule in visible
+    task.ocr_appear = lambda rule: rule in visible
+    task.appear_then_click = click_visible
+
+    assert task._return_to_activity_map()
+    assert task._challenge_type is None
+    assert clicked == [task.I_UI_BACK_RED]
 
 
 @pytest.mark.parametrize("entry_name", ["O_MAP_TITLE", "O_ENTER_PASS", "O_ENTER_AP", "O_ENTER_AP100"])

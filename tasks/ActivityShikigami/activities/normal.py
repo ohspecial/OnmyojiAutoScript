@@ -67,6 +67,9 @@ class NormalClimbAct(BaseAct):
         page_act.connect(page_act_map, self.O_ENTER_MAP, key="page_act->page_act_map")
         page_act_map.clear_transitions()
         page_act_map.recognizer = self._activity_map_matcher()
+        # 阵前战报弹窗不遮挡地图标题，到达地图时也要尝试关闭。
+        page_act_map.add_enter_success_hooks(self.I_UI_BACK_RED)
+        page_act_map.add_enter_failure_hooks(self.I_UI_BACK_RED)
         page_act_map.connect(
             page_act, self.I_UI_BACK_CIRCLE, key="page_act_map->page_act",
         )
@@ -86,7 +89,7 @@ class NormalClimbAct(BaseAct):
                 page_act_map, self._return_to_activity_map,
                 key=f"page_act_{climb_type}->page_act_map",
             )
-        self.navigator.add_unknown_closer(self.I_UI_BACK_CIRCLE)
+        self.navigator.add_unknown_closer(self.I_UI_BACK_RED, self.I_UI_BACK_CIRCLE)
         # 启动时先返回副本切换地图，确定当前进入的是哪一种挑战。
         self.goto_page(pages.page_act_map)
 
@@ -128,6 +131,9 @@ class NormalClimbAct(BaseAct):
                 return True
             if self.appear(self.I_UI_BACK_RED) and self.appear(self.I_PASS_4):
                 break
+            if self.appear(self.I_UI_BACK_RED):
+                self.appear_then_click(self.I_UI_BACK_RED, interval=1)
+                continue
             if self.appear_then_click(self.I_UI_CONFIRM, interval=0.5):
                 continue
             if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=0.5):
@@ -174,6 +180,9 @@ class NormalClimbAct(BaseAct):
             if self.appear(self.I_CHECK_BATTLE_MAIN):
                 self._challenge_type = "ap"
                 return True
+            if self.appear(self.I_UI_BACK_RED):
+                self.appear_then_click(self.I_UI_BACK_RED, interval=1)
+                continue
             if self._activity_map_matcher().evaluate(self):
                 if not tickets_checked:
                     self._capture_map_tickets("ap")
@@ -183,17 +192,23 @@ class NormalClimbAct(BaseAct):
         return False
 
     def _enter_ap100_challenge(self) -> bool:
-        self.screenshot()
-        if self._activity_map_matcher().evaluate(self):
-            self._capture_map_tickets("ap100")
-        # 在地图左侧列表内定位“刹那试炼”，到达副本后再切换模式。
-        if not self.ui_click(
-            self.O_ENTER_AP100, stop=self.I_CLIMB_MODE_AP100,
-            interval=1, timeout=30,
-        ):
-            return False
-        self._challenge_type = "ap100"
-        return True
+        timer = Timer(30).start()
+        tickets_checked = False
+        while not timer.reached():
+            self.screenshot()
+            if self.appear(self.I_CLIMB_MODE_AP100):
+                self._challenge_type = "ap100"
+                return True
+            if self.appear(self.I_UI_BACK_RED):
+                self.appear_then_click(self.I_UI_BACK_RED, interval=1)
+                continue
+            if self._activity_map_matcher().evaluate(self):
+                if not tickets_checked:
+                    self._capture_map_tickets("ap100")
+                    tickets_checked = True
+                self.ocr_appear_click(self.O_ENTER_AP100, interval=1)
+        logger.warning("Enter ap100 challenge screen timed out")
+        return False
 
     def _return_to_activity_map(self) -> bool:
         timer = Timer(30).start()
@@ -201,6 +216,10 @@ class NormalClimbAct(BaseAct):
         home_matcher = self._activity_home_matcher()
         while not timer.reached():
             self.screenshot()
+            # 战报弹窗上仍能识别地图标题，先关弹窗再确认返回成功。
+            if self.appear(self.I_UI_BACK_RED):
+                self.appear_then_click(self.I_UI_BACK_RED, interval=1.5)
+                continue
             if map_matcher.evaluate(self):
                 self._challenge_type = None
                 return True
@@ -211,8 +230,6 @@ class NormalClimbAct(BaseAct):
             if self.appear_then_click(self.I_UI_BACK_CIRCLE, interval=1.5):
                 continue
             if self.appear_then_click(self.I_UI_BACK_YELLOW, interval=2.5):
-                continue
-            if self.appear_then_click(self.I_UI_BACK_RED, interval=1.5):
                 continue
         logger.warning("Return to activity map timed out")
         return False
