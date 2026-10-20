@@ -62,6 +62,7 @@ class NormalClimbAct(BaseAct):
                 roi=rule.roi, area=rule.roi, keyword=rule.keyword,
             ))
         page_act = self.navigator.resolve_page(pages.page_act)
+        page_main = self.navigator.resolve_page(pages.page_main)
         page_act_pass = self.navigator.resolve_page(pages.page_act_pass)
         page_act_ap = self.navigator.resolve_page(pages.page_act_ap)
         page_act_ap100 = self.navigator.resolve_page(pages.page_act_ap100)
@@ -81,6 +82,8 @@ class NormalClimbAct(BaseAct):
 
         # 普通三个副本从磐长故地地图切换，首领入口单独位于活动主页右侧。
         # 只调整当前任务的页面副本，保留其他活动的全局页面定义。
+        # 庭院静态页面可能早于活动资源加载，启动时用当前任务的入口规则重新绑定。
+        page_main.connect(page_act, self.I_MAIN_GOTO_ACT, key="page_main->page_act")
         page_act.recognizer = self._activity_home_matcher()
         page_act.remove_transition(destination=page_act_map)
         page_act.connect(page_act_map, self.O_ENTER_MAP, key="page_act->page_act_map")

@@ -63,6 +63,19 @@ def test_activity_home_opens_map_before_entering_challenge():
     assert reverse[1].action == task.I_UI_BACK_CIRCLE
 
 
+def test_before_run_rebinds_cached_courtyard_entry_to_current_rule():
+    task = make_task()
+    courtyard = task.navigator.resolve_page(pages.page_main)
+    home = task.navigator.resolve_page(pages.page_act)
+    courtyard.connect(home, task.I_UI_BACK_YELLOW, key="page_main->page_act")
+
+    task.before_run()
+
+    path = task._build_path(courtyard, home)
+    assert len(path) == 1
+    assert path[0].action is task.I_MAIN_GOTO_ACT
+
+
 @pytest.mark.parametrize("arrived", [True, False])
 def test_map_transition_closes_report_with_shared_button_even_if_title_is_hidden(arrived):
     task = make_task()
