@@ -1,8 +1,8 @@
 [
   {
     "itemName": "d_honor",
-    "roiFront": "233,644,131,31",
-    "roiBack": "233,643,131,31",
+    "roiFront": "205,632,88,22",
+    "roiBack": "205,632,88,22",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",
