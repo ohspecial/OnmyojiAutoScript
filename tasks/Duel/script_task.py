@@ -219,14 +219,12 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
 
     def check_honor(self) -> bool:
         """检查荣誉是否满了"""
-        if not self.appear(self.I_DUEL_HONOR):
-            return False
-        roi_x = self.I_DUEL_HONOR.roi_front[0] + self.I_DUEL_HONOR.roi_front[2]
-        roi_y = self.I_DUEL_HONOR.roi_front[1]
-        roi_w = 110
-        roi_h = self.I_DUEL_HONOR.roi_front[3]
-        self.O_D_HONOR.roi = [roi_x, roi_y, roi_w, roi_h]
+        # 使用资源定义的数字区域，避免旧版荣誉图标定位覆盖 OCR 配置。
         current, remain, total = self.O_D_HONOR.ocr(self.device.image)
+        if total <= 0:
+            logger.warning('Failed to read Duel honor, skip honor limit check')
+            return False
+        logger.info(f'Duel honor: {current}/{total}')
         return current == total and remain == 0
 
     def get_and_update_cur_score(self, skip_screenshot: bool = True) -> int:
