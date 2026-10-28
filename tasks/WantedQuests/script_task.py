@@ -220,7 +220,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             # 防止点击后界面来不及刷新
             sleep(1.5)
         # 关闭单个任务的追踪界面
-        self.ui_click_until_smt_disappear(self.C_WQ_TRACE_ONE_CLOSE, stop=self.I_WQ_TRACE_ONE_CHECK_OPENED,
+        self.ui_click_until_smt_disappear(self.I_UI_BACK_RED, stop=self.I_WQ_TRACE_ONE_CHECK_OPENED,
                                           interval=1.5)
 
     def execute_mission(self, num_want: int):
@@ -237,7 +237,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             return False
         # 跳过不想打的
         monster_name = self.O_WQ_MONSTER_TYPE.detect_text(self.device.image)
-        if monster_name in self.unwanted_boss_name_list:
+        # 新界面的识别结果可能带“需要击败”等前缀，按名称包含匹配并忽略空配置项。
+        if any(name and name in monster_name for name in self.unwanted_boss_name_list):
             logger.warning(f'unwanted {monster_name}')
             self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
             return False
