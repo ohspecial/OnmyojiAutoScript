@@ -1,9 +1,11 @@
 {
   "Chess": "百鬼棋局",
   "chess_config": "百鬼棋局配置",
-  "lineup_bond": "选择阵容羁绊",
+  "lineup_bond": "战斗策略",
+  "hyakki_draft_enabled": "百鬼环节自动投掷",
+  "hyakki_draft_enabled_help": "在百鬼环节自动选择御魂并投掷",
   "rank_protection": "保段位",
-  "rank_protection_help": "上一局进入前四名后主动退出三局；主动退出的局数不计入执行次数",
+  "rank_protection_help": "上一局进入前四名后主动退出两局；主动退出的局数不计入执行次数",
   "run_count": "执行次数",
   "limit_time": "运行时间限制",
   "limit_time_help": "达到限制时间后不再开始下一局或下一场战斗，已经开始的战斗会正常完成",
