@@ -46,6 +46,17 @@
 - **装饰可选**: 全部初始皮肤是什么鬼，这里支持你喜欢的庭院、主题等等，[详细说明](https://github.com/runhey/OnmyojiAutoScript/issues/180)
 - **百鬼夜行**: 利用AI来智能撒豆子，模型包含所有式神，[效果展示](https://runhey.github.io/OnmyojiAutoScript-website/docs/user-manual/hyakkiyakou)
 
+### 百鬼棋局阵容编辑器
+
+启动 OAS 后端后，在同一服务地址打开 `/tool/chesslineup`（例如默认地址为
+[阵容编辑器](http://127.0.0.1:22288/tool/chesslineup)，端口以 `config/deploy.yaml` 为准）。
+拖放式神、御魂和纹章，保存后选择脚本配置并点击“保存并应用”；也可直接在 OASX
+的棋局阵容选项中选择已保存阵容。前排为 1–6 号位，后排为 7–12 号位。
+修改会在下一局或下次启动棋局时生效，正在进行的对局继续使用开局时的配置。
+
+内置阵容保存在 `tasks/Chess/strategy/lineup_strategy.json`；自定义阵容保存在同目录的
+`custom_lineups.json`，不会被 Git 跟踪。编辑器支持导入、导出和转为内置阵容。
+
 ## 许可证 LICENSE
 
 This project is licensed under the GNU General Public License v3.0.

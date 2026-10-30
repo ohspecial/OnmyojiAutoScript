@@ -501,6 +501,18 @@ class ChessEconomyMixin:
                 return self._block_shop_purchase(slot_index, matched_name, 'target lost before click', before)
             if not self._can_afford_shop_shikigami(slot_index, known_price=known_price):
                 return False
+            hand_count = self._hand_capacity_count()
+            if hand_count >= 10:
+                logger.info(f'Chess hand full before purchase: count={hand_count}/10; clear space first')
+                # 满手时先腾位，仍沿用本地的一次恢复预算和双帧确认。
+                if record.recovery_attempted:
+                    return self._block_shop_purchase(slot_index, matched_name, 'hand still full after recovery', before)
+                record.recovery_attempted = True
+                recovery = self._free_one_hand_slot_for_purchase()
+                if (recovery is None or
+                        recovery['hand_count_after'] >= recovery['hand_count_before']):
+                    return self._block_shop_purchase(slot_index, matched_name, 'no confirmed hand space', before)
+                continue
             if not self.click(click_rule, interval=0.3):
                 time.sleep(self.SCREENSHOT_INTERVAL)
                 continue

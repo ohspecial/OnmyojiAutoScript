@@ -43,6 +43,7 @@ def task(monkeypatch):
     result._can_afford_shop_shikigami = Mock(return_value=True)
     result._recognize_shop_slot = Mock(return_value={'name': 'hotarugusa', 'source': 'frame', 'score': .99})
     result._hand_card_detections = Mock(return_value=[{}] * 10)
+    result._hand_capacity_count = Mock(return_value=9)
     result._free_one_hand_slot_for_purchase = Mock(return_value=None)
     result._save_shop_purchase_failure = Mock()
     return result
@@ -88,6 +89,22 @@ def test_verified_recovery_can_retry_and_complete_purchase(task):
     assert not task.chess_state.shop_purchases
     assert not task.device.click_record
     task._save_shop_purchase_failure.assert_not_called()
+
+
+def test_full_hand_cleans_up_before_any_purchase_click(task):
+    task._hand_capacity_count.return_value = 10
+    assert task._buy_shop_slot(4, ChessAssets.C_SHIKIGAMI_4, 'hotarugusa') is False
+    task.click.assert_not_called()
+    task._free_one_hand_slot_for_purchase.assert_called_once_with()
+    assert task.chess_state.shop_purchases[(4, 'hotarugusa')].blocked_reason
+
+
+def test_full_hand_recovery_preserves_shared_purchase_budget(task):
+    task._hand_capacity_count.side_effect = [10, 9, 9, 9]
+    task._free_one_hand_slot_for_purchase.return_value = {'hand_count_before': 10, 'hand_count_after': 9}
+    assert task._buy_shop_slot(4, ChessAssets.C_SHIKIGAMI_4, 'hotarugusa') is False
+    assert task.click.call_count == 3
+    task._free_one_hand_slot_for_purchase.assert_called_once_with()
 
 
 def blocked_record(task):

@@ -233,6 +233,7 @@ def test_shop_purchase_confirms_card_disappears_after_click():
     task._can_afford_shop_shikigami = Mock(return_value=True)
     task._purchase_time_available = Mock(return_value=True)
     task._shop_purchase_snapshot = Mock(return_value={})
+    task._hand_capacity_count = Mock(return_value=0)
     task.screenshot = Mock()
     task.appear = Mock(return_value=False)
     task.click = Mock(return_value=True)
