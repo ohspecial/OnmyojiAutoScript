@@ -30,7 +30,7 @@ from tasks.GlobalGame.assets import GlobalGameAssets
 
 
 @pytest.mark.parametrize('old_lineup', [
-    '荒川', '流火', '冥府', '大江山', '狐妖',
+    '流火', '冥府', '大江山', '狐妖',
     'arakawa', 'liuhuo', 'mingfu', 'dajiangshan', 'huyao',
 ])
 def test_old_lineups_migrate_without_resetting_task_options(old_lineup):

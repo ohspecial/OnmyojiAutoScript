@@ -298,6 +298,95 @@
       "secondary_bond": "",
       "hakuzosu_protect_position": null,
       "arakawa_goldfish_position": null
+    },
+    {
+      "key": "huangchuan",
+      "display_name": "荒川",
+      "slots": [
+        {
+          "shikigami": "zashiki_Warashi",
+          "weight": 1,
+          "equipment": [
+            {
+              "kind": "soul",
+              "key": "wangliangzhixia"
+            }
+          ]
+        },
+        {
+          "shikigami": "kaoru",
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": "umibouzu",
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": "shouzu",
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": null,
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": null,
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": null,
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": "kujira",
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": "kappa",
+          "weight": 1,
+          "equipment": []
+        },
+        {
+          "shikigami": "kingyohime",
+          "weight": 1,
+          "equipment": [
+            {
+              "kind": "soul",
+              "key": "kuanggu"
+            },
+            {
+              "kind": "soul",
+              "key": "wangqie"
+            }
+          ]
+        },
+        {
+          "shikigami": "arakawa_no_nushi",
+          "weight": 1,
+          "equipment": [
+            {
+              "kind": "soul",
+              "key": "wangqie"
+            }
+          ]
+        },
+        {
+          "shikigami": null,
+          "weight": 1,
+          "equipment": []
+        }
+      ],
+      "primary_bond": "",
+      "secondary_bond": "回响",
+      "hakuzosu_protect_position": null,
+      "arakawa_goldfish_position": 7
     }
   ]
 }

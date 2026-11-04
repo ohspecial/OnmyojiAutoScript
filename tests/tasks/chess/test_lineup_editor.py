@@ -15,6 +15,7 @@ from module.config.config_model import ConfigModel
 from module.server import chesslineup_router as router
 from tasks.Chess.config import ChessConfig
 from tasks.Chess.runtime.activity_watchdog import ChessActivityWatchdog
+from tasks.Chess.runtime.state import ChessGameState
 from tasks.Chess.script_task import ScriptTask
 from tasks.Chess.strategy import custom_lineups as storage
 from tasks.Chess.strategy.lineup import LineupBond, oasx_lineup_choices
@@ -111,7 +112,7 @@ def test_catalog_images_exist_and_builtin_documents_validate():
         for item in catalog[kind]:
             assert (static / Path(item['image']).relative_to('/tool/chesslineup/static')).is_file(), item['image']
     assert (static / 'cards/special_hakuzosu_protect.webp').is_file()
-    assert len(load_lineup_registry()) == 4
+    assert set(load_lineup_registry()) == {'qijiaoshan', 'pinganjing', 'minghuo', 'haiguo', 'huangchuan'}
 
 
 def test_editor_refuses_to_delete_referenced_lineup(document, store, tmp_path, monkeypatch):
@@ -158,6 +159,10 @@ def test_missing_board_anchor_never_confirms_recall():
 @pytest.mark.parametrize('boss', [False, True])
 def test_board_scan_tracks_shifted_anchor_stars_and_frame_cache(boss):
     task = object.__new__(ScriptTask)
+    task.chess_state = ChessGameState()
+    task._read_chess_mode = Mock(return_value='备')
+    task._shop_refresh_marker_visible = Mock(return_value=False)
+    task._shop_assumed_open = False
     task._is_boss_challenge_round = Mock(return_value=boss)
     frame = task.F_BOSS_BOARD_OCCUPANCY if boss else task.F_BOARD_OCCUPANCY
     rng = np.random.default_rng(7)

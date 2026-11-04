@@ -22,11 +22,14 @@ def Press_and_Drag(
     point_random=(-10, -10, 10, 10),
     swipe_duration=0.5,
     name='Press_and_Drag',
+    retry=False,
 ):
     """在起点按住后拖到终点；仅供 Chess 手牌、棋盘和御魂操作。"""
     device.handle_control_check(name)
     p1, p2 = ensure_int(p1, p2)
     hold_duration = ensure_time(hold_duration)
+    if retry:
+        hold_duration = max(hold_duration, 0.35)
     swipe_duration = ensure_time(
         (swipe_duration * 0.92, swipe_duration * 1.08)
     )

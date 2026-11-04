@@ -7,6 +7,7 @@ from module.logger import logger
 from tasks.Chess.runtime.decision import ChessAction, decide_round
 from tasks.Chess.runtime.events import ChessEventKind, ChessEventMonitor
 from tasks.Chess.runtime.state import ChessGameState
+from tasks.Chess.runtime.cache import same_frame
 
 
 class ChessStateLoopMixin:
@@ -37,11 +38,13 @@ class ChessStateLoopMixin:
             )
         return value
 
+    @same_frame
     def _read_level(self) -> int | None:
         value = super()._read_level()
         self._record_observation(level=value)
         return value
 
+    @same_frame
     def _read_shop_gold(self) -> int | None:
         value = super()._read_shop_gold()
         self._record_observation(gold=value)
@@ -68,6 +71,12 @@ class ChessStateLoopMixin:
         return value, raw
 
     def _start_chess_game(self) -> None:
+        self._clear_player_identity()
+        self._chess_reader_cache = None
+        self._detail_frame_cache = None
+        self._chess_frame_card_cache = None
+        self._unchanged_store_cache = None
+        self._closed_shop_inspection_frame = None
         self.chess_state.begin_game()
         self.chess_events.reset()
         logger.info(f'Chess state: begin game {self.chess_state.game_number}')
@@ -239,6 +248,12 @@ class ChessStateLoopMixin:
                 if progress.phase == 'await_preparation':
                     # 这里处理的是上一个百鬼回目的待办，不提前标记本回目已复核。
                     self._check_pending_hyakki_lineup(round_no)
+                    if (self.chess_state.player_name
+                            and self.chess_state.first_hyakki_round is not None
+                            and round_no > self.chess_state.first_hyakki_round
+                            and self.chess_state.health_read_round != round_no):
+                        if not self._ensure_shop_closed():
+                            continue
                     self.purchase_lineup_cards_once()
                     self._run_preparation_economy_until_time_limit()
                     if not self._is_preparation_mode():
@@ -252,12 +267,7 @@ class ChessStateLoopMixin:
                             'complete; wait for 战/鬼/待'
                         )
 
-            interval = (
-                self.SCREENSHOT_INTERVAL
-                if mode == '鬼'
-                else self.SLOW_POLL_INTERVAL
-            )
-            time.sleep(interval)
+            # The device combat screenshot interval controls polling cadence.
 
     def _check_pending_hyakki_lineup(self, round_no: int) -> bool:
         """在新回目的准备画面复核遗留站位；首领回合保留待办。"""
@@ -268,6 +278,113 @@ class ChessStateLoopMixin:
         self._reconcile_lineup_after_hyakki_round(next_round_no=round_no)
         self.chess_state.hyakki_lineup_check_pending = False
         return True
+
+    def _read_current_health(self) -> int | None:
+        """首次百鬼后，在每回合首个确认关店画面读取本人生命。"""
+        import re
+        import numpy as np
+        from module.atom.ocr import RuleOcr
+
+        state = self.chess_state
+        round_no = self._read_round_number()
+        if (not state.player_name or state.first_hyakki_round is None
+                or round_no is None or round_no <= state.first_hyakki_round):
+            return None
+        if state.health_read_round == round_no:
+            return state.current_health
+        if self._shop_assumed_open or self._shop_refresh_marker_visible():
+            return state.current_health
+        state.health_read_round = round_no
+        image = self.device.image
+        matches = []
+        for result in self.O_NAME_RANGE.detect_and_ocr(image):
+            text = self._normalize_ocr_text(result.ocr_text)
+            if text != state.player_name:
+                continue
+            points = np.asarray(result.box)
+            right, bottom = points.max(axis=0)
+            right += self.O_NAME_RANGE.roi[0]
+            bottom += self.O_NAME_RANGE.roi[1]
+            matches.append((int(right), int(bottom)))
+        if len(matches) == 1:
+            right, bottom = matches[0]
+            left, top = max(0, right - 36), max(0, bottom)
+            width = min(image.shape[1], right + 6) - left
+            height = min(image.shape[0], top + 28) - top
+            if width > 0 and height > 0:
+                roi = (left, top, width, height)
+                rule = RuleOcr(name='chess_current_health', roi=roi, area=roi,
+                               mode='Digit', method='Default', keyword='')
+                raw = self._normalize_ocr_text(rule.ocr(image))
+                if re.fullmatch(r'\d{1,3}', raw) and 0 <= int(raw) <= 100:
+                    state.current_health = int(raw)
+        self._record_observation(player_name=state.player_name,
+                                 current_health=state.current_health)
+        logger.info(f'Chess player health: round={round_no}, '
+                    f'name={state.player_name}, health={state.current_health}')
+        return state.current_health
+
+    def _clear_player_identity(self) -> None:
+        """本人名字和生命仅供当局使用，结束或中断后立即清理。"""
+        from dataclasses import replace
+
+        state = self.chess_state
+        state.player_name = None
+        state.first_hyakki_round = None
+        state.health_read_round = None
+        state.current_health = None
+        if state.observation is not None:
+            state.observation = replace(state.observation,
+                                        player_name=None, current_health=None)
+        self._hyakki_player_row = None
+        self._hyakki_player_found = False
+
+    def _run_round_loop(self) -> None:
+        try:
+            super()._run_round_loop()
+        finally:
+            self._clear_player_identity()
+
+    def _ensure_shop_closed(self, allowed_modes=('备',)) -> bool:
+        closed = super()._ensure_shop_closed(allowed_modes=allowed_modes)
+        if closed:
+            self._inspect_closed_shop_once()
+        return closed
+
+    def _inspect_closed_shop_once(self, round_no: int | None = None) -> None:
+        """生命和下阵共用关店确认帧；检测过程不截图、不操作商店。"""
+        observed_round = self._read_round_number()
+        if observed_round is None or (round_no is not None and observed_round != round_no):
+            return
+        if (self._shop_assumed_open or self._shop_refresh_marker_visible()
+                or self.appear(self.I_SELECT_GRIGRI)):
+            return
+        image = self.device.image
+        key = (getattr(self.device, 'image_frame_id', None), id(image), observed_round)
+        previous = getattr(self, '_closed_shop_inspection_frame', None)
+        if previous is not None and previous[0] == key:
+            return
+        self._closed_shop_inspection_frame = (key, image)
+        self._read_current_health()
+        self._check_preparation_lineup_once(observed_round)
+
+    def _check_preparation_lineup_once(self, round_no: int) -> None:
+        """只检查现有关闭商店截图；有效有人棋盘每回合核对一次。"""
+        checked = self.chess_state.preparation_lineup_checked_rounds
+        if round_no in checked:
+            return
+        if (self._read_round_number() != round_no
+                or self._read_chess_mode() != '备'
+                or self.appear(self.I_SELECT_GRIGRI)):
+            return
+        if (self._shop_refresh_marker_visible()
+                or self._shop_assumed_open):
+            return
+        slots = self._board_frame_scan(round_no=round_no)
+        if not slots or not any(slot['occupied'] for slot in slots):
+            return
+        self._reconcile_preparation_lineup(slots)
+        checked.add(round_no)
 
 
 def _game_state_property(name):

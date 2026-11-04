@@ -1709,7 +1709,8 @@
       "matchmaking_timeout_seconds": 60,
       "coin_full_exit": false,
       "continue_grigri_refresh_below_nine": true,
-      "custom_lineup": ""
+      "custom_lineup": "",
+      "sixrealms_selection_enabled": true
     }
   },
   "collective_missions": {

@@ -10,6 +10,8 @@ from tasks.Chess.strategy.lineup import LineupBond, oasx_lineup_choices, resolve
 class ChessConfig(ConfigBase):
     """百鬼棋局循环与结束条件。"""
 
+    sixrealms_selection_enabled: bool = Field(title='选择六道', default=True)
+
     hyakki_draft_enabled: bool = Field(
         title='百鬼优先所需御魂', default=True,
     )
@@ -26,7 +28,7 @@ class ChessConfig(ConfigBase):
     @classmethod
     def migrate_removed_lineup(cls, value):
         raw = getattr(value, 'value', value)
-        if raw in {'流火', '冥府', '大江山', '狐妖', '荒川',
+        if raw in {'流火', '冥府', '大江山', '狐妖',
                    'liuhuo', 'mingfu', 'dajiangshan', 'huyao', 'arakawa'}:
             return LineupBond.QIJIAOSHAN
         return value

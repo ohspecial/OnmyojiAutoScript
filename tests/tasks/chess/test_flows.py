@@ -258,6 +258,41 @@ def test_restart_from_rank_page_waits_for_button_to_disappear(monkeypatch):
     assert task.click.call_args_list[-1] == call(ChessAssets.I_RESTART_AGAIN)
 
 
+@pytest.mark.parametrize('restart', [False, True])
+def test_unknown_result_back_button_recovers_before_fallback_click(monkeypatch, restart):
+    task = make_task(monkeypatch)
+    set_frames(task, ['share', 'unknown', 'rank' if restart else 'lobby', 'waiting'])
+    markers = {
+        'share': (ChessAssets.I_SHARE,), 'unknown': (ChessAssets.I_BACK_RED,),
+        'rank': (ChessAssets.I_RESTART_AGAIN,), 'lobby': (task.I_CHECK_CHESS,),
+        'waiting': (),
+    }
+    task.appear = lambda marker: any(marker is item for item in markers[task.offline_frame])
+    task.appear_then_click = Mock(return_value=False)
+    run = task._restart_chess_game_from_result if restart else task.return_to_chess_lobby
+    assert run() is True
+    assert call(ChessAssets.I_BACK_RED, interval=.8) in task.click.call_args_list
+    assert not task._chess_share_advancing
+
+
+def test_result_flow_accepts_lobby_without_share_or_rank(monkeypatch):
+    task = make_task(monkeypatch)
+    set_frames(task, ['lobby'])
+    task.appear = lambda marker: marker is task.I_CHECK_CHESS
+    assert task.return_to_chess_lobby() is True
+    task.click.assert_not_called()
+
+
+@pytest.mark.parametrize('known', ['lobby', 'rank', 'restart'])
+def test_unknown_result_recovery_preserves_known_pages(monkeypatch, known):
+    task = make_task(monkeypatch)
+    marker = {'lobby': task.I_CHECK_CHESS, 'rank': task.I_CHECK_CHESS_RANK,
+              'restart': ChessAssets.I_RESTART_AGAIN}[known]
+    task.appear = lambda target: target is marker or target is ChessAssets.I_BACK_RED
+    assert task._close_unknown_chess_result_page() is False
+    task.click.assert_not_called()
+
+
 def prepare_matchmaking(task, frames):
     set_frames(task, frames)
     task._matchmaking_timeout_seconds = 10

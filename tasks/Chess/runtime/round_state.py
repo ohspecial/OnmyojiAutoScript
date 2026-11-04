@@ -409,11 +409,20 @@ class ChessRoundStateMixin:
 
     def _is_early_round_layout(self) -> bool:
         """第二套 round/mode 布局即前三回合，此阶段禁止任何卖卡。"""
+        if self.device.image is not None:
+            monster, values = self._read_detail_frame()
+            if values is not None:
+                return monster
         _, use_alternate_layout = self._read_primary_round_layout()
         return use_alternate_layout
 
     def _read_round_number(self) -> int | None:
         """主 chess_mode 读到数字时使用前三回合专用 round_2。"""
+        if self.device.image is not None:
+            _, values = self._read_detail_frame()
+            if values is not None:
+                raw = self._normalize_ocr_text(values[0])
+                return int(raw) if re.fullmatch(r'\d+', raw) and int(raw) > 0 else None
         mode_raw, use_alternate_layout = self._read_primary_round_layout()
         ocr_rule = self.O_ROUND_2 if use_alternate_layout else self.O_ROUND
         value, round_raw = self._parse_round_number(ocr_rule)
@@ -454,6 +463,13 @@ class ChessRoundStateMixin:
 
     def _read_chess_mode(self) -> str | None:
         """优先识别特殊回合标志，其余阶段读取文字。"""
+        if self.device.image is not None:
+            _, values = self._read_detail_frame()
+            if values is not None:
+                raw = self._normalize_ocr_text(values[1])
+                if raw in ('备', '战', '鬼', '待'):
+                    return raw
+                return self._special_chess_mode() or ('待' if raw else None)
         special_mode = self._special_chess_mode()
         if special_mode is not None:
             return special_mode
@@ -492,7 +508,7 @@ class ChessRoundStateMixin:
         if not 1 <= index <= 12:
             raise ValueError(f'Chess board set position is not configured: {set_index}')
         slots = self._board_frame_scan()
-        return bool(slots and slots[index - 1]['occupied'])
+        return bool(slots[index - 1]['occupied']) if slots else None
 
     def _board_set_is_empty(self, set_index: int) -> bool:
         """普通或首领 Frame 确认原站位为空，锚点缺失不算下阵成功。"""
@@ -524,7 +540,7 @@ class ChessRoundStateMixin:
             )
             if set_index is None:
                 continue
-            if self._board_set_has_shikigami_visual(int(set_index)):
+            if self._board_set_has_shikigami_visual(int(set_index)) is not False:
                 continue
             deployed_names.discard(name)
             actual_positions.pop(name, None)
@@ -662,6 +678,10 @@ class ChessRoundStateMixin:
 
     def _read_remaining_time(self) -> int | None:
         """读取剩余时间；第二套布局复用第一套阶段框中的数字。"""
+        if self.device.image is not None:
+            _, values = self._read_detail_frame()
+            if values is not None:
+                return self._parse_remaining_time_text(self._normalize_ocr_text(values[2]))
         primary_raw, use_alternate_layout = (
             self._read_primary_round_layout()
         )
@@ -703,3 +723,60 @@ class ChessRoundStateMixin:
             if character in raw:
                 return rank, raw
         return None, raw
+
+    def _read_detail_frame(self):
+        """同一截图只匹配、读取一次；未命中 badge 时不读取范围。"""
+        image = self.device.image
+        cache = getattr(self, '_detail_frame_cache', None)
+        if cache is not None and cache[0] is image:
+            return cache[1]
+        captured_at = time.monotonic()
+        marker = getattr(self, 'I_STAGE_MONSTERNORMAL', self.I_STAGE_MONSTER)
+        monster = self.appear(marker)
+        if not monster and self._stage_marker_visible(self.I_STAGE_HYAKKI):
+            frame = self.F_CHESS_DETAIL_HYAKKI
+        else:
+            frame = self.F_CHESS_DETAIL_MONSTER if monster else self.F_CHESS_DETAIL_NORMAL
+        values = frame.execute(self)
+        result = (monster, values)
+        self._detail_frame_cache = image, result, captured_at
+        return result
+
+    def _reconcile_preparation_lineup(self, slots) -> list[str]:
+        """复用关店后已确认有人的棋盘结果，清理离场式神记录。"""
+        deployed_names = set(
+            getattr(self, '_board_lineup_names', set())
+        )
+        actual_positions = dict(
+            getattr(self, '_board_actual_positions', {})
+        )
+        player_positions = set(
+            getattr(self, '_player_deployed_positions', set())
+        )
+        removed = []
+        for name in sorted(deployed_names):
+            set_index = actual_positions.get(
+                name,
+                self.shikigami_deploy_positions.get(name),
+            )
+            if set_index is None:
+                continue
+            if slots[int(set_index) - 1]['occupied']:
+                continue
+            deployed_names.discard(name)
+            actual_positions.pop(name, None)
+            player_positions.discard(int(set_index))
+            removed.append(name)
+            logger.warning(
+                'Chess preparation shikigami missing; '
+                f'mark as undeployed: name={name}, set={set_index}'
+            )
+
+        self._board_lineup_names = deployed_names
+        self._board_actual_positions = actual_positions
+        self._player_deployed_positions = player_positions
+        logger.info(
+            'Chess preparation lineup check: '
+            f'removed={removed}, deployed={sorted(deployed_names)}'
+        )
+        return removed

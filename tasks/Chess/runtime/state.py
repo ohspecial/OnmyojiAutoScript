@@ -20,6 +20,8 @@ class ChessObservation:
     shop_refresh_visible: bool | None = None
     game_rank: int | None = None
     grigri_visible: bool | None = None
+    player_name: str | None = None
+    current_health: int | None = None
 
 
 @dataclass
@@ -66,6 +68,17 @@ class ChessGameState:
     board_special_units: dict[str, Any] = field(default_factory=dict)
     arakawa_goldfish_current_position: int | None = None
     last_game_rank: int | None = None
+    player_name: str | None = None
+    first_hyakki_round: int | None = None
+    health_read_round: int | None = None
+    current_health: int | None = None
+    preparation_lineup_checked_rounds: set[int] = field(default_factory=set)
+    economy_refresh_counts: dict[int, int] = field(default_factory=dict)
+    goldfish_non_positions: set[int] = field(default_factory=set)
+    drag_pending: set[str] = field(default_factory=set)
+    sale_failure_round: int | None = None
+    sale_failures: dict[tuple, int] = field(default_factory=dict)
+    hand_cleanup_status: str = 'complete'
 
     def begin_game(self) -> None:
         next_number = self.game_number + 1

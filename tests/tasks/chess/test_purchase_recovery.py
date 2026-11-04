@@ -38,6 +38,8 @@ def task(monkeypatch):
     result.screenshot = Mock()
     result.appear = Mock(return_value=False)
     result._read_chess_mode = Mock(return_value='备')
+    result._read_round_number = Mock(return_value=7)
+    result._read_level = Mock(return_value=6)
     result._read_remaining_time = Mock(return_value=30)
     result._read_shop_gold = Mock(return_value=38)
     result._can_afford_shop_shikigami = Mock(return_value=True)
@@ -131,7 +133,8 @@ def test_only_confirmed_refresh_releases_same_name_block(task, changed):
     before = {slot: {'name': 'hotarugusa', 'image': None} for slot in range(1, 6)}
     after = {slot: {'name': 'kaoru' if changed and slot <= 3 else 'hotarugusa', 'image': None}
              for slot in range(1, 6)}
-    task._shop_slot_refresh_snapshot = Mock(side_effect=[before, after, after] if not changed else [before, after])
+    snapshots = iter([before])
+    task._shop_slot_refresh_snapshot = Mock(side_effect=lambda: next(snapshots, after))
     result = task._click_shop_refresh_and_confirm_slots(allow_hidden=True)
     assert result == ('success' if changed else 'no_progress')
     assert bool(task.chess_state.shop_purchases) is not changed
