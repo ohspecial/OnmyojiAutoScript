@@ -47,7 +47,7 @@
   {
     "itemName": "town_goto_draft_duel",
     "imageName": "page_town_goto_draft_duel.png",
-    "roiFront": "335,159,55,72",
+    "roiFront": "344,154,38,39",
     "roiBack": "170,145,567,100",
     "method": "Template matching",
     "threshold": 0.8,

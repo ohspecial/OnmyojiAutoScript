@@ -266,6 +266,33 @@ class Window(Handle):
         end_lparam = MAKELONG(trace[-1][0], trace[-1][1])
         PostMessage(handleNum, WM_LBUTTONUP, 0, end_lparam)
 
+    def press_and_drag_window_message(self, p1, p2, steps, hold_duration, release_duration) -> None:
+        """用本地模拟器窗口句柄执行按住、连续移动和释放。"""
+        handles = {
+            EmulatorFamily.FAMILY_MUMU: 1,
+            EmulatorFamily.FAMILY_NOX: 3,
+            EmulatorFamily.FAMILY_LD: 0,
+        }
+        index = handles.get(self.emulator_family)
+        if index is None:
+            logger.warning('Window message drag is not supported by this emulator')
+            return
+        hwnd = self.control_handle_list[index]
+        last = MAKELONG(*p1)
+        SendMessage(hwnd, WM_NCHITTEST, 0, last)
+        SendMessage(hwnd, WM_SETCURSOR, hwnd, MAKELONG(HTCLIENT, WM_LBUTTONDOWN))
+        PostMessage(hwnd, WM_MOUSEMOVE, 0, last)
+        PostMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, last)
+        try:
+            time.sleep(hold_duration)
+            for point, wait in steps:
+                last = MAKELONG(*point)
+                PostMessage(hwnd, WM_MOUSEMOVE, MK_LBUTTON, last)
+                time.sleep(wait)
+            time.sleep(release_duration)
+        finally:
+            PostMessage(hwnd, WM_LBUTTONUP, 0, last)
+
     def swipe_vector_window_message2(self, startPos: list, endPos: list) -> None:
         """
         后台滑动, 直线滑动

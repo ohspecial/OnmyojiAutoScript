@@ -639,7 +639,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
         return True
 
-    def check_then_accept(self) -> bool:
+    def check_then_accept(self, timeout: float | None = None, default_invite: bool = True) -> bool:
         """
         队员接受邀请
         :return:
@@ -647,7 +647,10 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         if not self.appear_accept():
             return False
         logger.info('Click accept')
+        timer = Timer(timeout).start() if timeout is not None else None
         while True:
+            if timer is not None and timer.reached():
+                return False
             self.screenshot()
             if self.is_in_room():
                 return True
@@ -659,7 +662,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 continue
             if self.appear_then_click(self.I_GI_SURE, interval=1):
                 continue
-            if self.appear_then_click(self.I_I_ACCEPT_DEFAULT, interval=1):
+            if default_invite and self.appear_then_click(self.I_I_ACCEPT_DEFAULT, interval=1):
                 continue
             if self.appear_then_click(self.I_I_ACCEPT, interval=1) or \
                     self.appear_then_click(self.I_I_ACCEPT_APPRENTICE, interval=1):

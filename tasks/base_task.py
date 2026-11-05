@@ -170,6 +170,8 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         for target in targets:
             if not isinstance(target, RuleImage) or isinstance(target, RuleFrame):
                 continue
+            if target.method == RuleImage.METHOD_MASKED_TEMPLATE_MATCH:
+                continue
             cache_key = id(target)
             if cache_key in seen:
                 continue

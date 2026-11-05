@@ -18,6 +18,7 @@ from module.base.utils.utils import random_normal_distribution_int
 class RuleImage(RuleImageMallResourceMixin):
     debug_mode: bool = False
     METHOD_TEMPLATE_MATCH = "Template matching"
+    METHOD_MASKED_TEMPLATE_MATCH = "Masked template matching"
     METHOD_MULTI_SCALE_TEMPLATE_MATCH = "Multi-scale template matching"
     METHOD_SIFT_FLANN = "Sift Flann"
     DEFAULT_MULTI_SCALE_RANGE = (0.6, 1.2)
@@ -185,6 +186,8 @@ class RuleImage(RuleImageMallResourceMixin):
         return False
 
     def template_match(self, image: np.array, threshold: float = None) -> bool:
+        if self.method == self.METHOD_MASKED_TEMPLATE_MATCH:
+            return self._masked_template_match(image, threshold)
         if threshold is None:
             threshold = self.threshold
         source = self.corp(image)
@@ -202,6 +205,29 @@ class RuleImage(RuleImageMallResourceMixin):
             self._update_roi_front(max_loc, (mat.shape[1], mat.shape[0]))
             return True
         return False
+
+    @cached_property
+    def _template_mask(self):
+        path = Path(self.file)
+        path = path.with_name(f'{path.stem}_mask{path.suffix}')
+        mask = cv2.imdecode(fromfile(path, dtype=uint8), cv2.IMREAD_GRAYSCALE)
+        if mask is None or mask.shape != self.image.shape[:2] or not np.any(mask):
+            raise ValueError(f'Invalid image mask: {path}')
+        return mask
+
+    def _masked_template_match(self, image, threshold):
+        # 本地图像服务暂不支持蒙版；在当前截图上只比较蒙版覆盖的像素。
+        source, template = self.corp(image), self.image
+        height, width = template.shape[:2]
+        if source.shape[0] < height or source.shape[1] < width:
+            return False
+        scores = cv2.matchTemplate(source, template, cv2.TM_CCOEFF_NORMED, mask=self._template_mask)
+        scores[~np.isfinite(scores)] = -1
+        _, score, _, location = cv2.minMaxLoc(scores)
+        if score <= (self.threshold if threshold is None else threshold):
+            return False
+        self._update_roi_front(location, (width, height))
+        return True
 
     def _get_multi_scale_range(self) -> tuple[float, float, float]:
         active_scale_range = self.scale_range
@@ -260,6 +286,8 @@ class RuleImage(RuleImageMallResourceMixin):
         :param image:
         :return:
         """
+        if self.method == self.METHOD_MASKED_TEMPLATE_MATCH:
+            return self._masked_template_match(image, threshold)
         client = get_image_client()
         result = client.match_rule(
             rule_data=self.to_service_payload(),

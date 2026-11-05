@@ -5,6 +5,7 @@ from module.base.decorator import cached_property
 from module.base.timer import Timer
 from module.base.utils import *
 from module.device.env import IS_WINDOWS
+from module.device.press_and_drag import press_and_drag
 # from module.device.method.hermit import Hermit
 # from module.device.method.maatouch import MaaTouch
 from module.device.method.minitouch import Minitouch
@@ -198,6 +199,10 @@ class Control(Minitouch, Adb, Scrcpy, Window):
             blacklist_area=blacklist_area
         )
         self.swipe(p1, p2, duration=duration, control_name=name, distance_check=distance_check)
+
+    def press_and_drag(self, p1, p2, **kwargs) -> None:
+        """保持触点按下，从起点拖到终点。"""
+        press_and_drag(self, p1, p2, **kwargs)
 
     def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
              swipe_duration=0.25, shake_duration=0.1, name='DRAG'):

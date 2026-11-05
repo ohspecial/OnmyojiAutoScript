@@ -284,3 +284,8 @@ dataset/
 /tasks/Chess/strategy/custom_lineups.v1.bak.json
 /tasks/Chess/strategy/custom_lineups.tmp
 /tasks/Chess/strategy/*.lock
+
+# Local DraftDuel statistics, checkpoints and instance coordination
+/data/DraftDuel/
+/data/cooperation/
+/tasks/DraftDuel/fight_result/

@@ -25,6 +25,8 @@ from multiprocessing.queues import Queue
 from module.config.utils import convert_to_underscore
 from module.config.config import Config
 from module.config.anti_ban import AntiBanGuard
+from module.cooperation import Cooperation, prepare_task_cooperation
+from module.draft_duel_schedule import skip_draft_duel_outside_hours
 from module.device.device import Device
 from module.device.env import IS_WINDOWS
 from module.base.utils import load_module
@@ -308,6 +310,9 @@ class Script:
 
             time.sleep(5)
 
+            cooperation = self.__dict__.get('_cooperation')
+            if cooperation is not None and cooperation.requested():
+                return False
             if self.config.should_reload():
                 return False
 
@@ -351,7 +356,11 @@ class Script:
         :return:
         """
         while True:
+            cooperation = self._ensure_draft_duel_cooperation()
+            wake_task = cooperation.wake_next(self.config) if cooperation is not None else None
             task = self.config.get_next()
+            if wake_task and task.command != 'Restart':
+                task = next((item for item in self.config.pending_task if item.command == wake_task), task)
             now = datetime.now()
             antiban_wake = self.anti_ban_guard.wake_time(now, self.config.script.anti_ban)
             if antiban_wake is not None:
@@ -441,17 +450,51 @@ class Script:
 
         self._reset_task_runtime_outcome()
         try:
+            if command == 'DraftDuel':
+                self.config.cooperation_runtime = self.__dict__.get('_cooperation')
+                try:
+                    prepare_task_cooperation(self.config, command)
+                except ScriptError as error:
+                    logger.warning(f'DraftDuel cooperation settings: {error}')
+                    self.config.task_delay(task=command, success=False, server=False)
+                    self.config.task_runtime_outcome = dict(task=command, status='cooperation_failed',
+                                                            success=False, reason=str(error))
+                    raise TaskEnd(str(error)) from error
             self.device.screenshot()
             module_name = 'script_task'
             module_path = str(Path.cwd() / 'tasks' / command / (module_name + '.py'))
             logger.info(f'module_path: {module_path}, module_name: {module_name}')
             task_module = load_module(module_name, module_path)
-            task_module.ScriptTask(config=self.config, device=self.device).run()
+            runner = task_module.ScriptTask(config=self.config, device=self.device)
+            if command == 'DraftDuel':
+                runner._battle_cooperation_prepared = True
+            runner.run()
         except Exception as e:
             return self._handle_task_exception(e, command)
         return False
 
+    def _ensure_draft_duel_cooperation(self):
+        item = getattr(self.config.model, 'draft_duel', None)
+        runtime = self.__dict__.get('_cooperation')
+        if (item and item.scheduler.enable and item.invite_config.cooperation_script
+                and item.draft_duel_config.match_mode != '单人'):
+            if runtime is None:
+                runtime = self._cooperation = Cooperation(self.config_name)
+                runtime.start()
+        elif runtime is not None:
+            runtime.close()
+            self._cooperation = runtime = None
+        return runtime
+
     def loop(self):
+        try:
+            self._scheduler_loop()
+        finally:
+            runtime = self.__dict__.pop('_cooperation', None)
+            if runtime is not None:
+                runtime.close()
+
+    def _scheduler_loop(self):
         """
         Main loop of scheduler.
         :return:
@@ -489,6 +532,11 @@ class Script:
                     self.config.task_delay(task='Restart', success=True, server=True)
                     del_cached_property(self, 'config')
                     continue
+                if task == 'DraftDuel' and skip_draft_duel_outside_hours(
+                        self.config, self.__dict__.get('_cooperation')):
+                    self._capture_task_runtime_outcome(task)
+                    del_cached_property(self, 'config')
+                    continue
                 decision = self.runtime.prepare_task_execution(task)
             except Exception as e:
                 self._handle_task_exception(e, task)
@@ -512,11 +560,26 @@ class Script:
             logger.hr(task, level=0)
             self.config.model.running_task = task
             _task_start = datetime.now()
-            success = self.run(inflection.camelize(task))
+            cooperation = self.__dict__.get('_cooperation')
+            if cooperation is not None:
+                cooperation.publish(task)
+            try:
+                success = self.run(inflection.camelize(task))
+            finally:
+                if cooperation is not None:
+                    cooperation.publish('')
+                    if task == 'DraftDuel':
+                        cooperation.finish(task)
             self.config.model.running_task = ''
             logger.info(f'Scheduler: End task `{task}`')
             self.is_first_task = False
             self.anti_ban_guard.record_active((datetime.now() - _task_start).total_seconds())
+
+            outcome = self.last_task_runtime_outcome or {}
+            if outcome.get('status') in ('cooperation_waiting', 'cooperation_failed'):
+                # 等待另一个实例的调度结果不计为游戏故障。
+                del_cached_property(self, 'config')
+                continue
 
             # Check failures
             # failed = deep_get(self.failure_record, keys=task, default=0)
