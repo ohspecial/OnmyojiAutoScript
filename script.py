@@ -450,6 +450,12 @@ class Script:
 
         self._reset_task_runtime_outcome()
         try:
+            if command in ('MetaDemon', 'MetaDemonTicket'):
+                # 新任务自行握手，调度器只共享心跳通道，避免重复组队确认。
+                runtime = self._ensure_draft_duel_cooperation()
+                self.config.cooperation_runtime = runtime
+                if runtime is not None:
+                    runtime.publish(command)
             if command == 'DraftDuel':
                 self.config.cooperation_runtime = self.__dict__.get('_cooperation')
                 try:
@@ -476,8 +482,16 @@ class Script:
     def _ensure_draft_duel_cooperation(self):
         item = getattr(self.config.model, 'draft_duel', None)
         runtime = self.__dict__.get('_cooperation')
-        if (item and item.scheduler.enable and item.invite_config.cooperation_script
-                and item.draft_duel_config.match_mode != '单人'):
+        needed = bool(item and item.scheduler.enable and item.invite_config.cooperation_script
+                      and item.draft_duel_config.match_mode != '单人')
+        boss = getattr(self.config.model, 'meta_demon', None)
+        tickets = getattr(self.config.model, 'meta_demon_ticket', None)
+        # 对端可单向填写本实例，所以本端协助/组队模式也需要维持空闲心跳。
+        needed = needed or bool(boss and boss.scheduler.enable
+                                and '鬼王协助' in boss.meta_demon_config.mode)
+        needed = needed or bool(tickets and tickets.scheduler.enable
+                                and tickets.general_config.user_status != 'alone')
+        if needed:
             if runtime is None:
                 runtime = self._cooperation = Cooperation(self.config_name)
                 runtime.start()

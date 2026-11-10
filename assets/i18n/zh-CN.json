@@ -295,5 +295,14 @@
   "save_touch_fish_help": "默认使用全部存储按钮，主要目的是为了配合真蛇每周打一次即可获得俩次奖励(并不会节省体力)",
   "custom_lineup": "自定义阵容标识",
   "custom_lineup_help": "在 chesslineup 工具中保存并应用的阵容标识",
-  "sixrealms_selection_enabled": "选择六道"
+  "sixrealms_selection_enabled": "选择六道",
+  "MetaDemonTicket": "超鬼王门票",
+  "meta_demon_ticket": "超鬼王门票",
+  "low_star_battle_conf": "低星鬼王战斗配置",
+  "high_star_battle_conf": "高星鬼王战斗配置",
+  "quick_preset_config": "快速预设详情",
+  "assistance_config": "鬼王协助",
+  "settings_layout_config": "配置显示",
+  "high_star_powerful_enable": "启用高星强力追击",
+  "powerful_count": "强力追击次数"
 }

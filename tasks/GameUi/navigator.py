@@ -39,6 +39,13 @@ class GameUi(ChessBattleNavigationMixin, BaseTask, GameUiAssets):
 
     REPEATED_TRANSITION_FAILURE_THRESHOLD = 3
 
+    def finish_task_navigation(self) -> bool:
+        """连续任务允许保留当前页面，普通调度结束后返回庭院。"""
+        if getattr(self.config, 'defer_task_courtyard_return', False):
+            return True
+        from tasks.GameUi.default_pages import page_main
+        return self.goto_page(page_main)
+
     # 全局未知页关闭动作，所有任务共享。
     DEFAULT_UNKNOWN_CLOSERS = [
         GlobalGameAssets.I_UI_BACK_RED,

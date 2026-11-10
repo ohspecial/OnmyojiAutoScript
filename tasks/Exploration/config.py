@@ -55,6 +55,11 @@ class UpType(str, Enum):
     DARUMAA = 'up_daruma'  # 达摩
 
 
+class ExplorationDifficulty(str, Enum):
+    SIMPLE = '简单'
+    HARD = '困难'
+
+
 class UserStatus(str, Enum):
     LEADER = 'leader'
     MEMBER = 'member'
@@ -92,6 +97,7 @@ class ExplorationConfig(BaseModel):
 
     exploration_level: ExplorationLevel = Field(title='探索等级', default=ExplorationLevel.EXPLORATION_28,
                                                 description='exploration_level_help')
+    difficulty: ExplorationDifficulty = Field(default=ExplorationDifficulty.HARD, title='探索难度')
     collect_paper_reward: bool = Field(default=True, description='collect_paper_reward_help')
 
     auto_rotate: AutoRotate = Field(title='自动添加候补式神', default=AutoRotate.no,

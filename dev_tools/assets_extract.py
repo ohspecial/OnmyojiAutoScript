@@ -14,6 +14,7 @@ ASSETS_FILE = 'assets.py'
 ASSETS_CLASS = '\nclass Assets: \n'
 IMPORT_EXP = """
 from module.atom.image import RuleImage
+from module.atom.frame import RuleFrame, Image, Ocr, Click
 from module.atom.click import RuleClick
 from module.atom.long_click import RuleLongClick
 from module.atom.swipe import RuleSwipe
@@ -73,6 +74,41 @@ class ImageExtractor:
                     f'method="{item["method"]}", ' \
                     f'file="./{self.image_path}/{item["imageName"]}")\n'
         return description + name
+
+
+class FrameExtractor(ImageExtractor):
+    """将锚点和相对操作区一起生成，避免重新提取素材后丢失上阵按钮。"""
+
+    def extract_item(self, item):
+        def area(value):
+            return tuple(map(float, value.split(','))) if isinstance(value, str) else tuple(value)
+
+        ranges = item['roiRange']
+        ranges = [ranges] if isinstance(ranges, str) else ranges
+        operations = []
+        for operation in item.get('rangeOperations', [{'type': 'click'}] * len(ranges)):
+            kind = operation.get('type', 'click')
+            if kind == 'image':
+                template = operation.get('file')
+                if not template and operation.get('imageName'):
+                    template = f'./{self.image_path}/{operation["imageName"]}'
+                operations.append(f'Image(file={template!r}, method={operation.get("method", "Template matching")!r}, threshold={operation.get("threshold", 0.8)!r})')
+            elif kind == 'ocr':
+                operations.append(f'Ocr(mode={operation.get("mode", "Single")!r}, method={operation.get("method", "Default")!r}, keyword={operation.get("keyword", "")!r})')
+            elif kind == 'click':
+                operations.append('Click()')
+            else:
+                raise ValueError(f'Unknown frame operation: {kind}')
+        if len(operations) != len(ranges):
+            raise ValueError('Frame operations must align with ranges')
+        badges = item.get('badges') or [{'imageName': item['imageName']}]
+        files = [f'./{self.image_path}/{badge["imageName"]}' for badge in badges]
+        return (f'\tF_{name_transform(item["itemName"])} = RuleFrame('
+                f'name={item["itemName"]!r}, roi_badge={area(item["roiBadge"])!r}, '
+                f'roi_range={[area(value) for value in ranges]!r}, '
+                f'roi_back={area(item["roiBack"])!r}, threshold={item.get("threshold", 0.8)!r}, '
+                f'method={item.get("method", "Template matching")!r}, '
+                f'badgefile={files!r}, range=[{", ".join(operations)}])\n')
 
 
 class ClickExtractor:
@@ -368,7 +404,7 @@ class AssetsExtractor:
         :return:
         """
         with open(self.assets_file, 'w', encoding='utf-8', newline='\n') as f:
-            f.write(self._result)
+            f.write('\n'.join(line.rstrip() for line in self._result.splitlines()) + '\n')
 
     def extract(self) -> str:
         """
@@ -384,7 +420,9 @@ class AssetsExtractor:
             if self.is_list_file(data):
                 result += ListExtractor(file, data).result
                 continue
-            if self.is_image_file(data):
+            if isinstance(data, list) and 'roiBadge' in data[0] and 'roiRange' in data[0]:
+                result += FrameExtractor(file, data).result
+            elif self.is_image_file(data):
                 result += ImageExtractor(file, data).result
             elif self.is_click_file(data):
                 result += ClickExtractor(file, data).result

@@ -10,7 +10,7 @@ import re
 import inflection
 
 from pathlib import Path
-from pydantic import BaseModel, ValidationError, Field
+from pydantic import BaseModel, ValidationError, Field, model_validator
 
 from module.config.utils import *
 from module.logger import logger
@@ -66,6 +66,7 @@ from tasks.DyeTrials.config import DyeTrials
 # ----------------------------------------------------------------------------------------------------------------------
 
 # 肝帝专属---------------------------------------------------------------------------------------------------------------
+from tasks.MetaDemonTicket.config import MetaDemonTicket, split_legacy_meta_demon
 from tasks.BondlingFairyland.config import BondlingFairyland
 from tasks.EvoZone.config import EvoZone
 from tasks.GoryouRealm.config import GoryouRealm
@@ -87,6 +88,12 @@ from tasks.Chess.config import Chess
 # ----------------------------------------------------------------------------------------------------------------------
 
 class ConfigModel(ConfigBase):
+    @model_validator(mode='before')
+    @classmethod
+    def migrate_meta_demon_tickets(cls, data):
+        # 旧版刷票配置在读取时拆分，已有独立刷票配置始终优先。
+        return split_legacy_meta_demon(data) if isinstance(data, dict) else data
+
     config_name: str = "oas"
     running_task: str = ''
     script: Script = Field(default_factory=Script)
@@ -134,6 +141,7 @@ class ConfigModel(ConfigBase):
     gugu_art_studio: GuguArtStudio = Field(default_factory=GuguArtStudio)
 
     # 这些是肝帝专属
+    meta_demon_ticket: MetaDemonTicket = Field(default_factory=MetaDemonTicket)
     bondling_fairyland: BondlingFairyland = Field(default_factory=BondlingFairyland)
     evo_zone: EvoZone = Field(default_factory=EvoZone)
     goryou_realm: GoryouRealm = Field(default_factory=GoryouRealm)
@@ -343,12 +351,21 @@ class ConfigModel(ConfigBase):
                 item["title"] = value["title"] if "title" in value else inflection.underscore(key)
                 if "description" in value:
                     item["description"] = value["description"]
+                for option in ('ui_exclusive_groups', 'ui_hidden'):
+                    if option in value:
+                        item[option] = value[option]
                 item["default"] = value["default"]
                 item["value"] = jsons[key] if key in jsons else value["default"]
                 item["type"] = value["type"] if "type" in value else "enum"
                 if '$ref' in value:  # list
                     enum_key = re.search(r"/([^/]+)$", value['$ref']).group(1)
                     item["enumEnum"] = definitions[enum_key]["enum"]
+                elif value.get('type') == 'array' and '$ref' in value.get('items', {}):
+                    enum_key = re.search(r"/([^/]+)$", value['items']['$ref']).group(1)
+                    enum_values = definitions.get(enum_key, {}).get('enum')
+                    if enum_values:
+                        item['type'] = 'multi_enum'
+                        item['enumEnum'] = enum_values
                 # if 'allOf' in value:
                 #     enum_key = re.search(r"/([^/]+)$", value['allOf'][0]['$ref']).group(1)
                 #     item["enumEnum"] = definitions[enum_key]["enum"]
@@ -369,8 +386,17 @@ class ConfigModel(ConfigBase):
                         groups_value[key] = groups[group_name]
             result[key] = merge_value(groups_value[key], value, schema["$defs"])
 
+        layout = getattr(task, 'settings_layout', None)
+        if layout and 'settings_layout_config' in result:
+            for item in result['settings_layout_config']:
+                if item['name'] == 'merged_settings_enable':
+                    item['ui_layout'] = {'version': 1, 'sections': layout}
+
         if isinstance(task, Chess):
             result = task.oasx_args(result)
+        if isinstance(task, (MetaDemon, MetaDemonTicket)):
+            from module.config.settings_presentation import present_settings
+            result = present_settings(task, result)
         return result
 
     def script_set_arg(self, task: str, group: str, argument: str, value) -> bool:
@@ -431,6 +457,9 @@ class ConfigModel(ConfigBase):
 
         # 设置参数
         try:
+            if isinstance(task_object, (MetaDemon, MetaDemonTicket)):
+                candidate = group_object.model_validate({**group_object.model_dump(), argument: value})
+                value = getattr(candidate, argument)
             setattr(group_object, argument, value)
             logger.info(f'Set arg {self.config_name}.{task}.{group}.{argument}.{value}')
             self.save()  # 我是没有想到什么方法可以使得属性改变自动保存的

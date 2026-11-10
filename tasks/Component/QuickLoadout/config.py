@@ -47,3 +47,9 @@ class NamedQuickLoadoutConfig(QuickLoadoutConfig):
         default='ALL:(1,1);',
         description='quick_loadout_custom_preset_help',
     )
+
+
+class FrameQuickLoadoutConfig(QuickLoadoutConfig):
+    """frame 定位的上阵面板只按完整名称选取预设。"""
+
+    mode: QuickLoadoutMode = Field(default=QuickLoadoutMode.OCR)

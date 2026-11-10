@@ -4,6 +4,9 @@ import time
 from datetime import datetime, timedelta
 
 from module.logger import logger
+from module.base.timer import Timer
+from module.exception import GameStuckError
+from tasks.Exploration.config import ExplorationDifficulty
 from tasks.Exploration.base import BaseExploration
 from tasks.Exploration.config import AutoRotate, UserStatus, ExplorationLevel
 import tasks.Exploration.page as pages
@@ -73,6 +76,10 @@ class ScriptTask(BaseExploration):
                 break
 
     def run_on_exp_main(self):
+        # 请求退出后继续等待退出弹窗，不因延迟的一帧重新攻击怪物。
+        if self.need_exit:
+            self.quit_exp_main()
+            return
         if self.pre_page and self.pre_page != pages.page_exp_main:
             # 防止因延迟过大, 一直在主界面和奖励页面切换导致too many click
             self.device.click_record_clear()
@@ -102,8 +109,10 @@ class ScriptTask(BaseExploration):
                 if self.check_and_invite(self._config.invite_config.default_invite):
                     return
                 if datetime.now() - self.wait_start_time >= timedelta(seconds=10) or self.current_count == 0:
+                    self.ensure_difficulty(ExplorationDifficulty.HARD)
                     self.enter_team()
             case UserStatus.ALONE:
+                self.ensure_difficulty(self.solo_difficulty)
                 self.goto_page(pages.page_exp_main)
             case UserStatus.MEMBER:
                 self.check_then_accept()
@@ -121,7 +130,7 @@ class ScriptTask(BaseExploration):
                     self.goto_page(pages.page_exp_entrance)
             case UserStatus.ALONE:
                 self.collect_treasure_box()
-                self.goto_page(pages.page_exp_main)
+                self.goto_page(pages.page_exp_entrance)
             case UserStatus.MEMBER:
                 self.collect_treasure_box()
                 self.check_then_accept()
@@ -155,6 +164,29 @@ class ScriptTask(BaseExploration):
             return
         self.appear_then_click(self.I_E_EXIT_CONFIRM, interval=0.8)
         self.wait_start_time = datetime.now()  # 队友等待时间重置
+
+    def ensure_difficulty(self, difficulty: ExplorationDifficulty) -> None:
+        hard = difficulty == ExplorationDifficulty.HARD
+        selector = self.C_SELECT_HARD if hard else self.C_SELECT_NORMAL
+        timeout = Timer(8).start()
+        matched = False
+        while not timeout.reached():
+            self.screenshot()
+            if not self.appear(self.I_E_EXPLORATION_CLICK):
+                matched = False
+                continue
+            if self.appear(self.I_EXP_CREATE_TEAM) == hard:
+                if matched:
+                    return
+                matched = True
+                continue
+            matched = False
+            self.click(selector, interval=1)
+        raise GameStuckError(f'未确认探索难度：{difficulty.value}')
+
+    @property
+    def solo_difficulty(self) -> ExplorationDifficulty | None:
+        return self._config.exploration_config.difficulty
 
 
 if __name__ == "__main__":

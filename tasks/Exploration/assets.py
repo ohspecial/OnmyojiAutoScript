@@ -152,3 +152,6 @@ class ExplorationAssets:
 	S_SWIPE_SHIKI_TO_LEFT_ONE = RuleSwipe(roi_front=(977,582,21,21), roi_back=(889,584,21,22), mode="default", name="swipe_shiki_to_left_one")
 
 
+
+	C_SELECT_NORMAL = RuleClick(roi_front=(62,228,68,34), roi_back=(62,228,68,34), name="select_normal")
+	C_SELECT_HARD = RuleClick(roi_front=(69,315,68,34), roi_back=(69,315,68,34), name="select_hard")

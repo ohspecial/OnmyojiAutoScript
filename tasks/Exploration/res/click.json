@@ -10,5 +10,17 @@
     "roiFront": "545,222,506,100",
     "roiBack": "545,222,506,100",
     "description": "选中候补出战"
+  },
+  {
+    "itemName": "select_normal",
+    "roiFront": "62,228,68,34",
+    "roiBack": "62,228,68,34",
+    "description": "探索难度选择"
+  },
+  {
+    "itemName": "select_hard",
+    "roiFront": "69,315,68,34",
+    "roiBack": "69,315,68,34",
+    "description": "探索难度选择"
   }
 ]
