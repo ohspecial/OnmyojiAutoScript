@@ -387,7 +387,8 @@ class MetaDemonSettingsChecks(unittest.TestCase):
     def _summon_owner(self, frames, star=BossType.TWO_STARS):
         from copy import deepcopy
         owner = object.__new__(BossBattle)
-        owner.conf = MetaDemon(meta_demon_config={'fire_sequence': '2 1'})
+        owner.conf = MetaDemon()
+        owner._current_fatigue = 0
         owner.State = SimpleNamespace(done=False)
         owner.cur_boss_type = None
         owner.current_count = 7
@@ -438,11 +439,11 @@ class MetaDemonSettingsChecks(unittest.TestCase):
     def test_summon_sequence_override_only_uses_six_without_changing_config(self):
         owner, state, clicks = self._summon_owner([
             {'panel': True, 'selected': True}, {'fire': True}], star=BossType.SIX_STARS)
-        original = owner.conf.meta_demon_config.fire_sequence
+        original = owner.conf.meta_demon_config.model_dump()
         with patch('tasks.MetaDemon.boss_battle.time.monotonic', side_effect=lambda: state['time']):
             self.assertTrue(owner.check_and_switch_ticket(sequence=(BossType.SIX_STARS,)))
         self.assertEqual(owner.cur_boss_type, BossType.SIX_STARS)
-        self.assertEqual(owner.conf.meta_demon_config.fire_sequence, original)
+        self.assertEqual(owner.conf.meta_demon_config.model_dump(), original)
 
     def test_summon_recovers_closed_panel_and_confirms_two_star(self):
         owner, state, clicks = self._summon_owner([

@@ -15,7 +15,8 @@ from tasks.MetaDemon.config import BossType, MetaDemon
 class TicketSelectionChecks(unittest.TestCase):
     def test_missing_one_star_selects_two_after_transient_miss(self):
         task = object.__new__(BossBattle)
-        task.conf = MetaDemon(meta_demon_config={'fire_sequence': '1 2 3 4 5'})
+        task.conf = MetaDemon()
+        task._current_fatigue = 0
         task.State = SimpleNamespace(done=False)
         task.cur_boss_type = None
         task.current_count = 0
@@ -45,6 +46,7 @@ class TicketSelectionChecks(unittest.TestCase):
     def test_unrecognized_panel_does_not_end_task(self):
         task = object.__new__(BossBattle)
         task.conf = MetaDemon()
+        task._current_fatigue = 0
         task.State = SimpleNamespace(done=False)
         task.screenshot = Mock()
         task.appear = lambda rule: rule is task.I_MD_GET_BOSS

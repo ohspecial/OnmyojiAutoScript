@@ -62,7 +62,7 @@ def test_existing_independent_ticket_settings_survive_legacy_migration():
 
 def test_transient_miss_of_requested_ticket_does_not_end_with_another_star_visible(monkeypatch):
     task = object.__new__(BossBattle)
-    task.conf = MetaDemon(meta_demon_config={'fire_sequence': '1'})
+    task.conf = MetaDemon()
     task.State = SimpleNamespace(done=False)
     task.cur_boss_type = None
     task.current_count = 0
@@ -79,7 +79,7 @@ def test_transient_miss_of_requested_ticket_does_not_end_with_another_star_visib
         state['clock'] += 0.1
         return state['clock']
     monkeypatch.setattr('tasks.MetaDemon.boss_battle.time.monotonic', now)
-    assert task.check_and_switch_ticket()
+    assert task.check_and_switch_ticket(sequence=(BossType.ONE_STAR,))
     assert task.screenshot.call_count > 1
     assert task.cur_boss_type == BossType.ONE_STAR
     assert not task.State.done

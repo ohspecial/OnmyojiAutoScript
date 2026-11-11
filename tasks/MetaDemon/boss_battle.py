@@ -61,6 +61,7 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         self.cur_boss_type = None
         self.total_count = 0
         self._current_boss_attempts = 0
+        self._current_fatigue = None
         self.conf = self.config.meta_demon
         self.limit_time = self.conf.meta_demon_config.limit_time_v
         self.limit_count = self.conf.meta_demon_config.limit_count
@@ -270,6 +271,12 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
     def check_fatigue(self):
         logger.hr('Check fatigue')
         current, remain, total = self.O_MD_FATIGUE.ocr_digit_counter(self.device.image)
+        # OCR 失败会返回 0/0，不能据此当作低疲劳选票或沿用上次的读数。
+        if total <= 0 or current < 0:
+            self._current_fatigue = None
+            logger.warning('未识别到有效疲劳值，等待下一帧重新检查')
+            return False
+        self._current_fatigue = current
         # 不喝茶且当前疲劳度已满
         if not self.conf.meta_demon_config.auto_tea and (current > total or remain < 0):
             self.set_next_run('MetaDemon', target=datetime.now() + self.conf.scheduler.wait_interval)
@@ -320,7 +327,18 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
                 # The summon button may appear before the ticket cards settle.
                 if time.monotonic() < settle_until:
                     continue
-                available = [star for star in (self.conf.meta_demon_config.fire_sequence_v if sequence is None else sequence)
+                if sequence is None:
+                    # 召唤弹窗可能遮住疲劳数字，使用打开弹窗前的本轮读数。
+                    fatigue = getattr(self, '_current_fatigue', None)
+                    if fatigue is None:
+                        logger.warning('缺少本轮疲劳值，暂不选择鬼王门票')
+                        return False
+                    priority = self.conf.meta_demon_config.attack_sequence(fatigue)
+                    logger.info(f'疲劳值 {fatigue}，鬼王攻打优先级 {[int(star) for star in priority]}')
+                else:
+                    # 上供模式明确要求六星时，保持调用方指定的星级。
+                    priority = sequence
+                available = [star for star in priority
                              if star in tickets and self.ticket_matches_star(tickets[star], star)]
                 if not available:
                     # A missed template is not evidence that the tickets ran out.

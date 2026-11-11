@@ -44,7 +44,11 @@ class MetaDemonConfig(ConfigBase):
     limit_time: Time = Field(default=Time(minute=45), description='limit_time_help')
     limit_count: int = Field(default=50, description='limit_count_help')
     auto_tea: bool = Field(default=False, description='疲劳度满时是否自动喝茶, 关闭则自动根据调度器等待间隔时间安排下一次调度')
-    fire_sequence: str = Field(default='1 2 3 4', description='攻击顺序:从左到右,空格分隔(1:一星鬼王,2:二星鬼王...)\n例:3 2(先攻击三星鬼王然后二星鬼王)')
+    dynamic_star_level: bool = Field(
+        default=True, title='动态调节鬼王星级',
+        description='开启后，疲劳值低于50时按1→2→3→4→5→6星攻打；达到50后按5→6→1→2→3→4星攻打。'
+                    '缺少门票时按顺序选择下一星级。关闭后始终从低星到高星攻打；已召唤的鬼王继续打完。',
+    )
     high_star_powerful_enable: bool = Field(
         default=False, title='启用高星强力追击', description='仅对五星、六星鬼王生效。',
     )
@@ -67,14 +71,10 @@ class MetaDemonConfig(ConfigBase):
             return timedelta(hours=self.limit_time.hour, minutes=self.limit_time.minute, seconds=self.limit_time.second)
         return self.limit_time
 
-    @property
-    def fire_sequence_v(self) -> list[BossType]:
-        sequence_text = self.fire_sequence.strip()
-        if sequence_text == '':
-            return []
-        fire_num_list = sequence_text.split(' ')
-        fire_boss_type_list = [BossType(int(num_text)) for num_text in fire_num_list]
-        return fire_boss_type_list
+    def attack_sequence(self, current_fatigue: int) -> list[BossType]:
+        """每次召唤前按当前疲劳值重新确定星级优先级。"""
+        stars = (5, 6, 1, 2, 3, 4) if self.dynamic_star_level and current_fatigue >= 50 else range(1, 7)
+        return [BossType(star) for star in stars]
 
     @property
     def synthesis_list_v(self) -> list[BossType]:

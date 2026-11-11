@@ -1046,7 +1046,7 @@
       "limit_time": "00:45:00",
       "limit_count": 50,
       "auto_tea": false,
-      "fire_sequence": "1 2 3 4",
+      "dynamic_star_level": true,
       "high_star_powerful_enable": false,
       "powerful_count": 1,
       "synthesis_list": "1"
