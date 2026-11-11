@@ -1,10 +1,12 @@
 from tasks.DailyTrifles.assets import DailyTriflesAssets
 from tasks.GameUi.default_pages import page_friends, page_guild
-from tasks.GameUi.page import Page, page_mall, page_mall_recommend
+from tasks.GameUi.page import Page, any_of, page_mall, page_mall_recommend
 from tasks.GlobalGame.assets import GlobalGameAssets
 
 # 商店礼包屋页面
-page_store_gift_room = Page(DailyTriflesAssets.I_GIFT_RECOMMEND)
+# 回归号的额外侧栏标签可能把“日常”挤出屏幕，仍可用底部选中态识别礼包屋。
+page_store_gift_room = Page(any_of(DailyTriflesAssets.I_GIFT_RECOMMEND,
+                                  DailyTriflesAssets.I_CHECK_GIFT_ROOM))
 page_store_gift_room.connect(page_mall, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_store_gift_room->page_mall")
 page_mall.connect(page_store_gift_room, DailyTriflesAssets.I_ROOM_GIFT, key="page_mall->page_store_gift_room")
 # 推荐页底部已有礼包屋入口，签到无需先返回商城主页。

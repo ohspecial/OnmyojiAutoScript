@@ -19,7 +19,7 @@ from tasks.DailyTrifles.assets import DailyTriflesAssets
 from tasks.Component.Summon.summon import Summon
 
 from module.logger import logger
-from module.exception import TaskEnd
+from module.exception import GamePageUnknownError, TaskEnd
 from module.base.timer import Timer
 from tasks.DailyTrifles.config import SummonType
 import re
@@ -404,9 +404,8 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
             logger.info('Today is done, skip')
             return
         self.goto_page(page_store_gift_room)
+        self.enter_store_daily()
         self.config.daily_trifles.done_record.store_sign_dt = datetime.now()
-        self.screenshot()
-        self.appear_then_click(self.I_GIFT_RECOMMEND, interval=1)
         logger.info('Enter store sign')
         sleep(1)  # 等个动画
         self.screenshot()
@@ -416,6 +415,24 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
 
         if self.ui_get_reward(self.I_GIFT_SIGN, click_interval=2.5):
             logger.info('Get reward of gift sign')
+
+    def enter_store_daily(self):
+        """日常标签不可见时，向上拖动右侧栏以查找下方的标签。"""
+        max_swipes = 5
+        for swipe_count in range(max_swipes + 1):
+            self.screenshot()
+            if self.appear_then_click(self.I_GIFT_RECOMMEND):
+                return
+            # 只在确认位于礼包屋时滑动，避免在其他商城页面误操作。
+            if not self.appear(self.I_CHECK_GIFT_ROOM):
+                raise GamePageUnknownError('Gift room unavailable while searching for daily tab')
+            if swipe_count == max_swipes:
+                break
+            logger.info(f'Gift daily tab not visible, scroll sidebar down ({swipe_count + 1}/{max_swipes})')
+            self.device.swipe((1210, 550), (1210, 230), duration=0.5,
+                              control_name='STORE_GIFT_SIDEBAR')
+            sleep(0.6)  # 等侧栏滚动停止后，重新识别日常标签及其位置。
+        raise GamePageUnknownError('Gift daily tab not found after scrolling sidebar')
 
     def run_buy_sushi(self):
         logger.hr('store sushi', 2)
