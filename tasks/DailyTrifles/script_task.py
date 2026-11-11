@@ -391,10 +391,10 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
         if self.check_store_all_done():
             logger.info('Store all done, skip')
             return
-        self.goto_page(page_mall, confirm_wait=3)
         if self.config.daily_trifles.trifles_config.store_sign:
             self.run_store_sign()
         if self.config.daily_trifles.trifles_config.buy_sushi_count > 0:
+            self.goto_page(page_mall, confirm_wait=3)
             self.run_buy_sushi()
         self.goto_page(page_main)
 
@@ -403,8 +403,8 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
         if self.config.daily_trifles.today_is_done('store_sign'):
             logger.info('Today is done, skip')
             return
-        self.config.daily_trifles.done_record.store_sign_dt = datetime.now()
         self.goto_page(page_store_gift_room)
+        self.config.daily_trifles.done_record.store_sign_dt = datetime.now()
         self.screenshot()
         self.appear_then_click(self.I_GIFT_RECOMMEND, interval=1)
         logger.info('Enter store sign')

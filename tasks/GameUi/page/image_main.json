@@ -171,6 +171,15 @@
     "description": "商店页面标志"
   },
   {
+    "itemName": "check_mall_lantern",
+    "imageName": "page_check_mall_lantern.png",
+    "roiFront": "525,284,54,72",
+    "roiBack": "505,264,94,112",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "商店主页中央灯笼，避开左下角色对白"
+  },
+  {
     "itemName": "check_mall_recommend",
     "imageName": "page_check_mall_recommend.png",
     "roiFront": "930,12,42,37",
