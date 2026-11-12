@@ -1,5 +1,6 @@
 """使用模拟画面推进关键流程，不连接模拟器或发送实际输入。"""
 
+from copy import copy
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import Mock, call
@@ -7,13 +8,14 @@ from unittest.mock import Mock, call
 import numpy as np
 import pytest
 
-from module.exception import TaskEnd
+from module.exception import GameStuckError, TaskEnd
 from tasks.Chess.assets import ChessAssets
 from tasks.Chess.config import Chess, ChessConfig
 from tasks.Chess.runtime.events import ChessEventMonitor
 from tasks.Chess.runtime.round_state import ChessRoundStateMixin
 from tasks.Chess.runtime.state import ChessGameState
 from tasks.Chess.script_task import ScriptTask
+from tasks.GameUi.assets import GameUiAssets
 from tasks.GlobalGame.assets import GlobalGameAssets
 
 
@@ -243,6 +245,74 @@ def test_chess_exit_confirms_then_completes_requested_result_flow(monkeypatch, r
         task.return_to_chess_lobby.assert_called_once_with()
     else:
         task.return_to_chess_lobby.assert_not_called()
+
+
+@pytest.mark.parametrize('marker', [GameUiAssets.I_CHESS_EXIT_CONFIRM, GameUiAssets.I_CHESS_EXIT_CANCEL])
+@pytest.mark.parametrize('offset', [(-5, 7), (-16, -16), (16, 16)])
+def test_chess_exit_buttons_allow_dialog_position_offsets(marker, offset):
+    rule = copy(marker)
+    rule.roi_front = list(marker.roi_front)
+    image = np.zeros((720, 1280, 3), dtype=np.uint8)
+    x, y, w, h = rule.roi_front
+    x += offset[0]
+    y += offset[1]
+    image[y:y+h, x:x+w] = rule.image
+
+    assert rule.template_match(image)
+    assert rule.roi_front[:2] == [x, y]
+
+
+def test_chess_exit_does_not_click_background_when_confirmation_is_rate_limited(monkeypatch):
+    task = make_task(monkeypatch)
+    set_frames(task, ['confirm', 'result'])
+    task.select_chess_sixrealms_if_visible = Mock(return_value=False)
+    task.chess_result_page_visible = Mock(side_effect=lambda: task.offline_frame == 'result')
+    task.appear = lambda marker: task.offline_frame == 'confirm' and marker in (
+        task.I_CHESS_EXIT_CONFIRM, task.I_CHESS_EXIT,
+    )
+    task.appear_then_click = Mock(return_value=False)
+
+    assert task.Chess_Exit(return_to_lobby=False) is True
+    task.appear_then_click.assert_called_once_with(task.I_CHESS_EXIT_CONFIRM, interval=.8)
+
+
+@pytest.mark.parametrize('stalled_marker', ['entry', 'confirm', 'cancel'])
+def test_chess_exit_stalled_dialog_has_bounded_clicks_and_reports_failure(monkeypatch, stalled_marker):
+    task = make_task(monkeypatch)
+    set_frames(task, ['battle'] + ['stalled'] * 200)
+    task.select_chess_sixrealms_if_visible = Mock(return_value=False)
+    task.chess_result_page_visible = Mock(return_value=False)
+    markers = {
+        'entry': task.I_CHESS_EXIT,
+        'confirm': task.I_CHESS_EXIT_CONFIRM,
+        'cancel': task.I_CHESS_EXIT_CANCEL,
+    }
+    task.appear = lambda marker: marker is task.I_CHESS_EXIT or (
+        task.offline_frame == 'stalled' and marker is markers[stalled_marker]
+    )
+    task.appear_then_click = Mock(side_effect=lambda marker, **kwargs: task.appear(marker))
+
+    with pytest.raises(GameStuckError, match='failed to exit within'):
+        task.Chess_Exit(return_to_lobby=False)
+
+    calls = task.appear_then_click.call_args_list
+    entry_clicks = sum(args.args[0] is task.I_CHESS_EXIT for args in calls)
+    confirm_clicks = sum(args.args[0] is task.I_CHESS_EXIT_CONFIRM for args in calls)
+    assert entry_clicks == (task.CHESS_EXIT_MAX_ATTEMPTS if stalled_marker == 'entry' else 1)
+    assert confirm_clicks == (task.CHESS_EXIT_MAX_ATTEMPTS if stalled_marker == 'confirm' else 0)
+    task.device.click_record_remove.assert_not_called()
+
+
+def test_chess_exit_still_accepts_result_after_confirmation_retry_limit(monkeypatch):
+    task = make_task(monkeypatch)
+    set_frames(task, ['confirm'] * (task.CHESS_EXIT_MAX_ATTEMPTS + 1) + ['result'])
+    task.select_chess_sixrealms_if_visible = Mock(return_value=False)
+    task.chess_result_page_visible = Mock(side_effect=lambda: task.offline_frame == 'result')
+    task.appear = lambda marker: marker is task.I_CHESS_EXIT_CONFIRM and task.offline_frame == 'confirm'
+    task.appear_then_click = Mock(side_effect=lambda marker, **kwargs: task.appear(marker))
+
+    assert task.Chess_Exit(return_to_lobby=False) is True
+    assert task.appear_then_click.call_count == task.CHESS_EXIT_MAX_ATTEMPTS
 
 
 def test_restart_from_rank_page_waits_for_button_to_disappear(monkeypatch):

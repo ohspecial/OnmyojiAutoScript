@@ -17,6 +17,7 @@ class ChessBattleNavigationMixin:
 
     CHESS_EXIT_TIMEOUT = 60.0
     CHESS_EXIT_SCREENSHOT_INTERVAL = 0.35
+    CHESS_EXIT_MAX_ATTEMPTS = 3
 
     def select_chess_sixrealms_if_visible(self) -> bool:
         """完成开局必选场地；选定同一项后最多点击两次，等待页面消失。"""
@@ -204,9 +205,12 @@ class ChessBattleNavigationMixin:
         raise GameStuckError('Global Chess: failed to return to lobby after result')
 
     def Chess_Exit(self, return_to_lobby: bool = True) -> bool:
-        """主动退出当前百鬼棋局，可选择停在结算流程。"""
+        """有限重试退出并等待结算；超时交给卡死恢复，避免重复进入后继续连点。"""
         logger.warning('Global Chess page handler: exit interrupted battle')
         deadline = time.monotonic() + self.CHESS_EXIT_TIMEOUT
+        exit_clicks = 0
+        confirm_clicks = 0
+        unrecognized_confirm_logged = False
         while time.monotonic() < deadline:
             self.device.stuck_record_clear()
             self.screenshot()
@@ -216,22 +220,40 @@ class ChessBattleNavigationMixin:
                 deadline = time.monotonic() + self.CHESS_EXIT_TIMEOUT
                 continue
 
-            # 本地保留棋局专用确认素材；先确认退出，再检查结算和退出入口。
-            if self.appear_then_click(self.I_CHESS_EXIT_CONFIRM, interval=0.8):
+            # 弹窗出现后只处理确认，不能因点击间隔未到而再次点击背景退出入口。
+            if self.appear(self.I_CHESS_EXIT_CONFIRM):
+                if (confirm_clicks < self.CHESS_EXIT_MAX_ATTEMPTS
+                        and self.appear_then_click(self.I_CHESS_EXIT_CONFIRM, interval=0.8)):
+                    confirm_clicks += 1
+                    if confirm_clicks == self.CHESS_EXIT_MAX_ATTEMPTS:
+                        logger.warning('Chess exit confirmation retry limit reached; wait for result')
                 time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
                 continue
             if self.chess_result_page_visible():
-                self.ui_click_until_disappear(self.I_CHESS_EXIT_CONFIRM, interval=0.8)
                 logger.debug('Chess_Exit: result page reached')
                 if return_to_lobby:
                     return self.return_to_chess_lobby()
                 return True
 
-            self.appear_then_click(self.I_CHESS_EXIT, interval=6)
+            # 取消按钮也能证明退出弹窗存在；确认漏识别时等待，不点被遮挡的入口。
+            if self.appear(self.I_CHESS_EXIT_CANCEL):
+                if not unrecognized_confirm_logged:
+                    logger.warning('Chess exit dialog visible but confirmation button not recognized')
+                    unrecognized_confirm_logged = True
+                time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
+                continue
+
+            if (exit_clicks < self.CHESS_EXIT_MAX_ATTEMPTS
+                    and self.appear_then_click(self.I_CHESS_EXIT, interval=6)):
+                exit_clicks += 1
+                if exit_clicks == self.CHESS_EXIT_MAX_ATTEMPTS:
+                    logger.warning('Chess exit entry retry limit reached; wait for dialog or result')
             time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
 
-        logger.warning('Chess_Exit timed out before result page appeared')
-        return False
+        raise GameStuckError(
+            f'Chess: failed to exit within {self.CHESS_EXIT_TIMEOUT:.0f}s; '
+            f'exit_clicks={exit_clicks}, confirm_clicks={confirm_clicks}'
+        )
 
 
 def handle_chess_battle_page(task) -> bool:
