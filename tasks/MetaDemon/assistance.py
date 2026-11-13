@@ -262,8 +262,8 @@ class GhostOffering:
 
     def share(self):
         t = self.task
-        if t.cur_boss_type != BossType.SIX_STARS:
-            logger.warning('仅允许分享本次已确认召唤的六星鬼王')
+        if t.cur_boss_type not in self.settings.offering_star.stars:
+            logger.warning('仅允许分享本次已确认召唤且满足上供星级要求的鬼王')
             return False
         portrait_sent = False
         select_recipients = True
@@ -338,9 +338,9 @@ class GhostOffering:
             return True
         if not self.settled and t.appear(t.I_MD_FIRE):
             self.empty_frames = 0
-            if t.cur_boss_type != BossType.SIX_STARS:
+            if t.cur_boss_type not in self.settings.offering_star.stars:
                 if not self.unknown_reported:
-                    logger.warning('已有鬼王星级未确认，不分享、不挑战；等待其消失后仅召唤六星')
+                    logger.warning(f'已有鬼王星级未确认或不满足上供要求，不分享、不挑战；等待其消失后仅召唤{self.settings.offering_star.value}')
                     self.unknown_reported = True
             elif self.shared_generation != t._boss_generation:
                 if not self.share():
@@ -369,7 +369,7 @@ class GhostOffering:
             if not self.within_limit():
                 return True
         self.empty_frames = 0
-        return t.check_and_switch_ticket(sequence=(BossType.SIX_STARS,)) or t.State.done
+        return t.check_and_switch_ticket(sequence=self.settings.offering_sequence) or t.State.done
 
 
 class GhostAssistant:

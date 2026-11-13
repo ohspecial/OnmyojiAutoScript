@@ -308,5 +308,7 @@
   "assistance_config": "鬼王协助",
   "settings_layout_config": "配置显示",
   "high_star_powerful_enable": "启用高星强力追击",
-  "powerful_count": "强力追击次数"
+  "powerful_count": "强力追击次数",
+  "offering_star": "上供鬼王星级",
+  "offering_order": "上供召唤顺序"
 }

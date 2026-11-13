@@ -1074,7 +1074,9 @@
       "cooperation_script": "",
       "role": "上供",
       "friend_names": "",
-      "poll_interval": 5
+      "poll_interval": 5,
+      "offering_star": "六星",
+      "offering_order": "顺序"
     },
     "low_star_battle_conf": {
       "lock_team_enable": false,
