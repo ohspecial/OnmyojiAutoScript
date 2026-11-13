@@ -1536,6 +1536,9 @@
     }
   },
   "rich_man": {
+    "itachi_coin_shop": {
+      "itachi_coin_buy_jade": false
+    },
     "scheduler": {
       "enable": false,
       "next_run": "2023-01-01 00:00:00",

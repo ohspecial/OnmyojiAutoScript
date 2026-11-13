@@ -1,4 +1,8 @@
 {
+  "RichMan": "每周购买",
+  "itachi_coin_shop": "鼬乐币购买",
+  "itachi_coin_buy_jade": "购买鼬乐礼盒（勾玉）",
+  "itachi_coin_buy_jade_help": "进入鼬乐园商店，依次购买自动前移的鼬乐礼盒，每次最多3个。余额或价格识别失败、余额不足、未出现购买框或购买结果未确认时停止。",
   "Chess": "百鬼棋局",
   "DraftDuel": "协同斗技",
   "draft_duel_config": "协同斗技配置",

@@ -87,6 +87,11 @@ class Bondlings(BaseModel):
     high_bondling_discs: int = Field(title='High Bondling Discs', default=0, description='high_bondling_discs_help')
     medium_bondling_discs: int = Field(title='Medium Bondling Discs', default=0, description='medium_bondling_discs_help')
 
+class ItachiCoinShop(BaseModel):
+    itachi_coin_buy_jade: bool = Field(
+        default=False, description='itachi_coin_buy_jade_help',
+    )
+
 class GuildStore(BaseModel):
     # 寮商店
     enable: bool = Field(title='Enable', default=False)
@@ -99,6 +104,7 @@ class GuildStore(BaseModel):
 
 class RichMan(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
+    itachi_coin_shop: ItachiCoinShop = Field(default_factory=ItachiCoinShop)
     special_room: SpecialRoom = Field(default_factory=SpecialRoom)
     honor_room: HonorRoom = Field(default_factory=HonorRoom)
     friendship_points: FriendshipPoints = Field(default_factory=FriendshipPoints)

@@ -431,3 +431,23 @@ class RichManAssets:
 	O_TT_NUMBER = RuleOcr(roi=(576,415,58,49), area=(576,415,58,49), mode="Digit", method="Default", keyword="", name="tt_number")
 
 
+
+	# Click Rule Assets
+	#
+	C_ITACHI_GIFT = RuleClick(roi_front=(731,250,153,55), roi_back=(731,250,153,55), name="itachi_gift")
+
+
+
+	# Image Rule Assets
+	# 底部商店图标动态定位，兼容新增手册入口前后的位置
+	I_ITACHI_SHOP_ENTRY = RuleImage(roi_front=(301,635,45,40), roi_back=(20,620,550,80), threshold=0.8, method="Template matching", file="./tasks/RichMan/itachi_shop/itachi_shop_itachi_shop_entry.png")
+	#
+	I_ITACHI_SHOP_CHECK = RuleImage(roi_front=(121,37,78,39), roi_back=(116,33,88,49), threshold=0.8, method="Template matching", file="./tasks/RichMan/itachi_shop/itachi_shop_itachi_shop_check.png")
+
+
+
+	# Ocr Rule Assets
+	#
+	O_ITACHI_COIN = RuleOcr(roi=(1081,21,134,38), area=(1081,21,134,38), mode="DigitCounter", method="Default", keyword="", name="itachi_coin")
+	#
+	O_ITACHI_BUY_COST = RuleOcr(roi=(634,530,70,41), area=(634,530,70,41), mode="Digit", method="Default", keyword="", name="itachi_buy_cost")
