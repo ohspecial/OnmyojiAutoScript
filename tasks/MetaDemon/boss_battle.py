@@ -225,18 +225,15 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         if not self.ticket_matches_star(target_boss_ticket, material_level, synthesis=True):
             logger.info(f'{target_boss_ticket} not recognized, skip synthesis')
             return
-        click_cnt, max_cnt = 0, random.randint(2, 3)
         verification_failures = 0
         while True:
             self.screenshot()
-            if click_cnt >= max_cnt:  # 兜底,多次点击开始合成都没有出现获得奖励则退出
-                break
             if self.appear(self.I_MD_SYNTHESIS_NEED_MONEY, interval=0.8):  # 出现花钱购买合成券
                 self.ui_click(self.I_MD_CLOSE_POPUP, self.I_MD_START_SYNTHESIS, interval=0.6)  # 关闭购买弹窗
                 break
-            if self.appear(self.I_UI_REWARD, interval=0.8):  # 出现获得奖励说明合成成功
-                self.click(ipages.random_click(), interval=0.6)
-                click_cnt = 0  # 清空点击标志
+            if self.appear(self.I_UI_REWARD):
+                if not self._wait_synthesis_result(reward_seen=True):
+                    break
                 continue
             if self.appear(self.I_MD_SYNTHESIS_EMPTY, interval=0.8):  # 有空位
                 empty_list = self.I_MD_SYNTHESIS_EMPTY.match_all_any(self.device.image, frame_id=self.device.image_frame_id)
@@ -264,9 +261,36 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
                     continue
                 verification_failures = 0
                 if self.appear_then_click(self.I_MD_START_SYNTHESIS, interval=2.5):  # 点击开始合成
-                    click_cnt += 1
+                    # 合成动画会暂时清空材料槽、遮住标题和星级，必须先确认结果再检查余量。
+                    if not self._wait_synthesis_result():
+                        break
                 continue
         logger.info(f'{target_boss_ticket} synthesis done')
+
+    def _wait_synthesis_result(self, *, reward_seen=False) -> bool:
+        """等待本次合成奖励关闭，并确认已稳定回到合成界面。"""
+        deadline = time.monotonic() + 10
+        ready_frames = 0
+        while time.monotonic() < deadline:
+            self.screenshot()
+            if self.appear(self.I_MD_SYNTHESIS_NEED_MONEY):
+                # 只关闭购买提示，不消耗勾玉补充材料。
+                self.ui_click(self.I_MD_CLOSE_POPUP, self.I_MD_START_SYNTHESIS, interval=0.6)
+                return False
+            if self.appear(self.I_UI_REWARD):
+                reward_seen = True
+                ready_frames = 0
+                self.click(ipages.random_click(), interval=0.6)
+            elif reward_seen and self.appear(self.I_MD_START_SYNTHESIS):
+                ready_frames += 1
+                if ready_frames >= 2:
+                    logger.info('合成奖励已确认并返回合成界面，继续处理剩余材料')
+                    return True
+            else:
+                ready_frames = 0
+            time.sleep(0.3)
+        logger.warning('10秒内未确认合成结果或界面恢复，停止本星级合成，避免重复提交')
+        return False
 
     def check_fatigue(self):
         logger.hr('Check fatigue')
