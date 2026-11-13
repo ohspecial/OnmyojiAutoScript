@@ -31,8 +31,8 @@
     "roiFront": "924,14,76,28",
     "roiBack": "924,14,76,28",
     "mode": "DigitCounter",
-    "method": "Default",
+    "method": "CF_HSV(000078,B464FF)",
     "keyword": "",
-    "description": "（点出困难28时候）探索右上角 突破卷的数量"
+    "description": "章节入口突破券数量：过滤彩色图标，避免零票被误识别为10票"
   }
 ]
