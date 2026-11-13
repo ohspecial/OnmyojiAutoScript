@@ -105,6 +105,20 @@ class ChessAssets:
 	I_STAGE_DEMON = RuleImage(roi_front=(708,0,31,29), roi_back=(702,0,44,34), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_stage_demon.png")
 	# 小怪阶段
 	I_STAGE_MONSTER = RuleImage(roi_front=(624,1,31,29), roi_back=(499,0,268,31), threshold=0.8, method="Template matching", file="./tasks/Chess/c/c_stage_monster.png")
+	#
+	I_REWARD_CHESS = RuleImage(roi_front=(485,227,310,44), roi_back=(480,222,320,54), threshold=0.8, method="Template matching", file="./tasks/Chess/c/c_reward_chess.png")
+	# 首次教程弹窗，须与另一标志同时匹配
+	I_TUTORIAL_PROMPT = RuleImage(roi_front=(549,296,184,39), roi_back=(541,288,200,55), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_tutorial_prompt.png")
+	# 首次教程弹窗，须与另一标志同时匹配
+	I_TUTORIAL_SKIP = RuleImage(roi_front=(483,421,79,38), roi_back=(475,413,95,54), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_tutorial_skip.png")
+	# 棋局结算点击空白处提示
+	I_RESULT_CONTINUE_HINT = RuleImage(roi_front=(548,675,187,23), roi_back=(535,664,215,42), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_result_continue_hint.png")
+	# 棋局段位进度
+	I_RANK_PROGRESS = RuleImage(roi_front=(370,455,77,35), roi_back=(360,445,100,55), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_rank_progress.png")
+	# 棋局段位进度条左端
+	I_RANK_TRACK_LEFT = RuleImage(roi_front=(126,423,20,25), roi_back=(120,418,35,40), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_rank_track_left.png")
+	# 棋局段位进度条右端
+	I_RANK_TRACK_RIGHT = RuleImage(roi_front=(640,423,20,25), roi_back=(634,418,35,40), threshold=0.9, method="Template matching", file="./tasks/Chess/c/c_rank_track_right.png")
 
 
 	# Ocr Rule Assets

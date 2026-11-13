@@ -308,5 +308,71 @@
     "threshold": 0.8,
     "profile": "High",
     "description": "小怪阶段"
+  },
+  {
+    "itemName": "reward_chess",
+    "imageName": "c_reward_chess.png",
+    "profile": "High",
+    "roiFront": "485,227,310,44",
+    "roiBack": "480,222,320,54",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": ""
+  },
+  {
+    "itemName": "tutorial_prompt",
+    "imageName": "c_tutorial_prompt.png",
+    "roiFront": "549,296,184,39",
+    "roiBack": "541,288,200,55",
+    "method": "Template matching",
+    "threshold": 0.9,
+    "profile": "High",
+    "description": "首次教程弹窗，须与另一标志同时匹配"
+  },
+  {
+    "itemName": "tutorial_skip",
+    "imageName": "c_tutorial_skip.png",
+    "roiFront": "483,421,79,38",
+    "roiBack": "475,413,95,54",
+    "method": "Template matching",
+    "threshold": 0.9,
+    "profile": "High",
+    "description": "首次教程弹窗，须与另一标志同时匹配"
+  },
+  {
+    "itemName": "result_continue_hint",
+    "imageName": "c_result_continue_hint.png",
+    "roiFront": "548,675,187,23",
+    "roiBack": "535,664,215,42",
+    "method": "Template matching",
+    "threshold": 0.9,
+    "description": "棋局结算点击空白处提示"
+  },
+  {
+    "itemName": "rank_progress",
+    "imageName": "c_rank_progress.png",
+    "roiFront": "370,455,77,35",
+    "roiBack": "360,445,100,55",
+    "method": "Template matching",
+    "threshold": 0.9,
+    "description": "棋局段位进度"
+  },
+  {
+    "itemName": "rank_track_left",
+    "imageName": "c_rank_track_left.png",
+    "roiFront": "126,423,20,25",
+    "roiBack": "120,418,35,40",
+    "method": "Template matching",
+    "threshold": 0.9,
+    "description": "棋局段位进度条左端"
+  },
+  {
+    "itemName": "rank_track_right",
+    "imageName": "c_rank_track_right.png",
+    "roiFront": "640,423,20,25",
+    "roiBack": "634,418,35,40",
+    "method": "Template matching",
+    "threshold": 0.9,
+    "description": "棋局段位进度条右端"
   }
 ]

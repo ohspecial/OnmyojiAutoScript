@@ -5,10 +5,11 @@ from __future__ import annotations
 import time
 import random
 
+from module.atom.click import RuleClick
 from module.exception import GameStuckError
 from module.logger import logger
-from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from tasks.Chess.assets import ChessAssets
+from tasks.GameUi.assets import GameUiAssets
 from tasks.GlobalGame.assets import GlobalGameAssets
 
 
@@ -18,6 +19,15 @@ class ChessBattleNavigationMixin:
     CHESS_EXIT_TIMEOUT = 60.0
     CHESS_EXIT_SCREENSHOT_INTERVAL = 0.35
     CHESS_EXIT_MAX_ATTEMPTS = 3
+    CHESS_LOBBY_CONFIRM_FRAMES = 2
+    I_CHESS_SHARE_PANEL_BAR = GameUiAssets.I_CHESS_SHARE_PANEL_BAR
+    I_CHESS_SHARE_PANEL_CLOSE = GameUiAssets.I_CHESS_SHARE_PANEL_CLOSE
+    I_CHESS_RESULT_CONTINUE_HINT = ChessAssets.I_RESULT_CONTINUE_HINT
+    # Keep result clicks clear of the overlapping share/start buttons.
+    CHESS_RESULT_CONTINUE = RuleClick(
+        roi_front=(24, 150, 40, 280), roi_back=(24, 150, 40, 280),
+        name='CHESS_RESULT_CONTINUE',
+    )
 
     def select_chess_sixrealms_if_visible(self) -> bool:
         """完成开局必选场地；选定同一项后最多点击两次，等待页面消失。"""
@@ -54,50 +64,100 @@ class ChessBattleNavigationMixin:
         self.click(ChessAssets.I_BACK_RED, interval=0.8)
         return True
 
+    def chess_share_panel_visible(self) -> bool:
+        """棋局分享标志、平台栏和右上关闭按钮同时出现才关闭面板。"""
+        return (
+            self.appear(ChessAssets.I_SHARE)
+            and self.appear(self.I_CHESS_SHARE_PANEL_BAR)
+            and self.appear(self.I_CHESS_SHARE_PANEL_CLOSE)
+        )
+
+    def chess_lobby_visible(self) -> bool:
+        """开战按钮匹配前先排除结算；两个旧标志都来自同一按钮。"""
+        return (
+            not self.chess_result_page_visible()
+            and self.appear(self.I_CHECK_CHESS)
+            and self.appear(ChessAssets.I_CHESS_START)
+        )
+
+    def _click_chess_result_continue(self) -> None:
+        self.click(self.CHESS_RESULT_CONTINUE, interval=1.5)
+
+    def chess_result_continue_visible(self) -> bool:
+        """The result-specific hint and share icon jointly identify the rank screen."""
+        return (self.appear(self.I_CHESS_RESULT_CONTINUE_HINT)
+                and self.appear(ChessAssets.I_SHARE))
+
+    def _chess_reward_visible(self) -> bool:
+        return (self.appear(ChessAssets.I_REWARD_CHESS)
+                or self.appear(GlobalGameAssets.I_UI_REWARD))
+
+    def _chess_rank_progress_visible(self) -> bool:
+        return (self.appear(ChessAssets.I_RANK_PROGRESS)
+                or (self.appear(ChessAssets.I_RANK_TRACK_LEFT)
+                    and self.appear(ChessAssets.I_RANK_TRACK_RIGHT)))
+
     def _advance_chess_result_stage(self) -> bool:
         """优先处理奖励和分享阶段，避免背景被识别成大厅。"""
-        if self.appear(GlobalGameAssets.I_UI_REWARD):
-            self._chess_share_advancing = False
-            from tasks.GameUi.default_pages import random_click
-            self.click(random_click(), interval=1.5)
+        if self._chess_rank_progress_visible():
+            self._click_chess_result_continue()
             return True
+        if self.chess_share_panel_visible():
+            self._chess_share_advancing = True
+            logger.info('Chess share panel detected; close the panel without sharing')
+            self.click(self.I_CHESS_SHARE_PANEL_CLOSE, interval=1.5)
+            return True
+        if self.chess_result_continue_visible():
+            self._chess_share_advancing = True
+            self._click_chess_result_continue()
+            return True
+        if self._chess_reward_visible():
+            self._chess_share_advancing = False
+            self._click_chess_result_continue()
+            return True
+        # 过渡帧可能仍保留“分享”图标；明确的排名/返回按钮比该图标
+        # 更能确定下一步，交回调用方处理，保留“再来一局”原流程。
+        if any(self.appear(marker) for marker in (
+            ChessAssets.I_RESTART_AGAIN,
+            self.I_CHECK_CHESS_RANK,
+            self.I_CHESS_RANK_GOTO_LOBBY,
+            self.I_CHESS_EXIT_TO_LOBBY,
+            self.I_CHESS_EXIT_TO_LOBBY_2,
+        )):
+            self._chess_share_advancing = False
+            return False
         if self.appear(ChessAssets.I_SHARE):
             self._chess_share_advancing = True
         elif getattr(self, '_chess_share_advancing', False):
-            if any(self.appear(marker) for marker in (
-                ChessAssets.I_RESTART_AGAIN,
-                self.I_CHECK_CHESS_RANK,
-                self.I_CHESS_RANK_GOTO_LOBBY,
-                self.I_CHESS_EXIT_TO_LOBBY,
-                self.I_CHESS_EXIT_TO_LOBBY_2,
-                self.I_CHECK_CHESS,
-            )):
+            if self.chess_lobby_visible():
                 self._chess_share_advancing = False
         if getattr(self, '_chess_share_advancing', False):
-            if self._close_unknown_chess_result_page():
-                return True
             # 分享标志消失后仍推进未知过渡画面。保持规则名称和点击
             # 记录不变，让设备层的过多点击检查正常生效。
-            from tasks.GameUi.default_pages import random_click
-            self.click(random_click(), interval=1.5)
+            if self._close_unknown_chess_result_page():
+                return True
+            self._click_chess_result_continue()
             return True
         return False
 
     def chess_result_page_visible(self) -> bool:
         """检测百鬼棋局任一结算、分享或排名页面。"""
         return (
-            self.appear(self.I_CHESS_EXIT_TO_LOBBY)
+            self._chess_rank_progress_visible()
+            or self.chess_share_panel_visible()
+            or self.appear(self.I_CHESS_EXIT_TO_LOBBY)
             or self.appear(self.I_CHESS_EXIT_TO_LOBBY_2)
-            or self.appear(GlobalGameAssets.I_UI_REWARD)
+            or self._chess_reward_visible()
             or self.appear(ChessAssets.I_SHARE)
             or self.appear(self.I_CHECK_CHESS_RANK)
             or self.appear(self.I_CHESS_RANK_GOTO_LOBBY)
+            or self.appear(ChessAssets.I_RESTART_AGAIN)
         )
 
     def chess_result_flow_visible(self) -> bool:
         """检测百鬼棋局大厅或任一结算页面。"""
         return (
-            self.appear(self.I_CHECK_CHESS)
+            self.chess_lobby_visible()
             or self.chess_result_page_visible()
         )
 
@@ -109,6 +169,7 @@ class ChessBattleNavigationMixin:
         share_seen = False
         exit_clicked = False
         safe_clicks = 0
+        lobby_frames = 0
         next_rank_safe_click_at = 0.0
         fallback_exit_at = time.monotonic() + 1.5
 
@@ -117,14 +178,20 @@ class ChessBattleNavigationMixin:
             self.screenshot()
 
             if self._advance_chess_result_stage():
+                lobby_frames = 0
                 exit_clicked = True
                 share_seen = True
                 time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
                 continue
 
-            if self.appear(self.I_CHECK_CHESS):
-                logger.debug('Global Chess result flow: lobby reached')
-                return True
+            if self.chess_lobby_visible():
+                lobby_frames += 1
+                if lobby_frames >= self.CHESS_LOBBY_CONFIRM_FRAMES:
+                    logger.debug('Global Chess result flow: stable lobby reached')
+                    return True
+                time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
+                continue
+            lobby_frames = 0
 
             rank_page = self.appear(self.I_CHECK_CHESS_RANK)
             rank_button = self.appear(self.I_CHESS_RANK_GOTO_LOBBY)
@@ -140,7 +207,7 @@ class ChessBattleNavigationMixin:
                         'Global Chess result flow: advance rank page with '
                         'safe click'
                     )
-                    self.click(GeneralBattleAssets.C_RANDOM_LEFT)
+                    self._click_chess_result_continue()
                     safe_clicks += 1
                     next_rank_safe_click_at = time.monotonic() + 1.5
                 time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
@@ -150,7 +217,13 @@ class ChessBattleNavigationMixin:
                 time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
                 continue
 
-            if not exit_clicked:
+            # 奖励弹窗推进不代表真实返回按钮已经按下；只要按钮仍被
+            # 当前帧识别到，就按主仓库间隔规则处理，不被历史标志跳过。
+            if (
+                not exit_clicked
+                or self.appear(self.I_CHESS_EXIT_TO_LOBBY)
+                or self.appear(self.I_CHESS_EXIT_TO_LOBBY_2)
+            ):
                 if self.appear(self.I_CHESS_EXIT_TO_LOBBY):
                     self.appear_then_click(
                         self.I_CHESS_EXIT_TO_LOBBY,
@@ -190,16 +263,8 @@ class ChessBattleNavigationMixin:
                 time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
                 continue
 
-            if self.appear(self.I_CHECK_CHESS):
-                logger.debug(
-                    'Global Chess result flow: lobby reached after share, '
-                    f'safe_clicks={safe_clicks}'
-                )
-                return True
-
             safe_clicks += 1
-            from tasks.GameUi.default_pages import random_click
-            self.click(random_click(), interval=1.5)
+            self._click_chess_result_continue()
             time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
 
         raise GameStuckError('Global Chess: failed to return to lobby after result')

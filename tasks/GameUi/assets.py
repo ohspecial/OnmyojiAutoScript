@@ -242,3 +242,9 @@ class GameUiAssets:
 					 array=["版本"])
 
 
+
+	# Image Rule Assets
+	# 百鬼棋局分享平台栏（只识别，不点击）
+	I_CHESS_SHARE_PANEL_BAR = RuleImage(roi_front=(232,640,162,72), roi_back=(222,630,185,90), threshold=0.88, method="Template matching", file="./tasks/GameUi/page/page_chess_share_panel_bar.png")
+	# 百鬼棋局分享面板关闭（必须同时识别分享平台栏）
+	I_CHESS_SHARE_PANEL_CLOSE = RuleImage(roi_front=(1201,31,39,42), roi_back=(1180,10,90,90), threshold=0.85, method="Template matching", file="./tasks/GameUi/page/page_chess_share_panel_close.png")

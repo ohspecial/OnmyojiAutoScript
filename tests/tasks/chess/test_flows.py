@@ -207,7 +207,7 @@ def test_result_flow_reaches_lobby_through_share_and_rank(monkeypatch, first_sta
     frames = [first_stage]
     if first_stage != 'share':
         frames.append('share')
-    frames.extend(['transition', 'rank', 'lobby'])
+    frames.extend(['transition', 'rank', 'lobby', 'lobby'])
     set_frames(task, frames)
     markers = {
         'exit': (task.I_CHESS_EXIT_TO_LOBBY,),
@@ -215,7 +215,7 @@ def test_result_flow_reaches_lobby_through_share_and_rank(monkeypatch, first_sta
         'share': (ChessAssets.I_SHARE,),
         'transition': (),
         'rank': (task.I_CHECK_CHESS_RANK, task.I_CHESS_RANK_GOTO_LOBBY),
-        'lobby': (task.I_CHECK_CHESS,),
+        'lobby': (task.I_CHECK_CHESS, ChessAssets.I_CHESS_START),
     }
     task.appear = lambda marker: any(marker is value for value in markers[task.offline_frame])
     task.appear_then_click = Mock(side_effect=lambda marker, **kwargs: task.appear(marker))
@@ -331,10 +331,10 @@ def test_restart_from_rank_page_waits_for_button_to_disappear(monkeypatch):
 @pytest.mark.parametrize('restart', [False, True])
 def test_unknown_result_back_button_recovers_before_fallback_click(monkeypatch, restart):
     task = make_task(monkeypatch)
-    set_frames(task, ['share', 'unknown', 'rank' if restart else 'lobby', 'waiting'])
+    set_frames(task, ['share', 'unknown'] + (['rank', 'waiting'] if restart else ['lobby', 'lobby']))
     markers = {
         'share': (ChessAssets.I_SHARE,), 'unknown': (ChessAssets.I_BACK_RED,),
-        'rank': (ChessAssets.I_RESTART_AGAIN,), 'lobby': (task.I_CHECK_CHESS,),
+        'rank': (ChessAssets.I_RESTART_AGAIN,), 'lobby': (task.I_CHECK_CHESS, ChessAssets.I_CHESS_START),
         'waiting': (),
     }
     task.appear = lambda marker: any(marker is item for item in markers[task.offline_frame])
@@ -347,8 +347,8 @@ def test_unknown_result_back_button_recovers_before_fallback_click(monkeypatch, 
 
 def test_result_flow_accepts_lobby_without_share_or_rank(monkeypatch):
     task = make_task(monkeypatch)
-    set_frames(task, ['lobby'])
-    task.appear = lambda marker: marker is task.I_CHECK_CHESS
+    set_frames(task, ['lobby', 'lobby'])
+    task.appear = lambda marker: marker is task.I_CHECK_CHESS or marker is ChessAssets.I_CHESS_START
     assert task.return_to_chess_lobby() is True
     task.click.assert_not_called()
 
@@ -358,7 +358,8 @@ def test_unknown_result_recovery_preserves_known_pages(monkeypatch, known):
     task = make_task(monkeypatch)
     marker = {'lobby': task.I_CHECK_CHESS, 'rank': task.I_CHECK_CHESS_RANK,
               'restart': ChessAssets.I_RESTART_AGAIN}[known]
-    task.appear = lambda target: target is marker or target is ChessAssets.I_BACK_RED
+    task.appear = lambda target: (target is marker or target is ChessAssets.I_BACK_RED
+                                  or known == 'lobby' and target is ChessAssets.I_CHESS_START)
     assert task._close_unknown_chess_result_page() is False
     task.click.assert_not_called()
 
@@ -411,6 +412,7 @@ def prepare_task_run(task, config):
     task.goto_page = Mock()
     task._recover_interrupted_chess_game = Mock()
     task.return_to_chess_lobby = Mock(return_value=True)
+    task._coin_is_full = Mock(return_value=False)
 
 
 def test_top_four_rank_completes_two_protection_exits(monkeypatch):

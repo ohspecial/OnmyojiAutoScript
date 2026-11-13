@@ -16,12 +16,16 @@ from tasks.Chess.runtime.settings import ChessRuntimeSettings
 from tasks.Chess.runtime.state_loop import ChessStateLoopMixin
 from tasks.Chess.runtime.activity_watchdog import ChessActivityWatchdog
 from tasks.Chess.runtime.cache import economy_scope
+from tasks.Chess.runtime.coin_notice import ChessCoinNoticeMixin
+from tasks.Chess.runtime.lobby_recovery import ChessLobbyRecoveryMixin
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import page_chess
 
 
 class ChessLegacyScriptTask(
+    ChessCoinNoticeMixin,
+    ChessLobbyRecoveryMixin,
     ChessHyakkiDraftMixin,
     ChessRecognitionMixin,
     ChessHandOperationsMixin,
@@ -69,6 +73,8 @@ class ChessLegacyScriptTask(
 
     def _run_chess_task(self):
         """按执行次数循环百鬼棋局，并可在鼬乐币刷满时提前结束。"""
+        self._coin_notice_sent = False
+        self._coin_notice_attempts = 0
         chess_task_config = getattr(self.config, 'chess', None)
         chess_config = getattr(chess_task_config, 'chess_config', None)
         strategy = self.select_lineup_strategy(self._configured_lineup_key())
@@ -131,7 +137,8 @@ class ChessLegacyScriptTask(
                     )
                     break
                 self.screenshot()
-                if coin_full_exit and self._coin_is_full():
+                coin_full = self._check_full_coins_and_notify()
+                if coin_full_exit and coin_full:
                     logger.info(
                         'Stop Chess task before next game: '
                         'coin reached 600/600'
@@ -167,6 +174,10 @@ class ChessLegacyScriptTask(
                     )
                 else:
                     self.return_to_chess_lobby()
+                    self.screenshot()
+                    if self._check_full_coins_and_notify() and coin_full_exit:
+                        coin_limit_reached = True
+                        break
                 continue
 
             completed += 1
@@ -214,14 +225,12 @@ class ChessLegacyScriptTask(
 
             # 鼬乐币总数只在大厅可读；普通对局回到大厅后先核对，再
             # 决定是否继续下一场。保段位两局一旦开始则连续执行完毕。
-            if coin_full_exit:
-                self.screenshot()
-                if self._coin_is_full():
-                    logger.info(
-                        'Stop Chess task after game: coin reached 600/600'
-                    )
-                    coin_limit_reached = True
-                    break
+            self.screenshot()
+            coin_full = self._check_full_coins_and_notify()
+            if coin_full_exit and coin_full:
+                logger.info('Stop Chess task after game: coin reached 600/600')
+                coin_limit_reached = True
+                break
 
         logger.info(
             f'Chess task loop finished: completed={completed}, '
@@ -579,6 +588,7 @@ class ChessLegacyScriptTask(
         safe_clicks = 0
         next_safe_click_at = 0.0
         fallback_exit_at = time.monotonic() + 1.5
+        lobby_frames = 0
 
         while time.monotonic() < deadline:
             self.device.stuck_record_clear()
@@ -616,12 +626,17 @@ class ChessLegacyScriptTask(
                     'after 3 attempts'
                 )
 
-            if self.appear(self.I_CHECK_CHESS):
+            if self.chess_lobby_visible():
+                lobby_frames += 1
+                if lobby_frames < self.CHESS_LOBBY_CONFIRM_FRAMES:
+                    time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
+                    continue
                 logger.warning(
                     'Chess result flow reached lobby before restart-again; '
                     'start the next game from lobby instead'
                 )
                 return False
+            lobby_frames = 0
 
             # 已到排名页但按钮仍在动画中时只等待，不执行安全区点击，
             # 避免误触左侧“返回大厅”。
@@ -633,7 +648,8 @@ class ChessLegacyScriptTask(
                 time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
                 continue
 
-            if not exit_clicked:
+            if (not exit_clicked or self.appear(self.I_CHESS_EXIT_TO_LOBBY)
+                    or self.appear(self.I_CHESS_EXIT_TO_LOBBY_2)):
                 if self.appear(self.I_CHESS_EXIT_TO_LOBBY):
                     self.appear_then_click(
                         self.I_CHESS_EXIT_TO_LOBBY,
@@ -671,8 +687,7 @@ class ChessLegacyScriptTask(
 
             now = time.monotonic()
             if share_seen and now >= next_safe_click_at:
-                from tasks.GameUi.default_pages import random_click
-                self.click(random_click(), interval=1.5)
+                self._click_chess_result_continue()
                 safe_clicks += 1
                 next_safe_click_at = now + 1.5
             time.sleep(self.CHESS_EXIT_SCREENSHOT_INTERVAL)
@@ -765,11 +780,32 @@ class ChessLegacyScriptTask(
         matchmaking_timeout = float(
             getattr(self, '_matchmaking_timeout_seconds', 60)
         )
+        tutorial_skip_attempts = 0
+        lobby_frames = 0
         while True:
             # 匹配可能持续很久。截图本身会先检查设备卡死计时，因此必须
             # 在每次截图之前清除，不能等识别到“取消等待”后才清除。
             self.device.stuck_record_clear()
             self.screenshot()
+
+            # The tutorial covers a still-visible start button. Never click
+            # through the modal, and bound retries when skipping fails.
+            if self.appear(self.I_TUTORIAL_PROMPT):
+                lobby_frames = 0
+                if not self.appear(self.I_TUTORIAL_SKIP):
+                    raise GameStuckError('Chess: tutorial prompt visible but skip button not recognized')
+                if tutorial_skip_attempts >= 3:
+                    raise GameStuckError('Chess: tutorial skip did not dismiss prompt after 3 attempts')
+                self.click(self.I_TUTORIAL_SKIP)
+                tutorial_skip_attempts += 1
+                deadline = time.monotonic() + timeout
+                time.sleep(self.SLOW_POLL_INTERVAL)
+                continue
+
+            if self._recover_chess_outside_page():
+                lobby_frames = 0
+                deadline = time.monotonic() + timeout
+                continue
 
             if self.select_chess_sixrealms_if_visible():
                 deadline = time.monotonic() + timeout
@@ -931,7 +967,9 @@ class ChessLegacyScriptTask(
                 matched_loading_logged = False
                 continue
 
-            if retry_start and self.appear(self.I_CHESS_START):
+            lobby_frames = lobby_frames + 1 if self.chess_lobby_visible() else 0
+            if retry_start and lobby_frames >= self.CHESS_LOBBY_CONFIRM_FRAMES:
+                lobby_frames = 0
                 waiting_seen = False
                 matched_loading_started_at = None
                 matched_loading_logged = False
@@ -1011,7 +1049,7 @@ class ChessLegacyScriptTask(
         self.screenshot()
 
         # 已在大厅时无需恢复。
-        if self.appear(self.I_CHECK_CHESS):
+        if self.chess_lobby_visible():
             return False
 
         # 上次可能已经进入结算、分享或排名阶段，直接继续既有返回流程。
