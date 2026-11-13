@@ -60,12 +60,13 @@ class ScriptTask(GameUi, MemoryScrollsAssets):
                 # 安排下次探索
                 self.custom_next_run(task='Exploration', custom_time=self.config.memory_scrolls.memory_scrolls_finish.next_exploration_time, time_delta=1)
             else:
-                logger.warning('Small Memory Scrolls fragments not reached 50, task failed')
+                logger.info('Small Memory Scrolls fragments not reached 50, recheck after success interval')
                 # 先返回绘卷主界面
                 self.ui_click_until_disappear(GlobalGameAssets.I_UI_BACK_YELLOW, interval=1.5)
                 # 再返回庭院主界面
                 self.goto_page(page_main)
-                self.set_next_run(task='MemoryScrolls', success=False)
+                # 未满50属于正常检查结果，按成功间隔继续复查，避免被延后一天。
+                self.set_next_run(task='MemoryScrolls', success=True)
                 raise TaskEnd
             self.ui_click_until_smt_disappear(self.I_MS_FRAGMENT_S, stop=self.I_MS_FRAGMENT_S_VERIFICATION, interval=1.5)
         # 进入指定分卷
