@@ -20,7 +20,8 @@ class AssistanceChecks(unittest.TestCase):
         t = SimpleNamespace(conf=conf, config=SimpleNamespace(meta_demon=conf),
             start_time=datetime.now(), limit_time=timedelta(minutes=5), limit_count=10,
             total_count=0, State=SimpleNamespace(done=False), cur_boss_type=BossType.SIX_STARS,
-            _boss_generation=1, device=SimpleNamespace(image=object(), image_frame_id='frame'),
+            _boss_generation=1, device=SimpleNamespace(image=object(), image_frame_id='frame',
+                                                      press_and_drag=Mock()),
             screenshot=Mock(), swipe=Mock(), click=Mock(), appear_then_click=Mock(return_value=True),
             check_and_switch_ticket=Mock(return_value=True), start_battle=Mock(),
             set_next_run=Mock(), before_run=Mock(), goto_page=Mock())

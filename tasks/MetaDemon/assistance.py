@@ -105,6 +105,10 @@ class AssistanceLink:
 
 class GhostOffering:
     INVITE_RETRY_SECONDS = 20
+    FRIEND_SCROLL_PIXELS = 40
+    FRIEND_SCROLL_SECONDS = 0.55
+    FRIEND_SETTLE_SECONDS = 1.0
+    FRIEND_SCAN_LIMIT = 120
 
     def __init__(self, task, link=None):
         self.task = task
@@ -141,25 +145,63 @@ class GhostOffering:
         t = self.task
         return len(t.I_MD_FRIEND_SELECTED.match_all_any(t.device.image, frame_id=t.device.image_frame_id))
 
-    def list_to_top(self):
+    @staticmethod
+    def friend_rows_unchanged(previous, current):
+        if not previous or not current:
+            return False
+        # OCR may omit a name or level on any frame. Compare the positions of
+        # common unique names instead of requiring identical OCR output.
+        common = [name for name in previous.keys() & current.keys()
+                  if len(previous[name]) == len(current[name]) == 1]
+        if len(common) < min(2, len(previous), len(current)):
+            return False
+        for name in common:
+            before, after = previous[name][0], current[name][0]
+            if any(abs((before[axis] + before[axis + 2] / 2)
+                       - (after[axis] + after[axis + 2] / 2)) > 5 for axis in (0, 1)):
+                return False
+        return True
+
+    def scroll_friends(self, *, to_top=False):
+        if not self.within_limit():
+            return False
         t = self.task
         swipe = t.S_MD_SWIPE_FRIEND_UP
-        reverse = RuleSwipe(roi_front=swipe.roi_back, roi_back=swipe.roi_front,
-                            mode='default', name='metademon_friend_list_to_top')
+        start, end = ((swipe.roi_back, swipe.roi_front) if to_top
+                      else (swipe.roi_front, swipe.roi_back))
+        x = round((start[0] + start[2] / 2 + end[0] + end[2] / 2) / 2)
+        y = round(start[1] + start[3] / 2)
+        direction = 1 if to_top else -1
+        # Use the held drag API: several touch backends ignore swipe duration.
+        t.device.press_and_drag(
+            (x, y), (x, y + direction * self.FRIEND_SCROLL_PIXELS),
+            hold_duration=0.08, swipe_duration=self.FRIEND_SCROLL_SECONDS,
+            point_random=(-1, -1, 1, 1),
+            name='metademon_friend_list_to_top' if to_top else 'metademon_friend_list_down',
+        )
+        # An interval on Task.swipe only throttles calls; it does not wait for
+        # list inertia and edge bounce to settle before the next screenshot.
+        time.sleep(self.FRIEND_SETTLE_SECONDS)
+        return self.within_limit()
+
+    def list_to_top(self):
+        t = self.task
         previous = None
         stable = 0
-        for _ in range(20):
+        for _ in range(self.FRIEND_SCAN_LIMIT):
             if not self.within_limit():
                 return False
             t.screenshot()
             if not t.appear(t.I_MD_INVITE_FRIENDS):
                 return False
-            signature = tuple(self.friend_rows())
-            stable = stable + 1 if signature == previous else 0
+            rows = self.friend_rows()
+            stable = stable + 1 if self.friend_rows_unchanged(previous, rows) else 0
             if stable >= 2:
                 return True
-            previous = signature
-            t.swipe(reverse, interval=1.2)
+            previous = rows
+            if not self.scroll_friends(to_top=True):
+                return False
+        logger.warning('好友列表回到顶部超过限制，停止分享')
         return False
 
     def open_share_panel(self):
@@ -211,7 +253,7 @@ class GhostOffering:
         previous = None
         stable = 0
         available = set()
-        for _ in range(30):
+        for _ in range(self.FRIEND_SCAN_LIMIT):
             if not self.within_limit():
                 return False
             t.screenshot()
@@ -223,12 +265,12 @@ class GhostOffering:
                 logger.warning('好友名字有多个相同识别结果，无法唯一选择')
                 return False
             available.update(rows)
-            signature = tuple(rows)
-            stable = stable + 1 if signature == previous else 0
+            stable = stable + 1 if self.friend_rows_unchanged(previous, rows) else 0
             if stable >= 2:
                 break
-            previous = signature
-            t.swipe(t.S_MD_SWIPE_FRIEND_UP, interval=1.2)
+            previous = rows
+            if not self.scroll_friends():
+                return False
         else:
             logger.warning('好友列表扫描超过限制，停止分享')
             return False
@@ -239,7 +281,7 @@ class GhostOffering:
         if not self.list_to_top():
             return False
         remaining = dict(wanted)
-        for _ in range(30):
+        for _ in range(self.FRIEND_SCAN_LIMIT):
             if not self.within_limit():
                 return False
             t.screenshot()
@@ -257,7 +299,9 @@ class GhostOffering:
                 del remaining[name]
             if not remaining:
                 return True
-            t.swipe(t.S_MD_SWIPE_FRIEND_UP, interval=1.2)
+            if not self.scroll_friends():
+                return False
+        logger.warning('好友列表选择超过限制，未能选中: ' + '; '.join(remaining.values()))
         return False
 
     def share(self):
