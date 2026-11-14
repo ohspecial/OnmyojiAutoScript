@@ -270,6 +270,8 @@ class FrameQuickLoadout(BaseTask, SwitchSoulAssets):
         """未指定关闭区域时，使用左侧安全区域随机点击。"""
         target = dismiss if dismiss is not None else GeneralBattleAssets.C_RANDOM_LEFT
         timer = Timer(self.PANEL_CLOSE_TIMEOUT).start()
+        # 详情弹窗可能遮住面板，先尝试收起一层，再检查面板是否仍可见。
+        self.click(target, interval=1)
         while not timer.reached():
             self.screenshot()
             if not self._quick_loadout_panel_visible(frame):
@@ -377,6 +379,8 @@ class FrameQuickLoadout(BaseTask, SwitchSoulAssets):
         sleep(0.4)
         self.screenshot()
         if not self._quick_loadout_panel_visible(frame):
+            logger.warning('Quick loadout panel not visible after selecting preset')
+            self._dismiss_quick_loadout(frame, dismiss=dismiss)
             return False
         self.click(self._quick_loadout_fight(frame))
         timer = Timer(self.PANEL_CLOSE_TIMEOUT).start()

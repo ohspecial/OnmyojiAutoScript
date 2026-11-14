@@ -58,6 +58,7 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         self.State = BossBattle.State()
         self._active_loadout_group = None
         self._boss_generation = 0
+        self._quick_loadout_boss_name = None
         self.cur_boss_type = None
         self.total_count = 0
         self._current_boss_attempts = 0
@@ -456,15 +457,29 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
                 if name_ocr is None:
                     logger.error('缺少超鬼王首领名称 OCR 资源 O_BOSS_NAME')
                     return False
-                boss_name = self._read_quick_loadout_stage_name(name_ocr)
-                if not self._normalize_name(boss_name):
-                    logger.warning('未识别到首领名称，暂不上阵')
-                    return False
+                generation = getattr(self, '_boss_generation', 0)
+                cached_name = getattr(self, '_quick_loadout_boss_name', None)
+                if cached_name is not None and cached_name[0] == generation:
+                    boss_name = cached_name[1]
+                    logger.info(f'复用本只鬼王名称：{boss_name}')
+                else:
+                    # 预设面板会遮住首领名，不能把分组文字当作新的首领名。
+                    if self._quick_loadout_panel_visible(self.F_QUICK_LOADOUT_FRAME):
+                        if not self._dismiss_quick_loadout(self.F_QUICK_LOADOUT_FRAME):
+                            logger.warning('预设面板未关闭，暂不识别首领名称')
+                            return False
+                    boss_name = self._read_quick_loadout_stage_name(name_ocr)
+                    if not self._normalize_name(boss_name):
+                        logger.warning('未识别到首领名称，暂不上阵')
+                        return False
                 _, target, _ = self._match_custom_preset(boss_name, presets)
                 if target is None:
                     logger.error(f'首领 {boss_name} 无匹配预设，请配置对应名称或 ALL')
                     return False
+                # 上阵失败也保留本只首领名，下一次召唤递增 generation 后重新识别。
+                self._quick_loadout_boss_name = (generation, boss_name)
                 quick.group_name, quick.preset_name = target
+                logger.info(f'首领 {boss_name} 使用预设：{quick.group_name} / {quick.preset_name}')
             if not self.run_quick_loadout(
                 quick, frame=self.F_QUICK_LOADOUT_FRAME, skip_equip_soul=custom.skip_equip_soul,
             ):
