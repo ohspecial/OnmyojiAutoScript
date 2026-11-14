@@ -82,7 +82,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         # 真实挑战次数不包含退四；通用战斗的 current_count 会统计快速退出，不能用于本任务的挑战上限。
         success = True
         real_attack_count = 0
-        self.round_retreat_done = self.is_first_position_finished()
+        # 普通战败也会留下失败标记，不能由盘面推断本轮已经主动退出四次。
+        self.round_retreat_done = False
         self.first_attack_pending_after_retreat = False
 
         while 1:
@@ -100,6 +101,17 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 logger.info(f'Real attack count {real_attack_count}, max count {con.raid_config.number_attack}')
                 break
 
+            self.sync_round_state()
+            failed_positions = self.get_failed_positions(False)
+            formal_failures = [position for position in failed_positions
+                               if position != 1 or not self.first_attack_pending_after_retreat]
+            if formal_failures:
+                logger.info(f'Formal challenge failures {formal_failures}, ensure retreat four and refresh')
+                if self.refresh_round(con, failed_position=formal_failures[0]):
+                    continue
+                success = False
+                break
+
             force_first_attack = False
 
             # 阶段只以游戏盘面的三胜标记为准；任务从中途盘面启动时也能正确处理已三胜的一轮。
@@ -113,10 +125,9 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                     break
                 force_first_attack = three_win_action == 'attack_first'
 
-            # 屏蔽失败格后继续按勋章优先级寻找其他目标。
-            failed_positions = self.get_failed_positions(False)
+            # 主动退四留下的位置1失败标记，不代表正式挑战失败。
             if failed_positions:
-                logger.info(f'Ignore failed positions: {failed_positions}')
+                logger.info(f'Retreat failure positions pending formal challenge: {failed_positions}')
 
             if force_first_attack:
                 medal, index = None, 1
@@ -155,7 +166,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 logger.info('Rewards of three wins')
 
             if not last_battle:
-                logger.info('Battle lost before three wins, continue with other targets')
+                logger.info(f'Formal challenge at position {index} lost, ensure retreat four and refresh')
+                if self.refresh_round(con, failed_position=index):
+                    continue
+                success = False
+                break
 
         self.goto_page(page_exploration)
         self.set_next_run(task='RealmRaid', success=success, finish=True)
@@ -353,8 +368,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         """
         判断左上角第一个目标是否已经成功或失败。
 
-        位置1只要完成过正式挑战，就视为本轮已经执行过退四；任务运行期间不存在
-        “退四后中断”的状态，因此不需要额外持久化退四进度。
+        此状态仅用于盘面与换轮判断，失败标记不能证明已经执行过退四。
         """
         if screenshot:
             self.screenshot()
@@ -364,15 +378,29 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         self.false_image.roi_back = self.false_roi[0]
         return self.appear(self.false_image)
 
-    def retreat_four_at_first(self, config: RealmRaid) -> bool:
+    def sync_round_state(self) -> None:
+        """第1格完成标记连续两帧消失时，清除九胜自动换轮遗留的退四状态。"""
+        if not self.round_retreat_done:
+            return
+        if not self.appear(self.I_RR_PERSON) or self.is_first_position_finished(False):
+            return
+        self.screenshot()
+        if not self.appear(self.I_RR_PERSON) or self.is_first_position_finished(False):
+            return
+        logger.info('New realm raid board detected, reset retreat four state')
+        self.round_retreat_done = False
+        self.first_attack_pending_after_retreat = False
+
+    def retreat_four_at_first(self, config: RealmRaid, position: int=1) -> bool:
         """
-        固定在左上角第一个目标主动退出四次，不把这些退出计入真实挑战次数。
+        默认在左上角主动退出四次；第1格已击破时可指定仍能挑战的失败格。
+        主动退出不计入真实挑战次数。
         """
-        logger.info('Execute retreat four at position 1')
+        logger.info(f'Execute retreat four at position {position}')
         quick_exit_config = self.build_quick_exit_config(config.general_battle_config)
 
         for count in range(1, 5):
-            if not self.fire(1):
+            if not self.fire(position):
                 logger.warning(f'Retreat four failed to enter battle, count={count}')
                 return False
 
@@ -387,37 +415,49 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         logger.info('Retreat four completed')
         return True
 
-    def ensure_retreat_four(self, config: RealmRaid) -> bool:
+    def ensure_retreat_four(self, config: RealmRaid, position: int=1) -> bool:
         """
         开启退四时，确保当前这一轮在刷新或正式挑战位置1前已经完成退四。
         """
         if not config.raid_config.exit_four or self.round_retreat_done:
             return True
 
-        self.screenshot()
-        if self.is_first_position_finished(False):
-            logger.info('Position 1 is finished, treat retreat four as completed')
-            self.round_retreat_done = True
-            self.first_attack_pending_after_retreat = False
-            return True
-
         # 主动退出不消耗突破券，但进入战斗仍要求账号当前至少持有一张券。
         if not self.check_ticket():
             logger.warning('Retreat four cannot start without a realm raid pass')
             return False
-        if not self.retreat_four_at_first(config):
+        completed = (self.retreat_four_at_first(config) if position == 1
+                     else self.retreat_four_at_first(config, position=position))
+        if not completed:
             return False
 
         self.round_retreat_done = True
         # 退四会在位置1留下失败标记；该标记不能代表位置1已经完成正式挑战。
-        self.first_attack_pending_after_retreat = True
+        self.first_attack_pending_after_retreat = position == 1
         return True
 
-    def refresh_round(self, config: RealmRaid) -> bool:
+    def refresh_round(self, config: RealmRaid, failed_position: int | None=None) -> bool:
         """
-        结束当前轮：三胜或无其他目标时先确保完成退四，再刷新盘面。
+        结束当前轮：普通挑战失败或无其他目标时，先确保实际完成退四再刷新。
         """
-        if not self.ensure_retreat_four(config):
+        position = 1
+        if config.raid_config.exit_four and not self.round_retreat_done:
+            self.screenshot()
+            if self.appear(self.I_RAID_SUCCESS):
+                # 已击破的第1格不能再挑战，改用本次失败格或其他可挑战目标。
+                position = failed_position if failed_position != 1 else None
+                if position is None:
+                    failures = [p for p in self.get_failed_positions(False) if p != 1]
+                    if failures:
+                        position = failures[0]
+                    else:
+                        _, position = self.find_one(False, exclude_positions={1})
+                if position is None:
+                    logger.warning('No target available for retreat four, stop realm raid')
+                    return False
+        completed = (self.ensure_retreat_four(config) if position == 1
+                     else self.ensure_retreat_four(config, position=position))
+        if not completed:
             return False
         if not self.check_refresh():
             return False
@@ -430,24 +470,20 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         """
         处理三胜后的盘面。
 
-        退四后，若位置1之外没有失败目标，则正式挑战位置1并继续全清；
-        若其他位置存在失败目标，则尝试刷新，无法刷新时结束任务。
+        普通失败包含第1格，补齐退四后刷新；仅主动退四留下的失败标记等待正式挑战。
 
         :return: attack_first、continue、refreshed 或 stop
         """
-        if not self.ensure_retreat_four(config):
-            return 'stop'
-
         failed_positions = self.get_failed_positions()
-        failed_positions_outside_first = [
+        formal_failures = [
             position for position in failed_positions if position != 1
+            or not self.first_attack_pending_after_retreat
         ]
-        if failed_positions_outside_first:
+        if formal_failures:
             logger.info(
-                f'Failed positions outside position 1: {failed_positions_outside_first}, '
-                'try to refresh current round'
+                f'Formal challenge failures {formal_failures}, ensure retreat four and refresh'
             )
-            return 'refreshed' if self.refresh_round(config) else 'stop'
+            return 'refreshed' if self.refresh_round(config, failed_position=formal_failures[0]) else 'stop'
 
         if self.first_attack_pending_after_retreat:
             logger.info(
@@ -456,12 +492,14 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
             )
             return 'attack_first'
 
-        if not self.is_first_position_finished(False):
-            logger.info('No failed position outside position 1, attack position 1 and continue clearing')
-            return 'attack_first'
+        if self.is_first_position_finished(False):
+            logger.info('Position 1 was won, continue clearing current round')
+            return 'continue'
 
-        logger.info('No failed position outside position 1, continue clearing current round')
-        return 'continue'
+        if not self.ensure_retreat_four(config):
+            return 'stop'
+        logger.info('Attack position 1 after ensuring retreat four, continue clearing current round')
+        return 'attack_first'
 
     def reward_detect_click(self, screenshot: bool=True) -> bool:
         """
@@ -494,11 +532,12 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
         """
         if screenshot:
             self.screenshot()
-        if not self.appear(self.I_FRESH):
-            logger.info(f'No find refresh button and it is in CD')
-            return False
 
+        # 已打开确认弹窗时优先处理，背景刷新按钮可能被遮挡。
         if not self.appear(GlobalGameAssets.I_UI_CONFIRM):
+            if not self.appear(self.I_FRESH):
+                logger.info('No find refresh button and it is in CD')
+                return False
             if not self.appear_then_click(self.I_FRESH, interval=1):
                 logger.warning('Refresh button click failed, stop realm raid')
                 return False
@@ -507,17 +546,28 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, RealmRaidAssets):
                 logger.warning('Refresh confirmation did not appear, stop realm raid')
                 return False
 
-        if not self.appear_then_click(GlobalGameAssets.I_UI_CONFIRM):
-            logger.warning('Refresh confirmation click failed, stop realm raid')
-            return False
-
         timeout_timer = Timer(5).start()
+        ready_frames = 0
+        confirm_attempts = 0
         while not timeout_timer.reached():
             self.screenshot()
-            if not self.appear(GlobalGameAssets.I_UI_CONFIRM):
+            if self.appear(GlobalGameAssets.I_UI_CONFIRM):
+                ready_frames = 0
+                # 首次点击和重试都受间隔限制；暂时漏识别不直接结束任务。
+                if self.appear_then_click(GlobalGameAssets.I_UI_CONFIRM, interval=1):
+                    confirm_attempts += 1
+                    logger.info(f'Confirm realm raid refresh, attempt {confirm_attempts}')
+                continue
+            if self.appear(GlobalGameAssets.I_UI_CANCEL) or not self.appear(self.I_RR_PERSON):
+                ready_frames = 0
+                continue
+            # 单帧漏识别或过场动画不代表刷新完成，需稳定回到个人突破页。
+            ready_frames += 1
+            if ready_frames >= 2:
+                logger.info('Realm raid refresh completed')
                 return True
 
-        logger.warning('Refresh confirmation did not disappear, stop realm raid')
+        logger.warning('Refresh confirmation did not complete after retries, stop realm raid')
         return False
 
     def fire(self, order: int) -> bool:
