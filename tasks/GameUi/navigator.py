@@ -44,7 +44,8 @@ class GameUi(ChessBattleNavigationMixin, BaseTask, GameUiAssets):
         if getattr(self.config, 'defer_task_courtyard_return', False):
             return True
         from tasks.GameUi.default_pages import page_main
-        return self.goto_page(page_main)
+        # 等待协同任务可能已超过截图缓存 TTL，返回庭院前必须重新截图再识别页面。
+        return self.goto_page(page_main, skip_first_screenshot=False)
 
     # 全局未知页关闭动作，所有任务共享。
     DEFAULT_UNKNOWN_CLOSERS = [
