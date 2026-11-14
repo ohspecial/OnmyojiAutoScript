@@ -12,7 +12,7 @@ class MetaDemonAssets:
 
 
 	# Image Rule Assets
-	F_QUICK_LOADOUT_FRAME = RuleFrame(name='quick_loadout_frame', roi_badge=(1225.0, 433.0, 28.0, 31.0), roi_range=[(496.0, 224.0, 553.0, 387.0), (762.0, 557.0, 108.0, 36.0), (1113.0, 428.0, 109.0, 38.0)], roi_back=(474.0, 177.0, 800.0, 450.0), threshold=0.8, method='Template matching', badgefile=['./tasks/MetaDemon/md/quick_loadout_frame_badge_1.png'], range=[Image(file=None, method='Template matching', threshold=0.8), Image(file='./tasks/MetaDemon/md/md_quick_loadout_frame_fight.png', method='Template matching', threshold=0.8), Click()])
+	F_QUICK_LOADOUT_FRAME = RuleFrame(name='quick_loadout_frame', roi_badge=(1221.0, 430.0, 38.0, 33.0), roi_range=[(496.0, 224.0, 553.0, 387.0), (762.0, 557.0, 108.0, 36.0)], roi_back=(474.0, 177.0, 800.0, 450.0), threshold=0.8, method='Template matching', badgefile=['./tasks/MetaDemon/md/quick_loadout_frame_badge_1.png'], range=[Image(file=None, method='Template matching', threshold=0.8), Image(file='./tasks/MetaDemon/md/md_quick_loadout_frame_fight.png', method='Template matching', threshold=0.8)])
 
 
 	# List Rule Assets
