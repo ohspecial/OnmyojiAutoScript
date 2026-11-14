@@ -286,6 +286,16 @@ class MetaDemon(ConfigBase):
     low_star_battle_conf: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
     high_star_battle_conf: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
 
+    def oasx_args(self, groups):
+        # 运行模式互斥；用 OASX 已支持的单选控件展示，配置仍保存为旧列表格式。
+        modes = self.meta_demon_config.mode
+        for item in groups.get('meta_demon_config', []):
+            if item['name'] == 'mode':
+                item.update(type='enum', default=MetaDemonMode.BOSS_BATTLE.value,
+                            value=modes[0].value if modes else '')
+                item.pop('ui_exclusive_groups', None)
+        return groups
+
     def battle_config(self, category: str) -> GeneralBattleConfig:
         config = getattr(self, f'{category}_battle_conf')
         if category == 'high_star' and self.general_config.high_star_quick_loadout_enable:

@@ -408,7 +408,7 @@ class ConfigModel(ConfigBase):
                 if item['name'] == 'merged_settings_enable':
                     item['ui_layout'] = {'version': 1, 'sections': layout}
 
-        if isinstance(task, Chess):
+        if isinstance(task, (Chess, MetaDemon)):
             result = task.oasx_args(result)
         if entry or isinstance(task, (MetaDemon, MetaDemonTicket, AutoStory, ExplorationFight, CustomTask)):
             from module.config.settings_presentation import present_settings
