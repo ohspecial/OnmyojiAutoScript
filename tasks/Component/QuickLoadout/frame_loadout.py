@@ -399,7 +399,7 @@ class FrameQuickLoadout(BaseTask, SwitchSoulAssets):
         dismiss: RuleClick | None = None,
         skip_equip_soul: bool = False,
     ) -> bool:
-        """将目标预设上阵，默认先装配御魂。"""
+        """将目标预设上阵，普通分组默认先装配御魂，队伍租借直接上阵。"""
         if not config.enable:
             return True
         if isinstance(config, NamedQuickLoadoutConfig) and config.custom_preset_enable:
@@ -408,6 +408,10 @@ class FrameQuickLoadout(BaseTask, SwitchSoulAssets):
             else:
                 config, _ = self._resolve_named_quick_loadout(config, name_ocr)
         config.validate_target()
+        if self._normalize_name(config.group_name) == '队伍租借':
+            # 租借列表右侧是详情按钮，并非普通预设的御魂装配按钮。
+            skip_equip_soul = True
+            logger.info('队伍租借预设无需装配御魂，直接上阵')
         target = (frame.name, config.group_name.strip(), config.preset_name.strip(), skip_equip_soul)
         if getattr(self, '_last_quick_loadout', None) == target:
             logger.info(f'Quick loadout unchanged, keep current lineup: {target[1:3]}')
